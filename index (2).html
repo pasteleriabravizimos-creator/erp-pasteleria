@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP Pastelería - Sistema Completo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body { margin: 0; font-family: -apple-system, sans-serif; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .6; } }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+
+        const CONFIG = {
+            get GOOGLE_SHEETS_ID() { return localStorage.getItem('sheets_id') || ''; },
+            set GOOGLE_SHEETS_ID(v) { localStorage.setItem('sheets_id', v); },
+            get GOOGLE_API_KEY() { return localStorage.getItem('api_key') || ''; },
+            set GOOGLE_API_KEY(v) { localStorage.setItem('api_key', v); },
+        };
+
+        const ERP = () => {
+            const [module, setModule] = useState('dashboard');
+            const [syncing, setSyncing] = useState(false);
+            const [lastSync, setLastSync] = useState(null);
+            
+            const [ventas, setVentas] = useState([]);
+            const [gastos, setGastos] = useState([]);
+            const [personal, setPersonal] = useState([]);
+            const [inventario, setInventario] = useState([]);
+            const [clientes, setClientes] = useState([]);
+            const [productos, setProductos] = useState([]);
+            const [proveedores, setProveedores] = useState([]);
+            const [servicios, setServicios] = useState([]);
+
+            const syncSheets = async () => {
+                setSyncing(true);
+                try {
+                    if (!CONFIG.GOOGLE_SHEETS_ID || !CONFIG.GOOGLE_API_KEY) {
+                        alert('⚠️ Por favor configura primero:\n\n1. Google Sheets ID\n2. Google API Key\n\nVe a la pestaña ⚙️ Config');
+                        setModule('config');
+                        setSyncing(false);
+                        return;
+                    }
+
+                    const base = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.GOOGLE_SHEETS_ID}/values`;
+                    const key = `?key=${CONFIG.GOOGLE_API_KEY}`;
+                    let errors = [];
+
+                    // VENTAS
+                    try {
+                        const r = await fetch(`${base}/VENTAS!A2:R${key}`);
+                        if (r.ok) {
+                            const d = await r.json();
+                            if (d.values) setVentas(d.values.map((r, i) => ({
+                                id: i+1, numero: r[0]||'', fecha: r[1]||'', vendedor: r[5]||'', cliente: r[6]||'',
+                                monto: parseFloat(r[10])||0, distrito: r[15]||'', estado: r[17]||'Pendiente'
+                            })));
+                        } else errors.push('VENTAS');
+                    } catch(e) { errors.push('VENTAS'); }
+
+                    // GASTOS
+                    try {
+                        const r = await fetch(`${base}/GASTOS!A2:K${key}`);
+                        if (r.ok) {
+                            const d = await r.json();
+                            if (d.values) setGastos(d.values.map((r, i) => ({
+                                id: i+1, periodo: r[0]||'', area: r[1]||'', razon: r[2]||'',
+                                descripcion: r[6]||'', monto: parseFloat(r[7])||0, medio: r[9]||''
+                            })));
+                        } else errors.push('GASTOS');
+                    } catch(e) { errors.push('GASTOS'); }
+
+                    // PERSONAL
+                    try {
+                        const r = await fetch(`${base}/PERSONAL!A2:K${key}`);
+                        if (r.ok) {
+                            const d = await r.json();
+                            if (d.values) setPersonal(d.values.map((r, i) => ({
+                                id: i+1, nombre: r[0]||'', cargo: r[1]||'', sueldo: parseFloat(r[2])||0,
+                                afp: parseFloat(r[3])||0, planilla: r[6]==='SI', tipo: r[9]||'MENSUAL'
+                            })));
+                        } else errors.push('PERSONAL');
+                    } catch(e) { errors.push('PERSONAL'); }
+
+                    // INVENTARIO
+                    try {
+                        const r = await fetch(`${base}/INVENTARIO!A2:I${key}`);
+                        if (r.ok) {
+                            const d = await r.json();
+                            if (d.values) setInventario(d.values.map((r, i) => ({
+                                id: i+1, codigo: r[0]||'', nombre: r[1]||'', stock: parseFloat(r[2])||0,
+                                unidad: r[3]||'', costo: parseFloat(r[4])||0, stockMin: parseFloat(r[6])||0
+                            })));
+                        } else errors.push('INVENTARIO');
+                    } catch(e) { errors.push('INVENTARIO'); }
+
+                    // CLIENTES
+                    try {
+                        const r = await fetch(`${base}/CLIENTES!A2:I${key}`);
+                        if (r.ok) {
+                            const d = await r.json();
+                            if (d.values) setClientes(d.values.map((r, i) => ({
+                                id: i+1, doc: r[0]||'', nombre: r[1]||'', telefono: r[2]||'',
+                                distrito: r[3]||'', total: parseFloat(r[4])||0, cant: parseInt(r[5])||0, tipo: r[7]||'PERSONA'
+                            })));
+                        } else errors.push('CLIENTES');
+                    } catch(e) { errors.push('CLIENTES'); }
+
+                    // PRODUCTOS
+                    try {
+                        const r = await fetch(`${base}/PRODUCTOS!A2:J${key}`);
+                        if (r.ok) {
+                            const d = await r.json();
+                            if (d.values) setProductos(d.values.map((r, i) => ({
+                                id: i+1, codigo: r[0]||'', nombre: r[1]||'', precio: parseFloat(r[2])||0, categoria: r[3]||''
+                            })));
+                        } else errors.push('PRODUCTOS');
+                    } catch(e) { errors.push('PRODUCTOS'); }
+
+                    // PROVEEDORES
+                    try {
+                        const r = await fetch(`${base}/PROVEEDORES!A2:G${key}`);
+                        if (r.ok) {
+                            const d = await r.json();
+                            if (d.values) setProveedores(d.values.map((r, i) => ({
+                                id: i+1, ruc: r[0]||'', nombre: r[1]||'', telefono: r[2]||'', total: parseFloat(r[4])||0
+                            })));
+                        } else errors.push('PROVEEDORES');
+                    } catch(e) { errors.push('PROVEEDORES'); }
+
+                    // SERVICIOS
+                    try {
+                        const r = await fetch(`${base}/SERVICIOS!A2:H${key}`);
+                        if (r.ok) {
+                            const d = await r.json();
+                            if (d.values) setServicios(d.values.map((r, i) => ({
+                                id: i+1, nombre: r[0]||'', monto: parseFloat(r[1])||0, vencimiento: r[2]||'', pagado: parseFloat(r[3])||0
+                            })));
+                        } else errors.push('SERVICIOS');
+                    } catch(e) { errors.push('SERVICIOS'); }
+
+                    setLastSync(new Date());
+                    alert(`✅ Sincronización completa!\n\n📊 Datos cargados:\n- Ventas: ${ventas.length}\n- Gastos: ${gastos.length}\n- Personal: ${personal.length}\n- Inventario: ${inventario.length}\n- Clientes: ${clientes.length}\n\n${errors.length > 0 ? '⚠️ Hojas no encontradas: ' + errors.join(', ') : '✓ Todas las hojas sincronizadas'}`);
+                } catch (error) {
+                    alert(`❌ Error de sincronización:\n\n${error.message}\n\nVerifica:\n✓ Sheet ID correcto\n✓ API Key correcta\n✓ Google Sheets API habilitada`);
+                }
+                setSyncing(false);
+            };
+
+            const calc = useMemo(() => {
+                const ingresos = ventas.reduce((s, v) => s + v.monto, 0);
+                const gastosTotal = gastos.reduce((s, g) => s + g.monto, 0);
+                
+                const vendedoras = Object.entries(ventas.reduce((acc, v) => {
+                    if (!acc[v.vendedor]) acc[v.vendedor] = {cant: 0, monto: 0};
+                    acc[v.vendedor].cant++;
+                    acc[v.vendedor].monto += v.monto;
+                    return acc;
+                }, {})).sort((a,b) => b[1].monto - a[1].monto);
+
+                const distritos = Object.entries(ventas.reduce((acc, v) => {
+                    if (!acc[v.distrito]) acc[v.distrito] = {cant: 0, monto: 0};
+                    acc[v.distrito].cant++;
+                    acc[v.distrito].monto += v.monto;
+                    return acc;
+                }, {})).sort((a,b) => b[1].monto - a[1].monto);
+
+                const categorias = Object.entries(gastos.reduce((acc, g) => {
+                    if (!acc[g.area]) acc[g.area] = 0;
+                    acc[g.area] += g.monto;
+                    return acc;
+                }, {})).sort((a,b) => b[1] - a[1]);
+
+                return {ingresos, gastosTotal, balance: ingresos - gastosTotal, vendedoras, distritos, categorias, ticket: ventas.length ? ingresos/ventas.length : 0};
+            }, [ventas, gastos]);
+
+            const Dashboard = () => (
+                <div className="space-y-6">
+                    <div className="bg-blue-600 rounded-xl p-4 text-white flex justify-between items-center">
+                        <div>
+                            <p className="font-bold text-lg">📊 Dashboard Principal</p>
+                            {lastSync && <p className="text-sm opacity-90">Última sync: {lastSync.toLocaleTimeString()}</p>}
+                        </div>
+                        <button onClick={syncSheets} disabled={syncing} className="bg-white text-blue-600 px-6 py-2 rounded-lg font-bold hover:bg-blue-50 disabled:opacity-50">
+                            {syncing ? <span className="pulse">🔄 Sincronizando...</span> : '🔄 Sincronizar'}
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-6 text-white">
+                            <p className="text-3xl">💰</p>
+                            <h3 className="text-2xl font-bold">S/ {calc.ingresos.toLocaleString('es-PE', {minimumFractionDigits:2})}</h3>
+                            <p className="text-sm opacity-90">Ingresos Totales</p>
+                        </div>
+                        <div className="bg-gradient-to-br from-red-500 to-rose-600 rounded-xl p-6 text-white">
+                            <p className="text-3xl">💸</p>
+                            <h3 className="text-2xl font-bold">S/ {calc.gastosTotal.toLocaleString('es-PE', {minimumFractionDigits:2})}</h3>
+                            <p className="text-sm opacity-90">Gastos Totales</p>
+                        </div>
+                        <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-6 text-white">
+                            <p className="text-3xl">📊</p>
+                            <h3 className="text-2xl font-bold">S/ {calc.balance.toLocaleString('es-PE', {minimumFractionDigits:2})}</h3>
+                            <p className="text-sm opacity-90">Balance</p>
+                        </div>
+                        <div className="bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl p-6 text-white">
+                            <p className="text-3xl">📦</p>
+                            <h3 className="text-2xl font-bold">{ventas.length}</h3>
+                            <p className="text-sm opacity-90">Pedidos</p>
+                        </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <div className="bg-white rounded-xl shadow-lg p-6">
+                            <h3 className="text-xl font-bold mb-4">🏆 Ranking Vendedoras</h3>
+                            {calc.vendedoras.length === 0 ? <p className="text-gray-500">Sin datos</p> : (
+                                <div className="space-y-2">
+                                    {calc.vendedoras.slice(0,5).map(([nombre, data], i) => (
+                                        <div key={i} className="flex justify-between p-3 bg-gray-50 rounded-lg">
+                                            <div className="flex gap-3 items-center">
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${i===0?'bg-yellow-400':i===1?'bg-gray-300':'bg-orange-300'}`}>{i+1}</div>
+                                                <div>
+                                                    <p className="font-bold">{nombre}</p>
+                                                    <p className="text-sm text-gray-600">{data.cant} ventas</p>
+                                                </div>
+                                            </div>
+                                            <p className="text-xl font-bold text-green-600">S/ {data.monto.toLocaleString()}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="bg-white rounded-xl shadow-lg p-6">
+                            <h3 className="text-xl font-bold mb-4">📍 Ranking Distritos</h3>
+                            {calc.distritos.length === 0 ? <p className="text-gray-500">Sin datos</p> : (
+                                <div className="space-y-2">
+                                    {calc.distritos.slice(0,5).map(([dist, data], i) => (
+                                        <div key={i} className="flex justify-between p-3 bg-gray-50 rounded-lg">
+                                            <div>
+                                                <p className="font-bold">{dist || 'SIN DISTRITO'}</p>
+                                                <p className="text-sm text-gray-600">{data.cant} ventas</p>
+                                            </div>
+                                            <p className="text-xl font-bold text-blue-600">S/ {data.monto.toLocaleString()}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl shadow-lg p-6">
+                        <h3 className="text-xl font-bold mb-4">💰 Gastos por Categoría</h3>
+                        {calc.categorias.length === 0 ? <p className="text-gray-500">Sin datos</p> : (
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {calc.categorias.map(([cat, monto]) => (
+                                    <div key={cat} className="p-4 bg-red-50 rounded-lg border-2 border-red-200">
+                                        <p className="text-sm font-bold text-gray-700">{cat}</p>
+                                        <p className="text-xl font-bold text-red-600">S/ {monto.toLocaleString()}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+
+            const ReporteIngresos = () => (
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h2 className="text-2xl font-bold mb-6">💰 Reporte de Ingresos</h2>
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="bg-gray-100">
+                                    <th className="p-3 text-left">Fecha</th>
+                                    <th className="p-3 text-left">Cliente</th>
+                                    <th className="p-3 text-left">Vendedor</th>
+                                    <th className="p-3 text-left">Distrito</th>
+                                    <th className="p-3 text-right">Monto</th>
+                                    <th className="p-3 text-center">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {ventas.map(v => (
+                                    <tr key={v.id} className="border-b hover:bg-gray-50">
+                                        <td className="p-3">{v.fecha}</td>
+                                        <td className="p-3">{v.cliente}</td>
+                                        <td className="p-3">{v.vendedor}</td>
+                                        <td className="p-3">{v.distrito}</td>
+                                        <td className="p-3 text-right font-bold text-green-600">S/ {v.monto.toFixed(2)}</td>
+                                        <td className="p-3 text-center"><span className={`px-3 py-1 rounded-full text-xs font-bold ${v.estado==='ENTREGADO'?'bg-green-100 text-green-700':'bg-yellow-100 text-yellow-700'}`}>{v.estado}</span></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="mt-6 p-4 bg-green-50 rounded-lg">
+                        <p className="text-2xl font-bold text-green-700">Total: S/ {calc.ingresos.toFixed(2)}</p>
+                        <p className="text-gray-600">Ticket Promedio: S/ {calc.ticket.toFixed(2)}</p>
+                    </div>
+                </div>
+            );
+
+            const ReporteGastos = () => (
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h2 className="text-2xl font-bold mb-6">💸 Reporte de Gastos</h2>
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="bg-gray-100">
+                                    <th className="p-3 text-left">Periodo</th>
+                                    <th className="p-3 text-left">Categoría</th>
+                                    <th className="p-3 text-left">Razón Social</th>
+                                    <th className="p-3 text-left">Descripción</th>
+                                    <th className="p-3 text-right">Monto</th>
+                                    <th className="p-3 text-left">Medio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {gastos.map(g => (
+                                    <tr key={g.id} className="border-b hover:bg-gray-50">
+                                        <td className="p-3">{g.periodo}</td>
+                                        <td className="p-3"><span className="px-2 py-1 bg-purple-100 rounded text-sm">{g.area}</span></td>
+                                        <td className="p-3">{g.razon}</td>
+                                        <td className="p-3">{g.descripcion}</td>
+                                        <td className="p-3 text-right font-bold text-red-600">S/ {g.monto.toFixed(2)}</td>
+                                        <td className="p-3 text-sm">{g.medio}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="mt-6 p-4 bg-red-50 rounded-lg">
+                        <p className="text-2xl font-bold text-red-700">Total: S/ {calc.gastosTotal.toFixed(2)}</p>
+                    </div>
+                </div>
+            );
+
+            const ReportePersonal = () => (
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h2 className="text-2xl font-bold mb-6">👥 Personal y Planilla</h2>
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="bg-gray-100">
+                                    <th className="p-3 text-left">Nombre</th>
+                                    <th className="p-3 text-left">Cargo</th>
+                                    <th className="p-3 text-right">Sueldo Base</th>
+                                    <th className="p-3 text-right">AFP</th>
+                                    <th className="p-3 text-right">Total</th>
+                                    <th className="p-3 text-center">Planilla</th>
+                                    <th className="p-3 text-center">Tipo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {personal.map(p => (
+                                    <tr key={p.id} className="border-b hover:bg-gray-50">
+                                        <td className="p-3 font-bold">{p.nombre}</td>
+                                        <td className="p-3">{p.cargo}</td>
+                                        <td className="p-3 text-right">S/ {p.sueldo.toFixed(2)}</td>
+                                        <td className="p-3 text-right text-red-600">-S/ {p.afp.toFixed(2)}</td>
+                                        <td className="p-3 text-right font-bold text-green-600">S/ {(p.sueldo-p.afp).toFixed(2)}</td>
+                                        <td className="p-3 text-center"><span className={`px-2 py-1 rounded text-xs ${p.planilla?'bg-blue-100 text-blue-700':'bg-gray-100'}`}>{p.planilla?'PLANILLA':'RRXHH'}</span></td>
+                                        <td className="p-3 text-center text-sm">{p.tipo}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                        <p className="text-xl font-bold text-blue-700">Total Planilla: S/ {personal.reduce((s,p) => s + (p.sueldo-p.afp), 0).toFixed(2)}</p>
+                    </div>
+                </div>
+            );
+
+            const ReporteClientes = () => (
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h2 className="text-2xl font-bold mb-6">👤 Base de Clientes</h2>
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="bg-gray-100">
+                                    <th className="p-3 text-left">RUC/DNI</th>
+                                    <th className="p-3 text-left">Cliente</th>
+                                    <th className="p-3 text-left">Teléfono</th>
+                                    <th className="p-3 text-left">Distrito</th>
+                                    <th className="p-3 text-right">Total Compras</th>
+                                    <th className="p-3 text-center">Cant.</th>
+                                    <th className="p-3 text-center">Tipo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {clientes.sort((a,b) => b.total - a.total).map(c => (
+                                    <tr key={c.id} className="border-b hover:bg-gray-50">
+                                        <td className="p-3 font-mono text-sm">{c.doc}</td>
+                                        <td className="p-3 font-bold">{c.nombre}</td>
+                                        <td className="p-3">{c.telefono}</td>
+                                        <td className="p-3">{c.distrito}</td>
+                                        <td className="p-3 text-right font-bold text-green-600">S/ {c.total.toLocaleString()}</td>
+                                        <td className="p-3 text-center">{c.cant}</td>
+                                        <td className="p-3 text-center"><span className={`px-2 py-1 rounded text-xs ${c.tipo==='EMPRESA'?'bg-purple-100 text-purple-700':'bg-blue-100 text-blue-700'}`}>{c.tipo}</span></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+
+            const ReporteInventario = () => (
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                    <h2 className="text-2xl font-bold mb-6">📦 Inventario</h2>
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="bg-gray-100">
+                                    <th className="p-3 text-left">Código</th>
+                                    <th className="p-3 text-left">Insumo</th>
+                                    <th className="p-3 text-right">Stock</th>
+                                    <th className="p-3 text-center">Unidad</th>
+                                    <th className="p-3 text-right">Costo Unit.</th>
+                                    <th className="p-3 text-right">Valor Total</th>
+                                    <th className="p-3 text-center">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {inventario.map(i => (
+                                    <tr key={i.id} className="border-b hover:bg-gray-50">
+                                        <td className="p-3 font-mono text-sm">{i.codigo}</td>
+                                        <td className="p-3 font-bold">{i.nombre}</td>
+                                        <td className="p-3 text-right">{i.stock}</td>
+                                        <td className="p-3 text-center">{i.unidad}</td>
+                                        <td className="p-3 text-right">S/ {i.costo.toFixed(2)}</td>
+                                        <td className="p-3 text-right font-bold">S/ {(i.stock * i.costo).toFixed(2)}</td>
+                                        <td className="p-3 text-center">
+                                            <span className={`px-2 py-1 rounded text-xs font-bold ${i.stock<i.stockMin?'bg-red-100 text-red-700':i.stock<i.stockMin*1.5?'bg-yellow-100 text-yellow-700':'bg-green-100 text-green-700'}`}>
+                                                {i.stock<i.stockMin?'⚠️ CRÍTICO':i.stock<i.stockMin*1.5?'⚡ ALERTA':'✅ OK'}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+
+            const Config = () => {
+                const [id, setId] = useState(CONFIG.GOOGLE_SHEETS_ID);
+                const [key, setKey] = useState(CONFIG.GOOGLE_API_KEY);
+
+                return (
+                    <div className="bg-white rounded-xl p-6 max-w-2xl">
+                        <h2 className="text-2xl font-bold mb-4">⚙️ Configuración</h2>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block font-bold mb-2">Google Sheets ID</label>
+                                <input value={id} onChange={e => setId(e.target.value)} className="w-full p-3 border-2 rounded-lg font-mono text-sm" placeholder="1AbC...XyZ" />
+                                <p className="text-xs text-gray-600 mt-1">De la URL: docs.google.com/spreadsheets/d/<strong>ESTE_ID</strong>/edit</p>
+                            </div>
+                            <div>
+                                <label className="block font-bold mb-2">Google API Key</label>
+                                <input value={key} onChange={e => setKey(e.target.value)} className="w-full p-3 border-2 rounded-lg font-mono text-sm" placeholder="AIza..." />
+                                <p className="text-xs text-gray-600 mt-1">Crear en: console.cloud.google.com/apis/credentials</p>
+                            </div>
+                            <button onClick={() => { CONFIG.GOOGLE_SHEETS_ID = id; CONFIG.GOOGLE_API_KEY = key; alert('✅ Guardado! Recarga la página (F5)'); }} className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-bold text-lg hover:bg-blue-700">
+                                💾 Guardar Configuración
+                            </button>
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+                    <div className="bg-gradient-to-r from-slate-900 to-blue-900 text-white p-4 sticky top-0 z-50 shadow-xl">
+                        <h1 className="text-2xl md:text-3xl font-bold">🎂 ERP PASTELERÍA PROFESIONAL</h1>
+                        <p className="text-xs md:text-sm text-blue-200">Sistema Integrado de Gestión Empresarial</p>
+                    </div>
+
+                    <div className="bg-white border-b p-2 sticky top-16 z-40 shadow-md overflow-x-auto scrollbar-hide">
+                        <div className="flex gap-2">
+                            {[
+                                {id:'dashboard', name:'📊 Dashboard'},
+                                {id:'ingresos', name:'💰 Ingresos'},
+                                {id:'gastos', name:'💸 Gastos'},
+                                {id:'personal', name:'👥 Personal'},
+                                {id:'clientes', name:'👤 Clientes'},
+                                {id:'inventario', name:'📦 Inventario'},
+                                {id:'config', name:'⚙️ Config'},
+                            ].map(m => (
+                                <button key={m.id} onClick={() => setModule(m.id)} className={`px-4 py-2 rounded-lg font-bold whitespace-nowrap text-sm ${module===m.id?'bg-blue-600 text-white shadow-lg':'bg-gray-100 hover:bg-gray-200'}`}>
+                                    {m.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="p-4">
+                        {module==='dashboard' && <Dashboard />}
+                        {module==='ingresos' && <ReporteIngresos />}
+                        {module==='gastos' && <ReporteGastos />}
+                        {module==='personal' && <ReportePersonal />}
+                        {module==='clientes' && <ReporteClientes />}
+                        {module==='inventario' && <ReporteInventario />}
+                        {module==='config' && <Config />}
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<ERP />, document.getElementById('root'));
+    </script>
+</body>
+</html>
