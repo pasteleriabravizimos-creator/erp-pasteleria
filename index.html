@@ -1,222 +1,974 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>BRAVIZIMOS ERP V2</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRAVIZIMOS ERP V2</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-<style>
-/* ——— estilos (no cambié nada aquí) ——— */
-html,body{margin:0;padding:0;height:100%;font-family:'Inter',sans-serif;background:#0f172a;color:#e5e7eb}
-.app{display:flex;min-height:100%}
-.sidebar{width:250px;background:#020617;padding:1.5rem;display:flex;flex-direction:column}
-.logo{font-size:1.3rem;font-weight:800;margin-bottom:2rem;color:#38bdf8;letter-spacing:.05em}
-.nav-section{margin-bottom:1.5rem}
-.nav-section-title{font-size:.75rem;color:#6b7280;text-transform:uppercase;margin-bottom:.5rem}
-.nav-item{display:flex;align-items:center;gap:.6rem;padding:.6rem .8rem;border-radius:.7rem;color:#9ca3af;cursor:pointer}
-.nav-item i{width:18px;color:#6b7280}
-.nav-item.active,.nav-item:hover{background:#0b1120;color:#fff}
-.main{flex:1;padding:1.5rem}
-header{display:flex;justify-content:space-between;align-items:center}
-.page-header h1{margin:0;font-size:1.2rem}
-.card{background:#020617;border:1px solid #1f2937;border-radius:.8rem;padding:1rem;margin-bottom:1rem}
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
-.stat-card{background:#020617;border:1px solid #1f2937;border-radius:.8rem;padding:1rem}
-.stat-value{font-size:1.4rem;font-weight:700}
-.chart-container{background:#020617;border:1px solid #1f2937;border-radius:.8rem;padding:1rem}
-.table-container table{width:100%;border-collapse:collapse}
-.table-container th,.table-container td{padding:.7rem;border-bottom:1px solid #1f2937}
-.loader{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column}
-</style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #0f172a;
+            --dark-2: #1e293b;
+            --dark-3: #334155;
+            --border: rgba(148, 163, 184, 0.1);
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .app-container { display: flex; min-height: 100vh; }
+
+        .sidebar {
+            width: 280px;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--glass); border-radius: 10px; }
+
+        .logo { padding: 0 2rem 2rem; border-bottom: 1px solid var(--border); }
+        .logo h1 {
+            font-size: 1.75rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--warning));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .logo p { font-size: 0.75rem; color: #64748b; font-weight: 500; margin-top: 0.25rem; }
+
+        .nav-section { padding: 1.5rem 1rem 0.5rem; }
+        .nav-section-title {
+            font-size: 0.7rem; font-weight: 700; color: #64748b;
+            text-transform: uppercase; letter-spacing: 1px; padding: 0 1rem 0.75rem;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 0.875rem;
+            padding: 0.875rem 1rem; margin: 0.25rem 0.5rem; border-radius: 12px;
+            color: #94a3b8; cursor: pointer; transition: all 0.3s;
+            font-size: 0.9rem; font-weight: 500;
+        }
+        .nav-item i { font-size: 1.1rem; width: 24px; }
+        .nav-item:hover {
+            background: var(--glass); color: #e2e8f0; transform: translateX(4px);
+        }
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .main-content { flex: 1; margin-left: 280px; padding: 2rem; }
+
+        .page-header {
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 20px; padding: 2rem;
+            margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .page-header h1 {
+            font-size: 2.25rem; font-weight: 800; margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #e2e8f0, #94a3b8);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .page-header p { color: #64748b; }
+
+        .btn {
+            padding: 0.875rem 1.75rem; border: none; border-radius: 12px;
+            font-weight: 600; font-size: 0.9rem; cursor: pointer;
+            transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4); }
+
+        .card {
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 20px; padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem; margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 20px; padding: 1.5rem;
+            transition: all 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+
+        .stat-label { font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.5rem; }
+        .stat-value {
+            font-size: 2rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--warning));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .stat-change {
+            font-size: 0.75rem; margin-top: 0.5rem;
+            display: flex; align-items: center; gap: 0.25rem;
+        }
+        .stat-change.up { color: var(--success); }
+        .stat-change.down { color: var(--danger); }
+
+        .chart-container {
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 20px; padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        table {
+            width: 100%; border-collapse: collapse;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 12px; overflow: hidden;
+        }
+        thead tr { background: rgba(99, 102, 241, 0.1); }
+        th, td {
+            padding: 1rem; text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th { font-weight: 600; color: #e2e8f0; font-size: 0.875rem; }
+        td { color: #94a3b8; font-size: 0.875rem; }
+        tr:hover { background: var(--glass); }
+
+        .badge {
+            padding: 0.25rem 0.75rem; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 600;
+            display: inline-block;
+        }
+        .badge-success { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .badge-warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .badge-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .badge-info { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+
+        .sync-btn {
+            position: fixed; bottom: 2rem; right: 2rem;
+            width: 60px; height: 60px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none; color: white; font-size: 1.5rem;
+            cursor: pointer; box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s; z-index: 1000;
+        }
+        .sync-btn:hover { transform: scale(1.1) rotate(180deg); }
+        .sync-btn.syncing { animation: spin 1s linear infinite; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .alert {
+            padding: 0.75rem 1rem; border-radius: 12px; margin-bottom: 0.5rem;
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+        .alert-success { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: var(--success); }
+        .alert-warning { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: var(--warning); }
+        .alert-error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger); }
+
+        .loader {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.98);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999;
+        }
+        .loader-spinner {
+            width: 60px; height: 60px; border: 4px solid var(--border);
+            border-top-color: var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .loader-text { margin-top: 1.5rem; color: #94a3b8; }
+        .loader.hidden { display: none; }
+
+        .mic-btn {
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            color: white; border: none; padding: 0.75rem 1.5rem;
+            border-radius: 12px; font-weight: 600; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s;
+        }
+        .mic-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(236, 72, 153, 0.4); }
+        .mic-btn.recording { animation: pulse 1.5s ease-in-out infinite; }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .voice-result {
+            background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 12px; padding: 1rem; margin-top: 1rem;
+            color: #c4b5fd;
+        }
+
+        #alertContainer {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            max-width: 320px;
+            z-index: 2000;
+        }
+    </style>
 </head>
-
 <body>
-<div id="loader" class="loader">
-<i class="fas fa-spinner fa-spin" style="font-size:2rem;color:#3b82f6"></i>
-<p>Cargando BRAVIZIMOS ERP V2...</p>
-</div>
+    <div class="loader" id="loader">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">Cargando BRAVIZIMOS ERP V2...</div>
+    </div>
 
-<div class="app" id="app" style="display:none;">
-<div class="sidebar">
-<div class="logo">BRAVIZIMOS</div>
+    <div id="alertContainer"></div>
 
-<div class="nav-section">
-<div class="nav-section-title">General</div>
-<div class="nav-item active" onclick="navigate('dashboard')"><i class="fas fa-chart-line"></i>Dashboard</div>
-<div class="nav-item" onclick="navigate('ventas')"><i class="fas fa-shopping-cart"></i>Ventas / Pedidos</div>
-<div class="nav-item" onclick="navigate('cotizaciones')"><i class="fas fa-file-invoice"></i>Cotizaciones</div>
-<div class="nav-item" onclick="navigate('clientes')"><i class="fas fa-users"></i>Clientes</div>
-<div class="nav-item" onclick="navigate('delivery')"><i class="fas fa-truck"></i>Delivery</div>
-</div>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>BRAVIZIMOS</h1>
+                <p>Sistema ERP Completo V2</p>
+            </div>
 
-<div class="nav-section">
-<div class="nav-section-title">Producción</div>
-<div class="nav-item" onclick="navigate('productos')"><i class="fas fa-box"></i>Productos</div>
-<div class="nav-item" onclick="navigate('inventario')"><i class="fas fa-warehouse"></i>Inventario</div>
-<div class="nav-item" onclick="navigate('produccion')"><i class="fas fa-bread-slice"></i>Producción</div>
-<div class="nav-item" onclick="navigate('recetas')"><i class="fas fa-utensils"></i>Recetas</div>
-</div>
-</div>
+            <nav>
+                <div class="nav-section">
+                    <div class="nav-section-title">PRINCIPAL</div>
+                    <div class="nav-item active" onclick="navigateTo('dashboard')">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </div>
+                </div>
 
-<div class="main">
-<header>
-<div class="page-header">
-<h1>BRAVIZIMOS ERP V2</h1>
-</div>
-</header>
+                <div class="nav-section">
+                    <div class="nav-section-title">VENTAS</div>
+                    <div class="nav-item" onclick="navigateTo('ventas')">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Ventas / Pedidos</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('cotizaciones')">
+                        <i class="fas fa-file-invoice"></i>
+                        <span>Cotizaciones</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('clientes')">
+                        <i class="fas fa-users"></i>
+                        <span>Clientes</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('delivery')">
+                        <i class="fas fa-truck"></i>
+                        <span>Delivery</span>
+                    </div>
+                </div>
 
-<div id="content"></div>
-</div>
-</div>
+                <div class="nav-section">
+                    <div class="nav-section-title">PRODUCCIÓN</div>
+                    <div class="nav-item" onclick="navigateTo('productos')">
+                        <i class="fas fa-box"></i>
+                        <span>Productos</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('inventario')">
+                        <i class="fas fa-warehouse"></i>
+                        <span>Inventario</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('produccion')">
+                        <i class="fas fa-industry"></i>
+                        <span>Producción</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('recetas')">
+                        <i class="fas fa-book"></i>
+                        <span>Recetas</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('insumos')">
+                        <i class="fas fa-cubes"></i>
+                        <span>Insumos</span>
+                    </div>
+                </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <div class="nav-section">
+                    <div class="nav-section-title">COMPRAS Y GASTOS</div>
+                    <div class="nav-item" onclick="navigateTo('proveedores')">
+                        <i class="fas fa-building"></i>
+                        <span>Proveedores</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('compras')">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>Compras</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('gastos')">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Gastos</span>
+                    </div>
+                </div>
 
-<script>
-/* === API conectada === */
-const API_URL = 'https://script.google.com/macros/s/AKfycbwM6jN82P7YEslJw1X-rW44w0mVmbx-86hJbaCVp-pACcGSAjFeeIYXwfoGHPxIRrq7/exec';
+                <div class="nav-section">
+                    <div class="nav-section-title">FINANZAS</div>
+                    <div class="nav-item" onclick="navigateTo('facturas')">
+                        <i class="fas fa-receipt"></i>
+                        <span>Facturas</span>
+                    </div>
+                </div>
 
-let DATA = {};
+                <div class="nav-section">
+                    <div class="nav-section-title">PERSONAL</div>
+                    <div class="nav-item" onclick="navigateTo('personal')">
+                        <i class="fas fa-user-tie"></i>
+                        <span>Personal</span>
+                    </div>
+                </div>
 
-/* ============= Cargar datos ============= */
-async function loadData() {
-  try {
-    const res = await fetch(API_URL + '?action=getAll');
-    DATA = await res.json();
+                <div class="nav-section">
+                    <div class="nav-section-title">ANÁLISIS</div>
+                    <div class="nav-item" onclick="navigateTo('kpi')">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>KPIs & Vendedoras</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('marketing')">
+                        <i class="fas fa-bullhorn"></i>
+                        <span>Marketing</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('reclamos')">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Reclamos</span>
+                    </div>
+                </div>
 
-    document.getElementById("loader").style.display = "none";
-    document.getElementById("app").style.display = "flex";
+                <div class="nav-section">
+                    <div class="nav-section-title">IA & AUTOMATION</div>
+                    <div class="nav-item" onclick="navigateTo('ia-voz')">
+                        <i class="fas fa-microphone"></i>
+                        <span>IA de Voz</span>
+                    </div>
+                </div>
+            </nav>
+        </aside>
 
-    navigate('dashboard');
-  } catch(e) {
-    alert("Error cargando datos: " + e);
-  }
-}
+        <main class="main-content" id="mainContent">
+            <!-- Aquí se carga el contenido -->
+        </main>
+    </div>
 
-/* ============= Navegación ============= */
-function navigate(page) {
-  document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
-  const btn = [...document.querySelectorAll(".nav-item")].find(b => b.textContent.includes(page.charAt(0).toUpperCase()));
-  if(btn) btn.classList.add("active");
+    <button class="sync-btn" id="syncBtn" onclick="syncData()" title="Sincronizar">
+        <i class="fas fa-sync-alt"></i>
+    </button>
 
-  if(page === "dashboard") document.getElementById("content").innerHTML = renderDashboard();
-}
+    <script>
+        // URL de tu Apps Script (API)
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwM6jN82P7YEslJw1X-rW44w0mVmbx-86hJbaCVp-pACcGSAjFeeIYXwfoGHPxIRrq7/exec';
 
-/* ================= DASHBOARD ================= */
+        // Datos globales
+        let DATA = {
+            ventas: [],
+            cotizaciones: [],
+            inventario: [],
+            produccion: [],
+            insumos: [],
+            compras: [],
+            proveedores: [],
+            gastos: [],
+            facturas: [],
+            clientes: [],
+            delivery: [],
+            reclamos: [],
+            personal: [],
+            ksd: [],
+            kpiVendedoras: [],
+            estadisticas: {}
+        };
 
-function renderDashboard() {
-    const stats = DATA.estadisticas || {};
-    const ventas = DATA.ventas || [];
-    const alertas = [];
-    
-    const hoy = new Date();
-    const ventasHoy = ventas.filter(v => {
-        const f = new Date(v.fecharegistro || v.fecha);
-        return f.toDateString() === hoy.toDateString();
-    });
-    const totalHoy = ventasHoy.reduce((s, v) => s + parseFloat(v.total || 0), 0);
+        let currentView = 'dashboard';
 
-    (DATA.insumos || []).forEach(i => {
-        const stock = parseFloat(i.stockactual || i.stock || 0);
-        const minimo = parseFloat(i.stockminimo || i.minimo || 0);
-        if (stock <= minimo) {
-            alertas.push({
-                tipo: stock === 0 ? 'error' : 'warning',
-                mensaje: `${stock === 0 ? 'Sin stock' : 'Stock bajo'}: ${i.nombreinsumo || i.nombre} (${stock})`
+        window.addEventListener('DOMContentLoaded', async () => {
+            await syncData();
+            navigateTo('dashboard');
+            document.getElementById('loader').classList.add('hidden');
+        });
+
+        // Alertas tipo "toast"
+        function showAlert(message, type = 'success') {
+            const container = document.getElementById('alertContainer');
+            const div = document.createElement('div');
+            div.className = `alert alert-${type}`;
+            div.innerHTML = `<span>${message}</span>`;
+            container.appendChild(div);
+            setTimeout(() => {
+                div.remove();
+            }, 4000);
+        }
+
+        // Sincronizar con la API
+        async function syncData() {
+            const btn = document.getElementById('syncBtn');
+            if (!btn) return;
+            btn.classList.add('syncing');
+
+            try {
+                const response = await fetch(`${API_URL}?action=getAll`);
+                const data = await response.json();
+
+                if (data.error) {
+                    showAlert('Error al sincronizar: ' + data.mensaje, 'error');
+                    return;
+                }
+
+                DATA = data;
+                localStorage.setItem('bravizimos_data', JSON.stringify(DATA));
+                showAlert('✓ Datos sincronizados correctamente', 'success');
+
+                navigateTo(currentView);
+            } catch (err) {
+                console.error(err);
+                showAlert('Error de conexión. Usando datos locales si existen.', 'warning');
+                const cached = localStorage.getItem('bravizimos_data');
+                if (cached) {
+                    DATA = JSON.parse(cached);
+                }
+            } finally {
+                btn.classList.remove('syncing');
+            }
+        }
+
+        // Navegación
+        function navigateTo(view) {
+            currentView = view;
+
+            // actualizar activo en el menú
+            document.querySelectorAll('.nav-item').forEach(item => {
+                const onclick = item.getAttribute('onclick') || '';
+                if (onclick.includes(`'${view}'`)) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            const content = document.getElementById('mainContent');
+            if (!content) return;
+
+            switch (view) {
+                case 'dashboard':
+                    content.innerHTML = renderDashboard();
+                    setTimeout(renderCharts, 50);
+                    break;
+                case 'ventas':
+                    content.innerHTML = renderVentas();
+                    break;
+                case 'cotizaciones':
+                    content.innerHTML = renderCotizaciones();
+                    break;
+                case 'clientes':
+                    content.innerHTML = renderClientes();
+                    break;
+                case 'delivery':
+                    content.innerHTML = renderDelivery();
+                    break;
+                case 'productos':
+                case 'inventario':
+                    content.innerHTML = renderProductos();
+                    break;
+                case 'produccion':
+                    content.innerHTML = renderProduccion();
+                    break;
+                case 'insumos':
+                    content.innerHTML = renderInsumos();
+                    break;
+                case 'proveedores':
+                    content.innerHTML = renderProveedores();
+                    break;
+                case 'compras':
+                    content.innerHTML = renderCompras();
+                    break;
+                case 'gastos':
+                    content.innerHTML = renderGastos();
+                    break;
+                case 'facturas':
+                    content.innerHTML = renderFacturas();
+                    break;
+                case 'personal':
+                    content.innerHTML = renderPersonal();
+                    break;
+                case 'kpi':
+                    content.innerHTML = renderKPI();
+                    break;
+                case 'marketing':
+                    content.innerHTML = renderMarketing();
+                    break;
+                case 'reclamos':
+                    content.innerHTML = renderReclamos();
+                    break;
+                case 'ia-voz':
+                    content.innerHTML = renderIAVoz();
+                    break;
+                default:
+                    content.innerHTML = renderDashboard();
+            }
+        }
+
+        // DASHBOARD
+        function renderDashboard() {
+            const stats = DATA.estadisticas || {};
+            const ventas = DATA.ventas || [];
+            const inventario = DATA.inventario || [];
+            const insumos = DATA.insumos || [];
+
+            const hoy = new Date();
+            const ventasHoy = ventas.filter(v => {
+                const f = new Date(v.fecharegistro || v.fecha);
+                return f.toDateString() === hoy.toDateString();
+            });
+            const totalHoy = ventasHoy.reduce((s, v) => s + parseFloat(v.total || 0), 0);
+
+            const alertas = [];
+            insumos.forEach(i => {
+                const stock = parseFloat(i.stockactual || i.stock || 0);
+                const minimo = parseFloat(i.stockminimo || i.minimo || 0);
+                if (minimo > 0 && stock <= minimo) {
+                    alertas.push({
+                        tipo: stock === 0 ? 'error' : 'warning',
+                        mensaje: `${stock === 0 ? 'Sin stock' : 'Stock bajo'}: ${i.nombre || '-'} (${stock})`
+                    });
+                }
+            });
+
+            let alertasHTML = '';
+            if (alertas.length > 0) {
+                alertasHTML =
+                    `<div class="card">
+                        <h3 style="margin-bottom: 1rem;">🔔 Alertas</h3>
+                        ${alertas.map(a =>
+                            `<div class="alert alert-${a.tipo}">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>${a.mensaje}</span>
+                            </div>`
+                        ).join('')}
+                    </div>`;
+            }
+
+            const top = inventario.slice(0, 5);
+            const topRows = top.length > 0
+                ? top.map(p => {
+                    const nombre = p.nombreproducto || p.nombre || '-';
+                    const stock = parseFloat(p.stockactual || 0);
+                    const precio = parseFloat(p.precioventa || 0);
+                    const total = stock * precio;
+                    return `<tr>
+                        <td>${nombre}</td>
+                        <td>${stock}</td>
+                        <td>S/ ${total.toFixed(2)}</td>
+                    </tr>`;
+                }).join('')
+                : `<tr><td colspan="3" style="text-align:center;color:#64748b;">Sin datos de productos.</td></tr>`;
+
+            return `
+                <div class="page-header">
+                    <div>
+                        <h1>Dashboard</h1>
+                        <p>Bienvenido a BRAVIZIMOS ERP V2</p>
+                    </div>
+                </div>
+
+                ${alertasHTML}
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Ventas Hoy</div>
+                        <div class="stat-value">S/ ${totalHoy.toFixed(2)}</div>
+                        <div class="stat-change up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>${ventasHoy.length} pedidos</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-label">Total Ventas</div>
+                        <div class="stat-value">S/ ${(stats.totalVentas || 0).toFixed(2)}</div>
+                        <div class="stat-change">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>${stats.cantidadVentas || 0} ventas</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-label">Ticket Promedio</div>
+                        <div class="stat-value">S/ ${(stats.ticketPromedio || 0).toFixed(2)}</div>
+                        <div class="stat-change">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Por venta</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-label">Clientes</div>
+                        <div class="stat-value">${stats.totalClientes || 0}</div>
+                        <div class="stat-change">
+                            <i class="fas fa-users"></i>
+                            <span>Total registrados</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 1rem;">📈 Ventas Últimos 7 Días</h3>
+                    <canvas id="chartVentas" style="max-height: 300px;"></canvas>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem;">🏆 Top 5 Productos (Stock)</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad (Stock)</th>
+                                <th>Valor en Inventario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${topRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderCharts() {
+            const ctx = document.getElementById('chartVentas');
+            if (!ctx) return;
+
+            // Por ahora gráfico dummy (puedes adaptarlo a tus datos)
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                    datasets: [{
+                        label: 'Ventas (S/)',
+                        data: [850, 920, 1100, 980, 1250, 1400, 950],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    }
+                }
             });
         }
-    });
 
-    return `
-        <div class="page-header">
-            <div>
-                <h1>Dashboard</h1>
-                <p>Bienvenido a BRAVIZIMOS ERP V2</p>
-            </div>
-        </div>
+        // Helper para tablas
+        function formatValue(value, format) {
+            if (value == null || value === '') return '-';
 
-        ${alertas.length ? `
-            <div class="card">
-                <h3 style="margin-bottom: 1rem;">🔔 Alertas</h3>
-                ${alertas.map(a => `
-                    <div class="alert alert-${a.tipo}">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <span>${a.mensaje}</span>
+            if (format === 'currency') {
+                const num = parseFloat(value || 0);
+                return 'S/ ' + num.toFixed(2);
+            }
+
+            if (format === 'badge') {
+                const text = String(value);
+                let type = 'info';
+                const lower = text.toLowerCase();
+                if (['pagado', 'activo', 'emitida', 'completado', 'aceptada'].some(t => lower.includes(t))) type = 'success';
+                else if (['pendiente', 'por agotar', 'ordenada', 'vigente'].some(t => lower.includes(t))) type = 'warning';
+                else if (['anulado', 'vencido', 'cancelado'].some(t => lower.includes(t))) type = 'danger';
+                return `<span class="badge badge-${type}">${text}</span>`;
+            }
+
+            return value;
+        }
+
+        function renderTable(title, data, columns) {
+            if (!data || data.length === 0) {
+                return `
+                    <div class="page-header">
+                        <div>
+                            <h1>${title}</h1>
+                            <p>Gestión de ${title.toLowerCase()}</p>
+                        </div>
                     </div>
-                `).join('')}
-            </div>` : ''}
+                    <div class="card">
+                        <p style="text-align: center; color: #64748b; padding: 2rem;">
+                            No hay datos disponibles. Sincroniza con Google Sheets.
+                        </p>
+                    </div>
+                `;
+            }
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Ventas Hoy</div>
-                <div class="stat-value">S/ ${totalHoy.toFixed(2)}</div>
-                <div class="stat-change up">
-                    <i class="fas fa-arrow-up"></i>
-                    <span>${ventasHoy.length} pedidos</span>
+            const headerHTML = columns.map(c => `<th>${c.label}</th>`).join('');
+            const rowsHTML = data.map(row => {
+                const cells = columns.map(col => {
+                    const raw = row[col.key];
+                    const val = formatValue(raw, col.format);
+                    return `<td>${val}</td>`;
+                }).join('');
+                return `<tr>${cells}</tr>`;
+            }).join('');
+
+            return `
+                <div class="page-header">
+                    <div>
+                        <h1>${title}</h1>
+                        <p>Gestión de ${title.toLowerCase()}</p>
+                    </div>
                 </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-label">Total Ventas</div>
-                <div class="stat-value">S/ ${(stats.totalVentas || 0).toFixed(2)}</div>
-                <div class="stat-change">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span>${stats.cantidadVentas || 0} ventas</span>
+                <div class="card">
+                    <table>
+                        <thead><tr>${headerHTML}</tr></thead>
+                        <tbody>${rowsHTML}</tbody>
+                    </table>
                 </div>
-            </div>
+            `;
+        }
 
-            <div class="stat-card">
-                <div class="stat-label">Ticket Promedio</div>
-                <div class="stat-value">S/ ${(stats.ticketPromedio || 0).toFixed(2)}</div>
-                <div class="stat-change">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Por venta</span>
+        // VISTAS PRINCIPALES (usando renderTable)
+
+        function renderVentas() {
+            return renderTable('Ventas / Pedidos', DATA.ventas, [
+                { key: 'idventa',        label: 'ID' },
+                { key: 'fecharegistro',  label: 'Fecha' },
+                { key: 'cliente',        label: 'Cliente' },
+                { key: 'vendedora',      label: 'Vendedora' },
+                { key: 'total',          label: 'Total', format: 'currency' },
+                { key: 'estadopago',     label: 'Estado Pago', format: 'badge' },
+                { key: 'estadopedido',   label: 'Estado Pedido', format: 'badge' }
+            ]);
+        }
+
+        function renderCotizaciones() {
+            return renderTable('Cotizaciones', DATA.cotizaciones, [
+                { key: 'id',      label: 'ID' },
+                { key: 'fecha',   label: 'Fecha' },
+                { key: 'cliente', label: 'Cliente' },
+                { key: 'vendedora', label: 'Vendedora' },
+                { key: 'total',   label: 'Total', format: 'currency' },
+                { key: 'estado',  label: 'Estado', format: 'badge' }
+            ]);
+        }
+
+        function renderClientes() {
+            return renderTable('Clientes', DATA.clientes, [
+                { key: 'id',           label: 'ID' },
+                { key: 'nombre',       label: 'Nombre' },
+                { key: 'documento',    label: 'Documento' },
+                { key: 'telefono',     label: 'Teléfono' },
+                { key: 'email',        label: 'Email' },
+                { key: 'segmento',     label: 'Segmento', format: 'badge' },
+                { key: 'totalcompras', label: 'Total Compras', format: 'currency' }
+            ]);
+        }
+
+        function renderDelivery() {
+            return renderTable('Delivery', DATA.delivery, [
+                { key: 'id',        label: 'ID' },
+                { key: 'fecha',     label: 'Fecha' },
+                { key: 'cliente',   label: 'Cliente' },
+                { key: 'direccion', label: 'Dirección' },
+                { key: 'distrito',  label: 'Distrito' },
+                { key: 'repartidor',label: 'Repartidor' },
+                { key: 'costo',     label: 'Costo', format: 'currency' },
+                { key: 'estado',    label: 'Estado', format: 'badge' }
+            ]);
+        }
+
+        function renderProductos() {
+            return renderTable('Productos / Inventario', DATA.inventario, [
+                { key: 'codigo',        label: 'Código' },
+                { key: 'nombreproducto',label: 'Producto' },
+                { key: 'categoria',     label: 'Categoría' },
+                { key: 'stockactual',   label: 'Stock' },
+                { key: 'stockminimo',   label: 'Mínimo' },
+                { key: 'precioventa',   label: 'Precio Venta', format: 'currency' },
+                { key: 'costo',         label: 'Costo', format: 'currency' },
+                { key: 'estado',        label: 'Estado', format: 'badge' }
+            ]);
+        }
+
+        function renderProduccion() {
+            return renderTable('Producción', DATA.produccion, [
+                { key: 'id',       label: 'ID' },
+                { key: 'fecha',    label: 'Fecha' },
+                { key: 'producto', label: 'Producto' },
+                { key: 'cantidad', label: 'Cantidad' },
+                { key: 'estado',   label: 'Estado', format: 'badge' },
+                { key: 'costo',    label: 'Costo', format: 'currency' }
+            ]);
+        }
+
+        function renderInsumos() {
+            return renderTable('Insumos', DATA.insumos, [
+                { key: 'codigo',    label: 'Código' },
+                { key: 'nombre',    label: 'Nombre' },
+                { key: 'categoria', label: 'Categoría' },
+                { key: 'stock',     label: 'Stock' },
+                { key: 'minimo',    label: 'Mínimo' },
+                { key: 'costounit', label: 'Costo Unit', format: 'currency' },
+                { key: 'proveedor', label: 'Proveedor' },
+                { key: 'estado',    label: 'Estado', format: 'badge' }
+            ]);
+        }
+
+        function renderProveedores() {
+            return renderTable('Proveedores', DATA.proveedores, [
+                { key: 'id',         label: 'ID' },
+                { key: 'nombre',     label: 'Nombre' },
+                { key: 'ruc',        label: 'RUC' },
+                { key: 'telefono',   label: 'Teléfono' },
+                { key: 'email',      label: 'Email' },
+                { key: 'categoria',  label: 'Categoría' },
+                { key: 'calificacion', label: 'Calificación' }
+            ]);
+        }
+
+        function renderCompras() {
+            return renderTable('Compras', DATA.compras, [
+                { key: 'id',          label: 'ID' },
+                { key: 'fecha',       label: 'Fecha' },
+                { key: 'proveedor',   label: 'Proveedor' },
+                { key: 'total',       label: 'Total', format: 'currency' },
+                { key: 'estadopago',  label: 'Estado Pago', format: 'badge' },
+                { key: 'estadocompra',label: 'Estado Compra', format: 'badge' }
+            ]);
+        }
+
+        function renderGastos() {
+            return renderTable('Gastos', DATA.gastos, [
+                { key: 'id',          label: 'ID' },
+                { key: 'fecha',       label: 'Fecha' },
+                { key: 'categoria',   label: 'Categoría' },
+                { key: 'descripcion', label: 'Descripción' },
+                { key: 'monto',       label: 'Monto', format: 'currency' },
+                { key: 'metodopago',  label: 'Método Pago' },
+                { key: 'estado',      label: 'Estado', format: 'badge' }
+            ]);
+        }
+
+        function renderFacturas() {
+            return renderTable('Facturas', DATA.facturas, [
+                { key: 'id',      label: 'ID' },
+                { key: 'tipo',    label: 'Tipo' },
+                { key: 'numero',  label: 'Número' },
+                { key: 'fecha',   label: 'Fecha' },
+                { key: 'cliente', label: 'Cliente' },
+                { key: 'total',   label: 'Total', format: 'currency' },
+                { key: 'estado',  label: 'Estado', format: 'badge' }
+            ]);
+        }
+
+        function renderPersonal() {
+            return renderTable('Personal', DATA.personal, [
+                { key: 'id',        label: 'ID' },
+                { key: 'nombre',    label: 'Nombre' },
+                { key: 'dni',       label: 'DNI' },
+                { key: 'cargo',     label: 'Cargo' },
+                { key: 'telefono',  label: 'Teléfono' },
+                { key: 'sueldo',    label: 'Sueldo', format: 'currency' },
+                { key: 'comision',  label: 'Comisión %' },
+                { key: 'estado',    label: 'Estado', format: 'badge' }
+            ]);
+        }
+
+        function renderKPI() {
+            return renderTable('KPIs & Vendedoras', DATA.kpiVendedoras, [
+                { key: 'fecha',        label: 'Fecha' },
+                { key: 'vendedora',    label: 'Vendedora' },
+                { key: 'ventas',       label: 'Ventas', format: 'currency' },
+                { key: 'pedidos',      label: 'Pedidos' },
+                { key: 'ticketprom',   label: 'Ticket Prom', format: 'currency' },
+                { key: 'meta',         label: 'Meta', format: 'currency' },
+                { key: 'cumplimientoporcentaje', label: 'Cumplimiento %' },
+                { key: 'ranking',      label: 'Ranking' }
+            ]);
+        }
+
+        function renderMarketing() {
+            // Por ahora no viene en la API, así que mostramos mensaje simple
+            return `
+                <div class="page-header">
+                    <div>
+                        <h1>Marketing</h1>
+                        <p>Campañas y resultados</p>
+                    </div>
                 </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-label">Clientes</div>
-                <div class="stat-value">${stats.totalClientes || 0}</div>
-                <div class="stat-change">
-                    <i class="fas fa-users"></i>
-                    <span>Total registrados</span>
+                <div class="card">
+                    <p style="text-align:center;color:#64748b;padding:2rem;">
+                        Módulo de marketing aún no conectado a la API.
+                    </p>
                 </div>
-            </div>
-        </div>
+            `;
+        }
 
-        <div class="chart-container">
-            <h3 style="margin-bottom: 1rem;">📈 Ventas Últimos 7 Días</h3>
-            <canvas id="chartVentas" style="max-height: 300px;"></canvas>
-        </div>
+        function renderReclamos() {
+            return renderTable('Reclamos', DATA.reclamos, [
+                { key: 'id',        label: 'ID' },
+                { key: 'fecha',     label: 'Fecha' },
+                { key: 'cliente',   label: 'Cliente' },
+                { key: 'tipo',      label: 'Tipo' },
+                { key: 'descripcion', label: 'Descripción' },
+                { key: 'prioridad', label: 'Prioridad', format: 'badge' },
+                { key: 'estado',    label: 'Estado', format: 'badge' }
+            ]);
+        }
 
-        <div class="card">
-            <h3 style="margin-bottom: 1rem;">🏆 Top 5 Productos</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Cantidad (Stock)</th>
-                        <th>Valor en Inventario</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${(DATA.inventario || []).slice(0, 5).map(p => `
-                        <tr>
-                            <td>${p.nombreproducto || p.nombre || '-'}</td>
-                            <td>${p.stockactual || 0}</td>
-                            <td>S/ ${(parseFloat(p.precioventa || p.precio || 0) * parseFloat(p.stockactual || 0)).toFixed(2)}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
-}
+        function renderIAVoz() {
+            return `
+                <div class="page-header">
+                    <div>
+                        <h1>🎤 IA de Voz</h1>
+                        <p>Control por comandos de voz (demo)</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem;">Comandos disponibles</h3>
+                    <button class="mic-btn" onclick="startRecording()">
+                        <i class="fas fa-microphone"></i>
+                        Mantén presionado para hablar
+                    </button>
+                    <div id="voiceResult" class="voice-result" style="display:none;">
+                        <strong>Resultado:</strong>
+                        <p id="voiceText"></p>
+                    </div>
+                    <div style="margin-top: 2rem;">
+                        <h4 style="margin-bottom: 1rem;">Ejemplos:</h4>
+                        <ul style="list-style:none;padding:0;">
+                            <li style="padding:0.5rem 0;">💰 "Registrar venta de 50 bocaditos para Ana"</li>
+                            <li style="padding:0.5rem 0;">📊 "Cuánto vendimos hoy"</li>
+                            <li style="padding:0.5rem 0;">📦 "Cuántos alfajores quedan"</li>
+                            <li style="padding:0.5rem 0;">👥 "Quién vendió más esta semana"</li>
+                            <li style="padding:0.5rem 0;">💸 "Registrar gasto de delivery 25 soles"</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
 
-/* ============ iniciar ============ */
-loadData();
-</script>
+        // Stub para no romper al hacer clic
+        function startRecording() {
+            showAlert('La función de IA de voz aún no está configurada. 🔧', 'warning');
+        }
+    </script>
 </body>
 </html>
