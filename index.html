@@ -626,36 +626,25 @@
 </head>
 <body>
     <!-- LOGIN SCREEN -->
-    <div class="login-container" id="loginScreen">
-        <div class="login-box">
-            <div class="login-logo">
-                <span>🍰</span>
-                <h1>ERP BRAVIZIMO'S</h1>
-                <p>Sistema Inteligente con IA de Voz</p>
-            </div>
+    <script>
+function handleLogin(event) {
+  event.preventDefault();
 
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label class="form-label">Usuario o Email</label>
-                    <input type="text" class="form-input" id="username" required placeholder="admin@bravizimos.com">
-                </div>
+  const email = document.getElementById("nombredeusuario").value.trim();
+  const password = document.getElementById("contraseña").value.trim();
 
-                <div class="form-group">
-                    <label class="form-label">Contraseña</label>
-                    <input type="password" class="form-input" id="password" required placeholder="admin123">
-                </div>
+  const validEmail = "admin@bravizimos.com";
+  const validPassword = "admin123";
 
-                <button type="submit" class="btn btn-primary">Iniciar Sesión 🔐</button>
-            </form>
+  if (email === validEmail && password === validPassword) {
+    alert("Login exitoso 🎉");
+    window.location.href = "dashboard.html";
+  } else {
+    alert("Credenciales incorrectas. Revisa mayúsculas, números y espacios.");
+  }
+}
+</script>
 
-            <div class="login-footer">
-                <p><strong>Usuarios de Prueba:</strong></p>
-                <p>👑 Admin: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ed8c89808483ad8f9f8c9b84978480829ec38e8280">[email&#160;protected]</a> / admin123</p>
-                <p>🛒 Vendedora: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="cfb9aaa1abaaaba0bdae8fadbdaeb9a6b5a6a2a0bce1aca0a2">[email&#160;protected]</a> / vende123</p>
-                <p>📦 Logística: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1975767e706a6d707a78597b6b786f70637074766a377a7674">[email&#160;protected]</a> / logis123</p>
-            </div>
-        </div>
-    </div>
 
     <!-- MAIN APP -->
     <div class="app-container" id="appContainer">
