@@ -2,1432 +2,483 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>BRAVIZIMO’S ERP</title>
+  <title>BRAVIZIMO'S ERP V2</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-  <style>
-    :root{
-      --bg:#020617;
-      --bg-elevated:#020617;
-      --accent:#4f46e5;
-      --accent-soft:rgba(79,70,229,.25);
-      --border:#1e293b;
-      --text:#e2e8f0;
-      --muted:#64748b;
-    }
-    *{box-sizing:border-box;}
-    body{
-      margin:0;
-      font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
-      background:#020617;
-      color:var(--text);
-      display:flex;
-      min-height:100vh;
-    }
-    .sidebar{
-      width:260px;
-      background:#020617;
-      border-right:1px solid var(--border);
-      padding:1.25rem 1rem;
-      display:flex;
-      flex-direction:column;
-      gap:1rem;
-      position:sticky;
-      top:0;
-      height:100vh;
-    }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:.7rem;
-      padding:.25rem .5rem;
-    }
-    .brand-logo{
-      width:34px;height:34px;border-radius:999px;
-      background:radial-gradient(circle at 30% 30%,#f97316 0,#ea580c 35%,#4b1d0f 100%);
-      display:flex;align-items:center;justify-content:center;
-      font-weight:800;font-size:1rem;color:#020617;
-    }
-    .brand-text span:first-child{
-      font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.78rem;
-    }
-    .brand-text span:last-child{
-      font-size:.7rem;color:var(--muted);
-    }
-    .nav-section-title{
-      font-size:.7rem;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      color:var(--muted);
-      margin-top:.5rem;
-      margin-bottom:.25rem;
-      padding:0 .4rem;
-    }
-    .nav-item{
-      display:flex;
-      align-items:center;
-      gap:.5rem;
-      padding:.4rem .55rem;
-      border-radius:.6rem;
-      font-size:.83rem;
-      color:var(--muted);
-      cursor:pointer;
-      transition:background .12s,color .12s,transform .08s;
-    }
-    .nav-item:hover{
-      background:#020617;
-      color:var(--text);
-      transform:translateX(1px);
-    }
-    .nav-item.active{
-      background:var(--accent-soft);
-      color:var(--text);
-      border:1px solid rgba(79,70,229,.7);
-    }
-    .nav-item i{width:18px;text-align:center;}
-    .sidebar-footer{
-      margin-top:auto;
-      font-size:.7rem;
-      color:var(--muted);
-      padding:0 .5rem;
-    }
-
-    .main{
-      flex:1;
-      padding:1.25rem 1.5rem;
-      max-width:1320px;
-      margin:0 auto;
-      display:flex;
-      flex-direction:column;
-      gap:.9rem;
-    }
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:1rem;
-    }
-    .topbar-title h1{
-      margin:0;
-      font-size:1.25rem;
-      letter-spacing:.04em;
-    }
-    .topbar-title p{
-      margin:.2rem 0 0;
-      font-size:.78rem;
-      color:var(--muted);
-    }
-    .topbar-actions{
-      display:flex;
-      gap:.5rem;
-      align-items:center;
-    }
-    .btn{
-      border-radius:999px;
-      border:1px solid var(--border);
-      background:#020617;
-      color:var(--text);
-      padding:.42rem .85rem;
-      font-size:.78rem;
-      display:inline-flex;
-      align-items:center;
-      gap:.3rem;
-      cursor:pointer;
-    }
-    .btn-primary{
-      background:linear-gradient(135deg,#4f46e5,#6366f1);
-      border-color:transparent;
-      color:#fff;
-      box-shadow:0 0 0 1px rgba(129,140,248,.4),0 16px 40px rgba(15,23,42,.9);
-    }
-    .btn-primary:hover{filter:brightness(1.07);}
-
-    .page-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-end;
-      gap:1rem;
-      margin-top:.3rem;
-      margin-bottom:.35rem;
-    }
-    .page-header h1{
-      margin:0;
-      font-size:1.05rem;
-    }
-    .page-header p{
-      margin:.15rem 0 0;
-      font-size:.78rem;
-      color:var(--muted);
-    }
-
-    .stats-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-      gap:.85rem;
-    }
-    .card{
-      background:#020617;
-      border-radius:1rem;
-      border:1px solid var(--border);
-      padding:.9rem 1rem;
-      box-shadow:0 18px 50px rgba(15,23,42,.95);
-    }
-    .card h3{
-      margin:0 0 .5rem;
-      font-size:.9rem;
-    }
-    .card small{
-      font-size:.75rem;
-      color:var(--muted);
-    }
-
-    .stat-value{
-      font-size:1.2rem;
-      font-weight:600;
-    }
-    .stat-sub{
-      font-size:.75rem;
-      color:var(--muted);
-    }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:.78rem;
-    }
-    th,td{
-      padding:.4rem .5rem;
-      border-bottom:1px solid #020617;
-      text-align:left;
-    }
-    th{
-      font-size:.7rem;
-      color:var(--muted);
-      background:#020617;
-      letter-spacing:.06em;
-      text-transform:uppercase;
-      position:sticky;
-      top:0;
-      z-index:1;
-    }
-    tbody tr:hover{background:rgba(15,23,42,.85);}
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:.12rem .45rem;
-      border-radius:999px;
-      font-size:.65rem;
-      border:1px solid #4b5563;
-    }
-    .badge.green{
-      border-color:rgba(22,163,74,.7);
-      color:#4ade80;
-      background:rgba(22,163,74,.16);
-    }
-    .badge.red{
-      border-color:rgba(248,113,113,.8);
-      color:#fecaca;
-      background:rgba(248,113,113,.14);
-    }
-    .badge.amber{
-      border-color:rgba(245,158,11,.7);
-      color:#facc15;
-      background:rgba(245,158,11,.14);
-    }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:.35rem;
-      padding:.16rem .55rem;
-      border-radius:999px;
-      border:1px solid var(--border);
-      font-size:.7rem;
-      color:var(--muted);
-    }
-
-    .loader{
-      padding:2rem 0;
-      text-align:center;
-      font-size:.8rem;
-      color:var(--muted);
-    }
-
-    .toast{
-      position:fixed;
-      bottom:1.5rem;
-      right:1.5rem;
-      display:none;
-      align-items:center;
-      gap:.5rem;
-      background:#020617;
-      border-radius:999px;
-      border:1px solid var(--border);
-      padding:.45rem .8rem;
-      font-size:.78rem;
-      box-shadow:0 18px 55px rgba(15,23,42,.95);
-      z-index:999;
-    }
-    .toast.success{border-color:rgba(34,197,94,.5);}
-    .toast.error{border-color:rgba(248,113,113,.7);}
-    .toast.warn{border-color:rgba(234,179,8,.8);}
-
-    @media (max-width:900px){
-      .sidebar{display:none;}
-      body{display:block;}
-      .main{padding:1rem;}
-    }
-  </style>
+  <!-- Tailwind CDN para estilos rápidos -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-logo">BR</div>
-      <div class="brand-text">
-        <span>BRAVIZIMO’S</span>
-        <span>ERP · Bocaditos</span>
-      </div>
-    </div>
-
-    <div>
-      <div class="nav-section-title">General</div>
-      <div class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard',this)">
-        <i class="fas fa-chart-line"></i><span>Dashboard</span>
+<body class="bg-slate-950 text-slate-100">
+  <div class="min-h-screen flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-950/95 border-r border-slate-800 flex flex-col">
+      <div class="px-4 py-4 border-b border-slate-800 flex items-center gap-2">
+        <div class="h-8 w-8 rounded-full bg-amber-400 flex items-center justify-center font-bold text-slate-900">
+          B
+        </div>
+        <div>
+          <div class="text-xs text-slate-400 leading-tight">BRAVIZIMO'S</div>
+          <div class="text-sm font-semibold">ERP · Bocaditos</div>
+        </div>
       </div>
 
-      <div class="nav-section-title">Ventas & Entregas</div>
-      <div class="nav-item" data-page="ventas" onclick="navigateTo('ventas',this)">
-        <i class="fas fa-receipt"></i><span>Ventas</span>
+      <nav class="flex-1 overflow-y-auto text-sm">
+        <p class="px-4 pt-4 pb-1 text-[11px] uppercase tracking-wide text-slate-500">General</p>
+        <ul>
+          <li><button data-view="dashboard" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800 flex items-center gap-2 text-emerald-300 font-semibold">Dashboard</button></li>
+        </ul>
+
+        <p class="px-4 pt-4 pb-1 text-[11px] uppercase tracking-wide text-slate-500">Ventas & Entregas</p>
+        <ul>
+          <li><button data-view="ventas" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Ventas</button></li>
+          <li><button data-view="delivery" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Delivery</button></li>
+        </ul>
+
+        <p class="px-4 pt-4 pb-1 text-[11px] uppercase tracking-wide text-slate-500">Operación</p>
+        <ul>
+          <li><button data-view="inventario" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Inventario</button></li>
+          <li><button data-view="insumos" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Insumos</button></li>
+          <li><button data-view="produccion" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Producción</button></li>
+          <li><button data-view="compras" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Compras</button></li>
+          <li><button data-view="proveedores" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Proveedores</button></li>
+        </ul>
+
+        <p class="px-4 pt-4 pb-1 text-[11px] uppercase tracking-wide text-slate-500">Finanzas</p>
+        <ul>
+          <li><button data-view="gastos" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Gastos generales</button></li>
+          <li><button data-view="servicios" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Servicios</button></li>
+          <li><button data-view="facturas" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Facturas</button></li>
+        </ul>
+
+        <p class="px-4 pt-4 pb-1 text-[11px] uppercase tracking-wide text-slate-500">Personas & Clientes</p>
+        <ul>
+          <li><button data-view="clientes" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Clientes</button></li>
+          <li><button data-view="personal" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">RRHH / Personal</button></li>
+          <li><button data-view="reclamos" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Reclamos</button></li>
+        </ul>
+      </nav>
+
+      <div class="px-4 py-3 border-t border-slate-800 text-[11px] text-slate-500">
+        BRAVIZIMO'S ERP v2<br />
+        <span id="footer-connection">Conectado a Google Sheets</span>
       </div>
-      <div class="nav-item" data-page="cotizaciones" onclick="navigateTo('cotizaciones',this)">
-        <i class="fas fa-file-invoice-dollar"></i><span>Cotizaciones</span>
-      </div>
-      <div class="nav-item" data-page="delivery" onclick="navigateTo('delivery',this)">
-        <i class="fas fa-motorcycle"></i><span>Delivery</span>
-      </div>
+    </aside>
 
-      <div class="nav-section-title">Operación</div>
-      <div class="nav-item" data-page="inventario" onclick="navigateTo('inventario',this)">
-        <i class="fas fa-boxes-stacked"></i><span>Inventario</span>
-      </div>
-      <div class="nav-item" data-page="insumos" onclick="navigateTo('insumos',this)">
-        <i class="fas fa-bowl-rice"></i><span>Insumos</span>
-      </div>
-      <div class="nav-item" data-page="produccion" onclick="navigateTo('produccion',this)">
-        <i class="fas fa-industry"></i><span>Producción</span>
-      </div>
-      <div class="nav-item" data-page="compras" onclick="navigateTo('compras',this)">
-        <i class="fas fa-cart-shopping"></i><span>Compras</span>
-      </div>
-      <div class="nav-item" data-page="proveedores" onclick="navigateTo('proveedores',this)">
-        <i class="fas fa-truck-field"></i><span>Proveedores</span>
-      </div>
-
-      <div class="nav-section-title">Finanzas</div>
-      <div class="nav-item" data-page="gastos" onclick="navigateTo('gastos',this)">
-        <i class="fas fa-coins"></i><span>Gastos</span>
-      </div>
-      <div class="nav-item" data-page="servicios" onclick="navigateTo('servicios',this)">
-        <i class="fas fa-bolt"></i><span>Servicios</span>
-      </div>
-      <div class="nav-item" data-page="facturas" onclick="navigateTo('facturas',this)">
-        <i class="fas fa-file-invoice"></i><span>Facturas</span>
-      </div>
-      <div class="nav-item" data-page="kpi_vendedoras" onclick="navigateTo('kpi_vendedoras',this)">
-        <i class="fas fa-ranking-star"></i><span>KPI vendedoras</span>
-      </div>
-      <div class="nav-item" data-page="ksd" onclick="navigateTo('ksd',this)">
-        <i class="fas fa-chart-column"></i><span>KSD diario</span>
-      </div>
-
-      <div class="nav-section-title">Personas & Servicio</div>
-      <div class="nav-item" data-page="clientes" onclick="navigateTo('clientes',this)">
-        <i class="fas fa-user-group"></i><span>Clientes</span>
-      </div>
-      <div class="nav-item" data-page="personal" onclick="navigateTo('personal',this)">
-        <i class="fas fa-users"></i><span>RRHH / Personal</span>
-      </div>
-      <div class="nav-item" data-page="reclamos" onclick="navigateTo('reclamos',this)">
-        <i class="fas fa-triangle-exclamation"></i><span>Reclamos</span>
-      </div>
-    </div>
-
-    <div class="sidebar-footer">
-      <div>BRAVIZIMO’S ERP v2</div>
-      <div style="margin-top:.1rem;">Conectado a Google Sheets</div>
-    </div>
-  </aside>
-
-  <main class="main">
-    <header class="topbar">
-      <div class="topbar-title">
-        <h1>Panel de control</h1>
-        <p>Resumen de ventas, operación, finanzas y equipo</p>
-      </div>
-      <div class="topbar-actions">
-        <button class="btn" onclick="syncData()">
-          <i class="fas fa-arrows-rotate"></i> Sincronizar
-        </button>
-      </div>
-    </header>
-
-    <div id="app"></div>
-  </main>
-
-  <div id="toast" class="toast"><span id="toast-icon">🔔</span><span id="toast-text">Mensaje</span></div>
-
-  <script src="https://kit.fontawesome.com/a2e0e6ad1b.js" crossorigin="anonymous"></script>
-  <script>
-    // 🔗 URL de tu Web App de Apps Script (ACTUALIZADA)
-    const API_URL = 'https://script.google.com/macros/s/AKfycbx-Y51fuMKIirWSwadTPWj4m_bdKjIriOIB8DBG2rTQQhk3X-r1iqdW5EDhX6bgiVX_5w/exec';
-
-    let DATA = null;
-    let DASHBOARD = null;
-    let currentPage = 'dashboard';
-    let kpiChart = null;
-    let gastosChart = null;
-
-    function showToast(msg, type='info'){
-      const t = document.getElementById('toast');
-      const icon = document.getElementById('toast-icon');
-      const text = document.getElementById('toast-text');
-      t.className = 'toast';
-      if(type==='success') t.classList.add('success');
-      if(type==='error') t.classList.add('error');
-      if(type==='warn') t.classList.add('warn');
-      text.textContent = msg;
-      icon.textContent = type==='success'?'✅':type==='error'?'❌':'⚠️';
-      t.style.display = 'flex';
-      setTimeout(()=>{t.style.display='none';},3000);
-    }
-
-    function showLoader(msg){
-      document.getElementById('app').innerHTML =
-        '<div class="loader"><i class="fas fa-circle-notch fa-spin"></i> '+msg+'</div>';
-    }
-
-    async function fetchJSON(url){
-      const res = await fetch(url);
-      if(!res.ok) throw new Error('HTTP '+res.status);
-      return res.json();
-    }
-
-    async function init(){
-      try{
-        showLoader('Cargando datos del ERP...');
-        const [dash, all] = await Promise.all([
-          fetchJSON(API_URL + '?action=dashboard'),
-          fetchJSON(API_URL + '?action=getAll')
-        ]);
-        DASHBOARD = dash;
-        DATA = all;
-        render();
-      }catch(e){
-        console.error(e);
-        showLoader('Error al conectar con el ERP. Revisa que el Web App tenga acceso "Cualquiera" y URL correcta.');
-      }
-    }
-
-    async function syncData(){
-      try{
-        showLoader('Sincronizando con Google Sheets...');
-        await fetchJSON(API_URL + '?action=sync');
-        const [dash, all] = await Promise.all([
-          fetchJSON(API_URL + '?action=dashboard'),
-          fetchJSON(API_URL + '?action=getAll')
-        ]);
-        DASHBOARD = dash;
-        DATA = all;
-        render();
-        showToast('Sincronización completa.', 'success');
-      }catch(e){
-        console.error(e);
-        showToast('Error al sincronizar.', 'error');
-      }
-    }
-
-    function navigateTo(page, el){
-      currentPage = page;
-      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-      if(el) el.classList.add('active');
-      render();
-    }
-
-    function money(v){
-      const n = parseFloat(v || 0);
-      return 'S/ ' + n.toFixed(2);
-    }
-
-    function badge(text){
-      if(!text) return '';
-      const t = String(text).toLowerCase();
-      let cls = 'amber';
-      if(['pagado','completado','activo','emitida','entregado','resuelto'].includes(t)) cls='green';
-      if(['anulado','cancelado','vencido'].includes(t)) cls='red';
-      return '<span class="badge '+cls+'">'+text+'</span>';
-    }
-
-    function render(){
-      if(!DATA || !DASHBOARD){
-        showLoader('Cargando datos...');
-        return;
-      }
-      let html = '';
-      switch(currentPage){
-        case 'dashboard':       html = renderDashboard();       break;
-        case 'ventas':          html = renderVentas();          break;
-        case 'cotizaciones':    html = renderCotizaciones();    break;
-        case 'inventario':      html = renderInventario();      break;
-        case 'insumos':         html = renderInsumos();         break;
-        case 'produccion':      html = renderProduccion();      break;
-        case 'compras':         html = renderCompras();         break;
-        case 'proveedores':     html = renderProveedores();     break;
-        case 'gastos':          html = renderGastos();          break;
-        case 'servicios':       html = renderServicios();       break;
-        case 'facturas':        html = renderFacturas();        break;
-        case 'delivery':        html = renderDelivery();        break;
-        case 'clientes':        html = renderClientes();        break;
-        case 'personal':        html = renderPersonal();        break;
-        case 'reclamos':        html = renderReclamos();        break;
-        case 'kpi_vendedoras':  html = renderKpiVendedoras();   break;
-        case 'ksd':             html = renderKsd();             break;
-        default:                html = renderDashboard();
-      }
-      document.getElementById('app').innerHTML = html;
-
-      if(currentPage === 'kpi_vendedoras') initKpiChart();
-      if(currentPage === 'gastos') initGastosChart();
-    }
-
-    // ───────────────────── DASHBOARD ─────────────────────
-    function renderDashboard(){
-      const est = DATA.estadisticas || {};
-      const a = DASHBOARD.alertas || [];
-      const alertsHtml = a.map(x=>`<div class="pill">${x.tipo==='error'?'🔴':'🟡'} ${x.mensaje}</div>`).join('') ||
-        '<span class="stat-sub">Sin alertas de inventario ni servicios.</span>';
-
-      return `
-        <div class="page-header">
-          <div>
-            <h1>Resumen general</h1>
-            <p>Ventas, pedidos, clientes y alertas clave</p>
-          </div>
-          <div>
-            <span class="pill">
-              <i class="fas fa-database"></i> Datos: ${DATA.timestamp ? DATA.timestamp.substring(0,10) : ''}
-            </span>
-          </div>
+    <!-- Main -->
+    <main class="flex-1 bg-slate-900/90">
+      <!-- Top bar -->
+      <header class="h-14 border-b border-slate-800 flex items-center justify-between px-6">
+        <div>
+          <h1 id="view-title" class="text-lg font-semibold">Dashboard</h1>
+          <p class="text-xs text-slate-400" id="view-subtitle">Resumen de ventas, operación y finanzas</p>
         </div>
-
-        <div class="stats-grid">
-          <div class="card">
-            <h3>Ventas hoy</h3>
-            <div class="stat-value">${money(DASHBOARD.ventasHoy.total || 0)}</div>
-            <div class="stat-sub">${DASHBOARD.ventasHoy.cantidad || 0} pedidos</div>
-          </div>
-          <div class="card">
-            <h3>Ventas del mes</h3>
-            <div class="stat-value">${money(DASHBOARD.ventasMes.total || 0)}</div>
-            <div class="stat-sub">${DASHBOARD.ventasMes.cantidad || 0} pedidos</div>
-          </div>
-          <div class="card">
-            <h3>Ticket promedio</h3>
-            <div class="stat-value">${money(est.ticketPromedio || 0)}</div>
-            <div class="stat-sub">${est.cantidadVentas || 0} ventas históricas</div>
-          </div>
-          <div class="card">
-            <h3>Clientes & Productos</h3>
-            <div class="stat-value">${est.totalClientes || 0} <span style="font-size:.8rem;font-weight:400;color:var(--muted);">clientes</span></div>
-            <div class="stat-sub">${est.totalProductos || 0} productos activos</div>
-          </div>
-        </div>
-
-        <div class="stats-grid" style="margin-top:.9rem;">
-          <div class="card">
-            <h3>Pedidos pendientes</h3>
-            <p class="stat-sub" style="margin-bottom:.5rem;">Pedidos con estado Pendiente o Confirmado</p>
-            <div class="stat-value">${DASHBOARD.pedidosPendientes || 0}</div>
-          </div>
-          <div class="card">
-            <h3>Alertas</h3>
-            <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.45rem;">
-              ${alertsHtml}
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    // ───────────────────── VENTAS ─────────────────────
-    function renderVentas(){
-      const v = DATA.ventas || [];
-      const rows = v.slice(0,120).map(r=>`
-        <tr>
-          <td>${r.idventa||''}</td>
-          <td>${r.fecharegistro||''}</td>
-          <td>${r.fechaentrega||''}</td>
-          <td>${r.canal||''}</td>
-          <td>${r.cliente||''}</td>
-          <td>${r.vendedora||''}</td>
-          <td>${money(r.total||0)}</td>
-          <td>${badge(r.estadopago)}</td>
-          <td>${badge(r.estadopedido)}</td>
-        </tr>
-      `).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:.8rem;">Sin ventas registradas.</td></tr>';
-
-      return `
-        <div class="page-header">
-          <div>
-            <h1>Ventas</h1>
-            <p>Historial de ventas por canal y estado</p>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Listado de ventas</h3>
-          <div style="max-height:460px;overflow:auto;margin-top:.4rem;border-radius:.7rem;border:1px solid #020617;">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>F. Registro</th>
-                  <th>F. Entrega</th>
-                  <th>Canal</th>
-                  <th>Cliente</th>
-                  <th>Vendedora</th>
-                  <th>Total</th>
-                  <th>Pago</th>
-                  <th>Pedido</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    // ───────────────────── COTIZACIONES ─────────────────────
-    function renderCotizaciones(){
-      const c = DATA.cotizaciones || [];
-      const rows = c.slice(0,80).map(r=>`
-        <tr>
-          <td>${r.id||''}</td>
-          <td>${r.fecha||''}</td>
-          <td>${r.cliente||''}</td>
-          <td>${r.vendedora||''}</td>
-          <td>${money(r.total||0)}</td>
-          <td>${badge(r.estado)}</td>
-        </tr>
-      `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:.8rem;">Sin cotizaciones.</td></tr>';
-      return `
-        <div class="page-header">
-          <div>
-            <h1>Cotizaciones</h1>
-            <p>Propuestas a clientes (pendientes y aceptadas)</p>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Listado de cotizaciones</h3>
-          <div style="max-height:440px;overflow:auto;margin-top:.4rem;border-radius:.7rem;border:1px solid #020617;">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Fecha</th>
-                  <th>Cliente</th>
-                  <th>Vendedora</th>
-                  <th>Total</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    // ───────────────────── INVENTARIO ─────────────────────
-    function renderInventario(){
-      const inv = DATA.inventario || [];
-      const rows = inv.slice(0,160).map(p=>{
-        const stock = parseFloat(p.stockactual||0);
-        const min = parseFloat(p.stockminimo||0);
-        let estado = 'OK', cls='green';
-        if(stock<=0){estado='Sin stock';cls='red';}
-        else if(stock<=min){estado='Por agotarse';cls='amber';}
-        return `
-          <tr>
-            <td>${p.codigo||''}</td>
-            <td>${p.nombreproducto||''}</td>
-            <td>${p.categoria||''}</td>
-            <td>${stock}</td>
-            <td>${min}</td>
-            <td>${money(p.precioventa||0)}</td>
-            <td>${money(p.costo||0)}</td>
-            <td><span class="badge ${cls}">${estado}</span></td>
-          </tr>
-        `;
-      }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:.8rem;">Sin productos en inventario.</td></tr>';
-
-      return `
-        <div class="page-header">
-          <div>
-            <h1>Inventario</h1>
-            <p>Stock de productos terminados</p>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Productos</h3>
-          <div style="max-height:460px;overflow:auto;margin-top:.4rem;border-radius:.7rem;border:1px solid #020617;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Producto</th>
-                  <th>Categoría</th>
-                  <th>Stock</th>
-                  <th>Mínimo</th>
-                  <th>Precio</th>
-                  <th>Costo</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    // ───────────────────── INSUMOS ─────────────────────
-    function renderInsumos(){
-      const ins = DATA.insumos || [];
-      const rows = ins.slice(0,160).map(i=>{
-        const stock = parseFloat(i.stock||0);
-        const min   = parseFloat(i.minimo||0);
-        let estado='OK',cls='green';
-        if(stock<=0){estado='Sin stock';cls='red';}
-        else if(stock<=min){estado='Por agotarse';cls='amber';}
-        return `
-          <tr>
-            <td>${i.codigo||''}</td>
-            <td>${i.nombre||''}</td>
-            <td>${i.categoria||''}</td>
-            <td>${stock}</td>
-            <td>${min}</td>
-            <td>${money(i.costounit||0)}</td>
-            <td>${i.proveedor||''}</td>
-            <td><span class="badge ${cls}">${estado}</span></td>
-          </tr>
-        `;
-      }).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:.8rem;">Sin insumos registrados.</td></tr>';
-
-      return `
-        <div class="page-header">
-          <div>
-            <h1>Insumos</h1>
-            <p>Harinas, azúcar, mantequilla, envases y más</p>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Lista de insumos</h3>
-          <div style="max-height:460px;overflow:auto;margin-top:.4rem;border-radius:.7rem;border:1px solid #020617;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Código</th>
-                  <th>Nombre</th>
-                  <th>Categoría</th>
-                  <th>Stock</th>
-                  <th>Mínimo</th>
-                  <th>Costo Unit</th>
-                  <th>Proveedor</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    // ───────────────────── PRODUCCIÓN ─────────────────────
-    function renderProduccion(){
-      const p = DATA.produccion || [];
-      const rows = p.slice(0,120).map(r=>`
-        <tr>
-          <td>${r.id||''}</td>
-          <td>${r.fecha||''}</td>
-          <td>${r.producto||''}</td>
-          <td>${r.cantidad||''}</td>
-          <td>${money(r.costo||0)}</td>
-          <td>${badge(r.estado)}</td>
-        </tr>
-      `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:.8rem;">Sin órdenes de producción.</td></tr>';
-
-      return `
-        <div class="page-header">
-          <div>
-            <h1>Producción</h1>
-            <p>Lotes producidos de bocaditos y tortas</p>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Órdenes de producción</h3>
-          <div style="max-height:460px;overflow:auto;margin-top:.4rem;border-radius:.7rem;border:1px solid #020617;">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Fecha</th>
-                  <th>Producto</th>
-                  <th>Cantidad</th>
-                  <th>Costo</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    // ───────────────────── COMPRAS ─────────────────────
-    function renderCompras(){
-      const c = DATA.compras || [];
-      const rows = c.slice(0,120).map(r=>`
-        <tr>
-          <td>${r.id||''}</td>
-          <td>${r.fecha||''}</td>
-          <td>${r.proveedor||''}</td>
-          <td>${money(r.total||0)}</td>
-          <td>${badge(r.estadopago)}</td>
-          <td>${badge(r.estadocompra)}</td>
-        </tr>
-      `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:.8rem;">Sin compras registradas.</td></tr>';
-
-      return `
-        <div class="page-header">
-          <div>
-            <h1>Compras</h1>
-            <p>Compras de insumos y otros conceptos</p>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Listado de compras</h3>
-          <div style="max-height:460px;overflow:auto;margin-top:.4rem;border-radius:.7rem;border:1px solid #020617;">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Fecha</th>
-                  <th>Proveedor</th>
-                  <th>Total</th>
-                  <th>Estado Pago</th>
-                  <th>Estado Compra</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    // ───────────────────── PROVEEDORES ─────────────────────
-    function renderProveedores(){
-      const p = DATA.proveedores || [];
-      const rows = p.slice(0,120).map(r=>`
-        <tr>
-          <td>${r.id||''}</td>
-          <td>${r.nombre||''}</td>
-          <td>${r.ruc||''}</td>
-          <td>${r.telefono||''}</td>
-          <td>${r.email||''}</td>
-          <td>${r.categoria||''}</td>
-          <td>${r.calificacion||''}</td>
-          <td>${r.estado||''}</td>
-        </tr>
-      `).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:.8rem;">Sin proveedores.</td></tr>';
-
-      return `
-        <div class="page-header">
-          <div>
-            <h1>Proveedores</h1>
-            <p>Makro, Guta y otros aliados</p>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Directorio de proveedores</h3>
-          <div style="max-height:460px;overflow:auto;margin-top:.4rem;border-radius:.7rem;border:1px solid #020617;">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>RUC</th>
-                  <th>Teléfono</th>
-                  <th>Email</th>
-                  <th>Categoría</th>
-                  <th>Calificación</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    // ───────────────────── GASTOS ─────────────────────
-    function renderGastos(){
-      const g = DATA.gastos || [];
-      const rows = g.slice(0,160).map(r=>`
-        <tr>
-          <td>${r.id||''}</td>
-          <td>${r.fecha||''}</td>
-          <td>${r.categoria||''}</td>
-          <td>${r.descripcion||''}</td>
-          <td>${money(r.monto||0)}</td>
-          <td>${r.metodopago||''}</td>
-          <td>${r.cuenta||''}</td>
-          <td>${badge(r.estado)}</td>
-        </tr>
-      `).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:.8rem;">Sin gastos registrados.</td></tr>';
-
-      return `
-        <div class="page-header">
-          <div>
-            <h1>Gastos</h1>
-            <p>Servicios, compras, personal, publicidad, delivery y más</p>
-          </div>
-        </div>
-        <div class="stats-grid">
-          <div class="card">
-            <h3>Lista de gastos</h3>
-            <div style="max-height:430px;overflow:auto;margin-top:.4rem;border-radius:.7rem;border:1px solid #020617;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Fecha</th>
-                    <th>Categoría</th>
-                    <th>Descripción</th>
-                    <th>Monto</th>
-                    <th>Método</th>
-                    <th>Cuenta</th>
-                    <th>Estado</th>
-                  </tr>
-                </thead>
-                <tbody>${rows}</tbody>
-              </table>
-            </div>
-          </div>
-          <div class="card">
-            <h3>Gastos por categoría</h3>
-            <small>Vista rápida de distribución de gastos</small>
-            <canvas id="chartGastos" style="max-height:260px;margin-top:.7rem;"></canvas>
-          </div>
-        </div>
-      `;
-    }
-
-    function initGastosChart(){
-      const canvas = document.getElementById('chartGastos');
-      if(!canvas) return;
-      const g = DATA.gastos || [];
-      const map = {};
-      g.forEach(r=>{
-        const cat = r.categoria || 'Otro';
-        const monto = parseFloat(r.monto || 0);
-        if(!map[cat]) map[cat]=0;
-        map[cat]+=monto;
-      });
-      const labels = Object.keys(map);
-      const data = Object.values(map);
-      if(!labels.length) return;
-      if(gastosChart){gastosChart.destroy();}
-      gastosChart = new Chart(canvas,{
-        type:'doughnut',
-        data:{labels,datasets:[{data}]},
-        options:{
-          plugins:{
-            legend:{labels:{color:'#e2e8f0',font:{size:11}}}
-          }
-        }
-      });
-    }
-
-    // ───────────────────── SERVICIOS (wrapper sobre GASTOS) ─────────────────────
-    function renderServicios(){
-      const g = DATA.gastos || [];
-      const servicios = g.filter(x => String(x.categoria||'').toLowerCase()==='servicios');
-      const rows = servicios.slice(0,160).map(r=>`
-        <tr>
-          <td>${r.id||''}</td>
-          <td>${r.fecha||''}</td>
-          <td>${r.descripcion||''}</td>
-          <td>${money(r.monto||0)}</td>
-          <td>${r.metodopago||''}</td>
-          <td>${r.cuenta||''}</td>
-          <td>${badge(r.estado)}</td>
-        </tr>
-      `).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:.8rem;">Sin servicios registrados (categoría "Servicios" en Gastos).</td></tr>';
-
-      return `
-        <div class="page-header">
-          <div>
-            <h1>Servicios</h1>
-            <p>Luz, agua, internet, alquiler, etc. (desde módulo Gastos)</p>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Registrar servicio rápido</h3>
-          <small>Se guarda como Gasto con categoría "Servicios"</small>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.55rem;margin-top:.6rem;">
-            <input id="svcDesc" type="text" placeholder="Servicio (ej: Luz Enel Enero)" style="padding:.45rem;border-radius:.6rem;border:1px solid var(--border);background:#020617;color:#e2e8f0;">
-            <input id="svcMonto" type="number" step="0.01" placeholder="Monto (S/)" style="padding:.45rem;border-radius:.6rem;border:1px solid var(--border);background:#020617;color:#e2e8f0;">
-            <select id="svcMedio" style="padding:.45rem;border-radius:.6rem;border:1px solid var(--border);background:#020617;color:#e2e8f0;">
-              <option value="">Medio de pago</option>
-              <option>Transferencia</option>
-              <option>Tarjeta</option>
-              <option>Efectivo</option>
-              <option>Yape / Plin</option>
-            </select>
-            <select id="svcCuenta" style="padding:.45rem;border-radius:.6rem;border:1px solid var(--border);background:#020617;color:#e2e8f0;">
-              <option value="">Cuenta</option>
-              <option>Bcp BRAVIZIMO’S</option>
-              <option>RUS Rosa</option>
-              <option>RUS Martín</option>
-              <option>RUS Milagros</option>
-              <option>RUS Sandy</option>
-            </select>
-          </div>
-          <button class="btn btn-primary" style="margin-top:.7rem;" onclick="guardarServicioComoGasto()">
-            <i class="fas fa-save"></i> Guardar servicio
+        <div class="flex items-center gap-3">
+          <button id="btn-sync" class="px-3 py-1.5 rounded-full text-xs border border-slate-700 hover:border-emerald-400 hover:text-emerald-300">
+            Sincronizar ahora
           </button>
         </div>
+      </header>
 
-        <div class="card" style="margin-top:.75rem;">
-          <h3>Historial de servicios (gastos)</h3>
-          <div style="max-height:380px;overflow:auto;margin-top:.4rem;border-radius:.7rem;border:1px solid #020617;">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Fecha</th>
-                  <th>Servicio</th>
-                  <th>Monto</th>
-                  <th>Medio</th>
-                  <th>Cuenta</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
+      <!-- Contenido -->
+      <section id="view-container" class="p-6 space-y-6 text-sm overflow-y-auto h-[calc(100vh-3.5rem)]">
+        <!-- Aquí se renderizan las vistas con JS -->
+      </section>
+    </main>
+  </div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbx-Y51fuMKIirWSwadTPWj4m_bdKjIriOIB8DBG2rTQQhk3X-r1iqdW5EDhX6bgiVX_5w/exec";
+
+let ERP_DATA = null;
+
+// Util: formato moneda
+const fmtMoney = (n) => "S/ " + (Number(n || 0)).toFixed(2);
+
+// ================== CARGA INICIAL ==================
+async function loadAll() {
+  setViewSubtitle("Cargando datos desde Google Sheets...");
+  try {
+    const res = await fetch(API_URL + "?action=getAll");
+    const data = await res.json();
+    ERP_DATA = data;
+    setViewSubtitle("Datos actualizados " + new Date().toLocaleString());
+    renderDashboard();
+  } catch (e) {
+    console.error(e);
+    setViewSubtitle("Error al conectar con la API");
+  }
+}
+
+function setViewTitle(t, s) {
+  document.getElementById("view-title").textContent = t;
+  if (s) document.getElementById("view-subtitle").textContent = s;
+}
+function setViewSubtitle(s) {
+  document.getElementById("view-subtitle").textContent = s;
+}
+
+// ================== VISTAS ==================
+function renderDashboard() {
+  if (!ERP_DATA) return;
+
+  setViewTitle("Dashboard", "Resumen de ventas, finanzas y operación");
+
+  const stats = ERP_DATA.estadisticas || {};
+  const dash = ERP_DATA.dashboard || {};
+
+  const totalVentas = stats.totalVentas || 0;
+  const ticketProm = stats.ticketPromedio || 0;
+  const totalClientes = stats.totalClientes || 0;
+  const totalProductos = stats.totalProductos || 0;
+
+  const container = document.getElementById("view-container");
+  container.innerHTML = `
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+        <div class="text-[11px] text-slate-400 mb-1">Total Ventas (histórico)</div>
+        <div class="text-2xl font-semibold">${fmtMoney(totalVentas)}</div>
+        <div class="text-[11px] text-emerald-400 mt-1">Ticket promedio: ${fmtMoney(ticketProm)}</div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+        <div class="text-[11px] text-slate-400 mb-1">Clientes registrados</div>
+        <div class="text-2xl font-semibold">${totalClientes}</div>
+        <div class="text-[11px] text-sky-400 mt-1">Base de datos de clientes</div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+        <div class="text-[11px] text-slate-400 mb-1">Productos en inventario</div>
+        <div class="text-2xl font-semibold">${totalProductos}</div>
+        <div class="text-[11px] text-amber-400 mt-1">Insumos + productos finales</div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+        <div class="text-[11px] text-slate-400 mb-1">Fecha/Hora</div>
+        <div class="text-lg font-semibold">${new Date().toLocaleDateString()}</div>
+        <div class="text-[11px] text-slate-400 mt-1">${new Date().toLocaleTimeString()}</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 col-span-2">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-semibold">Top productos por stock</h2>
         </div>
-      `;
-    }
-
-    async function guardarServicioComoGasto(){
-      const desc   = document.getElementById('svcDesc').value.trim();
-      const monto  = parseFloat(document.getElementById('svcMonto').value || '0');
-      const medio  = document.getElementById('svcMedio').value;
-      const cuenta = document.getElementById('svcCuenta').value;
-
-      if(!desc || !monto){
-        showToast('Coloca descripción y monto.', 'warn');
-        return;
-      }
-
-      try{
-        const res = await fetch(API_URL,{
-          method:'POST',
-          headers:{'Content-Type':'application/json;charset=utf-8'},
-          body:JSON.stringify({
-            action:'crear_gasto',
-            categoria:'Servicios',
-            descripcion:desc,
-            monto:monto,
-            metodopago:medio,
-            cuenta:cuenta,
-            estado:'Pagado'
-          })
-        });
-        const jsonResp = await res.json();
-        if(jsonResp.error){
-          showToast('Error al guardar servicio: '+jsonResp.mensaje,'error');
-        }else{
-          showToast('Servicio guardado en Gastos.', 'success');
-          await syncData();
-          navigateTo('servicios', document.querySelector('.nav-item[data-page="servicios"]'));
-        }
-      }catch(e){
-        console.error(e);
-        showToast('Error de conexión al guardar servicio.', 'error');
-      }
-    }
-
-    // ───────────────────── FACTURAS ─────────────────────
-    function renderFacturas(){
-      const f = DATA.facturas || [];
-      const rows = f.slice(0,120).map(r=>`
-        <tr>
-          <td>${r.id||''}</td>
-          <td>${r.tipo||''}</td>
-          <td>${r.numero||''}</td>
-          <td>${r.fecha||''}</td>
-          <td>${r.cliente||''}</td>
-          <td>${money(r.total||0)}</td>
-          <td>${badge(r.estado)}</td>
-        </tr>
-      `).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:.8rem;">Sin facturas registradas.</td></tr>';
-
-      return `
-        <div class="page-header">
-          <div>
-            <h1>Facturas y boletas</h1>
-            <p>Comprobantes emitidos para SUNAT</p>
-          </div>
+        <div class="overflow-x-auto text-xs">
+          ${renderTablaSimple(ERP_DATA.inventario || [], ["codigo","nombreproducto","categoria","stockactual","precioventa"], {
+            codigo: "Código",
+            nombreproducto: "Producto",
+            categoria: "Categoría",
+            stockactual: "Stock",
+            precioventa: "P. Venta"
+          })}
         </div>
-        <div class="card">
-          <h3>Comprobantes</h3>
-          <div style="max-height:460px;overflow:auto;margin-top:.4rem;border-radius:.7rem;border:1px solid #020617;">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Tipo</th>
-                  <th>Número</th>
-                  <th>Fecha</th>
-                  <th>Cliente</th>
-                  <th>Total</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    // ───────────────────── DELIVERY ─────────────────────
-    function renderDelivery(){
-      const d = DATA.delivery || [];
-      const rows = d.slice(0,120).map(r=>`
-        <tr>
-          <td>${r.id||''}</td>
-          <td>${r.fecha||''}</td>
-          <td>${r.cliente||''}</td>
-          <td>${r.direccion||''}</td>
-          <td>${r.distrito||''}</td>
-          <td>${r.repartidor||''}</td>
-          <td>${money(r.costo||0)}</td>
-          <td>${badge(r.estado)}</td>
-        </tr>
-      `).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:.8rem;">Sin entregas registradas.</td></tr>';
-
-      return `
-        <div class="page-header">
-          <div>
-            <h1>Delivery</h1>
-            <p>Entregas por distrito, repartidor y estado</p>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Pedidos de delivery</h3>
-          <div style="max-height:460px;overflow:auto;margin-top:.4rem;border-radius:.7rem;border:1px solid #020617;">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Fecha</th>
-                  <th>Cliente</th>
-                  <th>Dirección</th>
-                  <th>Distrito</th>
-                  <th>Repartidor</th>
-                  <th>Costo</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    // ───────────────────── CLIENTES ─────────────────────
-    function renderClientes(){
-      const c = DATA.clientes || [];
-      const rows = c.slice(0,120).map(r=>`
-        <tr>
-          <td>${r.id||''}</td>
-          <td>${r.nombre||''}</td>
-          <td>${r.documento||''}</td>
-          <td>${r.telefono||''}</td>
-          <td>${r.email||''}</td>
-          <td>${r.segmento||''}</td>
-          <td>${money(r.totalcompras||0)}</td>
-          <td>${r.estado||''}</td>
-        </tr>
-      `).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:.8rem;">Sin clientes registrados.</td></tr>';
-
-      return `
-        <div class="page-header">
-          <div>
-            <h1>Clientes</h1>
-            <p>Ranking básico por monto y segmento</p>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Lista de clientes</h3>
-          <div style="max-height:460px;overflow:auto;margin-top:.4rem;border-radius:.7rem;border:1px solid #020617;">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>Documento</th>
-                  <th>Teléfono</th>
-                  <th>Email</th>
-                  <th>Segmento</th>
-                  <th>Total Compras</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    // ───────────────────── PERSONAL ─────────────────────
-    function renderPersonal(){
-      const p = DATA.personal || [];
-      const rows = p.slice(0,120).map(r=>`
-        <tr>
-          <td>${r.id||''}</td>
-          <td>${r.nombre||''}</td>
-          <td>${r.dni||''}</td>
-          <td>${r.cargo||''}</td>
-          <td>${r.telefono||''}</td>
-          <td>${money(r.sueldo||0)}</td>
-          <td>${r.comision||r.comisionporcentaje||''}</td>
-          <td>${r.estado||''}</td>
-        </tr>
-      `).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:.8rem;">Sin personal registrado.</td></tr>';
-
-      return `
-        <div class="page-header">
-          <div>
-            <h1>Personal</h1>
-            <p>Equipo, sueldos base y comisiones</p>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Colaboradores</h3>
-          <div style="max-height:460px;overflow:auto;margin-top:.4rem;border-radius:.7rem;border:1px solid #020617;">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Nombre</th>
-                  <th>DNI</th>
-                  <th>Cargo</th>
-                  <th>Teléfono</th>
-                  <th>Sueldo</th>
-                  <th>Comisión %</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    // ───────────────────── RECLAMOS ─────────────────────
-    function renderReclamos(){
-      const r = DATA.reclamos || [];
-      const rows = r.slice(0,120).map(x=>`
-        <tr>
-          <td>${x.id||''}</td>
-          <td>${x.fecha||''}</td>
-          <td>${x.cliente||''}</td>
-          <td>${x.tipo||''}</td>
-          <td>${x.descripcion||''}</td>
-          <td>${x.prioridad||''}</td>
-          <td>${badge(x.estado)}</td>
-        </tr>
-      `).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:.8rem;">Sin reclamos registrados.</td></tr>';
-
-      return `
-        <div class="page-header">
-          <div>
-            <h1>Reclamos</h1>
-            <p>Seguimiento de problemas en pedidos</p>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Historial de reclamos</h3>
-          <div style="max-height:460px;overflow:auto;margin-top:.4rem;border-radius:.7rem;border:1px solid #020617;">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Fecha</th>
-                  <th>Cliente</th>
-                  <th>Tipo</th>
-                  <th>Descripción</th>
-                  <th>Prioridad</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
-
-    // ───────────────────── KPI VENDEDORAS ─────────────────────
-    function renderKpiVendedoras(){
-      const k = DATA.kpiVendedoras || [];
-      const rows = k.slice(0,80).map(r=>`
-        <tr>
-          <td>${r.fecha||''}</td>
-          <td>${r.vendedora||''}</td>
-          <td>${money(r.ventas||0)}</td>
-          <td>${r.pedidos||''}</td>
-          <td>${money(r.ticketprom||0)}</td>
-          <td>${money(r.meta||0)}</td>
-          <td>${r.cumplimientoporcentaje||r.cumplimiento||''}</td>
-          <td>${r.ranking||''}</td>
-        </tr>
-      `).join('') || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:.8rem;">Sin KPI registrados.</td></tr>';
-
-      return `
-        <div class="page-header">
-          <div>
-            <h1>KPI vendedoras</h1>
-            <p>Ventas, pedidos, ticket promedio y cumplimiento</p>
-          </div>
-        </div>
-        <div class="stats-grid">
-          <div class="card">
-            <h3>Ranking</h3>
-            <div style="max-height:260px;overflow:auto;margin-top:.4rem;border-radius:.7rem;border:1px solid #020617;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Fecha</th>
-                    <th>Vendedora</th>
-                    <th>Ventas</th>
-                    <th>Pedidos</th>
-                    <th>Ticket Prom</th>
-                    <th>Meta</th>
-                    <th>%</th>
-                    <th>Rank</th>
-                  </tr>
-                </thead>
-                <tbody>${rows}</tbody>
-              </table>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+        <h2 class="text-sm font-semibold mb-2">Alertas de inventario</h2>
+        <div id="alertas-box" class="space-y-2 text-xs">
+          ${(ERP_DATA.alertas || []).map(a => `
+            <div class="rounded-xl px-3 py-2 bg-${a.tipo === "error" ? "rose" : "amber"}-900/40 border border-${a.tipo === "error" ? "rose" : "amber"}-500/40">
+              ${a.mensaje}
             </div>
-          </div>
-          <div class="card">
-            <h3>Ventas por vendedora</h3>
-            <canvas id="chartKpi" style="max-height:260px;margin-top:.7rem;"></canvas>
-          </div>
+          `).join("") || "<div class='text-slate-500 text-xs'>Sin alertas por ahora 🎉</div>"}
         </div>
-      `;
-    }
+      </div>
+    </div>
+  `;
+}
 
-    function initKpiChart(){
-      const canvas = document.getElementById('chartKpi');
-      if(!canvas) return;
-      const k = DATA.kpiVendedoras || [];
-      const map = {};
-      k.forEach(r=>{
-        const v = r.vendedora || 'Otro';
-        const m = parseFloat(r.ventas||0);
-        if(!map[v]) map[v]=0;
-        map[v]+=m;
-      });
-      const labels = Object.keys(map);
-      const data = Object.values(map);
-      if(!labels.length) return;
-      if(kpiChart){kpiChart.destroy();}
-      kpiChart = new Chart(canvas,{
-        type:'bar',
-        data:{labels,datasets:[{data}]},
-        options:{
-          plugins:{legend:{display:false}},
-          scales:{
-            x:{ticks:{color:'#e2e8f0'}},
-            y:{ticks:{color:'#e2e8f0'}}
-          }
-        }
-      });
-    }
-
-    // ───────────────────── KSD ─────────────────────
-    function renderKsd(){
-      const k = DATA.ksd || [];
-      const rows = k.slice(0,80).map(r=>`
+function renderTablaSimple(rows, cols, labels) {
+  if (!rows || rows.length === 0) {
+    return `<div class="text-slate-500 py-4">Sin registros</div>`;
+  }
+  return `
+    <table class="min-w-full text-left border-collapse">
+      <thead>
         <tr>
-          <td>${r.fecha||''}</td>
-          <td>${money(r.ventasnetas||0)}</td>
-          <td>${r.margenbruto||r.margenbrutoporcentaje||''}</td>
-          <td>${r.numpedidos||''}</td>
-          <td>${money(r.ticketpromedio||0)}</td>
-          <td>${r.satisfaccion||''}</td>
+          ${cols.map(c => `<th class="border-b border-slate-800 px-2 py-1 font-semibold text-[11px] text-slate-400">${labels[c] || c}</th>`).join("")}
         </tr>
-      `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:.8rem;">Sin KSD registrados.</td></tr>';
-      return `
-        <div class="page-header">
-          <div>
-            <h1>KSD diario</h1>
-            <p>Ventas netas, margen y satisfacción por día</p>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Histórico KSD</h3>
-          <div style="max-height:460px;overflow:auto;margin-top:.4rem;border-radius:.7rem;border:1px solid #020617;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Ventas Netas</th>
-                  <th>Margen Bruto %</th>
-                  <th>Pedidos</th>
-                  <th>Ticket Promedio</th>
-                  <th>Satisfacción</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
+      </thead>
+      <tbody>
+        ${rows.slice(0, 20).map(r => `
+          <tr class="hover:bg-slate-800/60">
+            ${cols.map(c => `<td class="border-b border-slate-900 px-2 py-1">${formatCell(c, r[c])}</td>`).join("")}
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+}
+function formatCell(key, val) {
+  if (key === "total" || key === "monto" || key === "precioventa" || key === "costo") {
+    return fmtMoney(val);
+  }
+  return val ?? "";
+}
 
-    document.addEventListener('DOMContentLoaded', init);
-  </script>
+// --------- Vistas simples de tablas ----------
+function renderTableView(nombre, titulo, columnas, labels) {
+  if (!ERP_DATA) return;
+  const rows = ERP_DATA[nombre] || [];
+  setViewTitle(titulo, `Mostrando ${rows.length} registros`);
+  const container = document.getElementById("view-container");
+  container.innerHTML = `
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-sm font-semibold">${titulo}</h2>
+        <span class="text-[11px] text-slate-500">Fuente: hoja ${nombre.toUpperCase()}</span>
+      </div>
+      <div class="overflow-x-auto text-xs">
+        ${renderTablaSimple(rows, columnas, labels)}
+      </div>
+    </div>
+  `;
+}
+
+// --------- Vista Servicios (con formulario) ----------
+function renderServicios() {
+  if (!ERP_DATA) return;
+  const servicios = ERP_DATA.servicios || [];
+  setViewTitle("Servicios", "Registrar luz, agua, internet, alquiler, etc. Se guardan también en GASTOS");
+
+  const container = document.getElementById("view-container");
+  container.innerHTML = `
+    <div class="space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+        <h2 class="text-sm font-semibold mb-3">Registrar servicio rápido</h2>
+        <div class="grid md:grid-cols-5 gap-3 text-xs">
+          <input id="srv-nombre" type="text" placeholder="Servicio (ej: Luz Enel Enero)" class="bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400 md:col-span-2" />
+          <input id="srv-monto" type="number" step="0.01" placeholder="Monto (S/)" class="bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400" />
+          <select id="srv-medio" class="bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400">
+            <option value="">Medio de pago</option>
+            <option>Transferencia</option>
+            <option>Yape</option>
+            <option>Plin</option>
+            <option>Efectivo</option>
+            <option>Débito automático</option>
+          </select>
+          <select id="srv-cuenta" class="bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400">
+            <option value="">Cuenta</option>
+            <option>Bcp BRAVIZIMO’S</option>
+            <option>RUS Rosa</option>
+            <option>RUS Martín</option>
+            <option>RUS Milagros</option>
+            <option>RUS Sandy</option>
+          </select>
+          <select id="srv-estado" class="bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400">
+            <option>Pagado</option>
+            <option>Pendiente</option>
+          </select>
+        </div>
+        <div class="mt-3 flex justify-end">
+          <button id="btn-guardar-servicio" class="px-4 py-2 rounded-full bg-emerald-500 text-slate-900 text-xs font-semibold hover:bg-emerald-400">
+            Guardar servicio
+          </button>
+        </div>
+        <div id="srv-msg" class="mt-2 text-[11px] text-slate-400"></div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+        <h2 class="text-sm font-semibold mb-3">Historial de servicios (gastos)</h2>
+        <div class="overflow-x-auto text-xs">
+          ${renderTablaSimple(servicios, ["id","fecha","servicio","monto","mediopago","cuenta","estado"], {
+            id: "ID",
+            fecha: "Fecha",
+            servicio: "Servicio",
+            monto: "Monto",
+            mediopago: "Medio",
+            cuenta: "Cuenta",
+            estado: "Estado"
+          })}
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById("btn-guardar-servicio").addEventListener("click", guardarServicio);
+}
+
+async function guardarServicio() {
+  const nombre = document.getElementById("srv-nombre").value.trim();
+  const monto = document.getElementById("srv-monto").value;
+  const medio = document.getElementById("srv-medio").value;
+  const cuenta = document.getElementById("srv-cuenta").value;
+  const estado = document.getElementById("srv-estado").value;
+  const msgEl = document.getElementById("srv-msg");
+
+  if (!nombre || !monto) {
+    msgEl.textContent = "Completa al menos servicio y monto.";
+    msgEl.className = "mt-2 text-[11px] text-amber-400";
+    return;
+  }
+
+  msgEl.textContent = "Guardando servicio...";
+  msgEl.className = "mt-2 text-[11px] text-slate-400";
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "crear_servicio",
+        servicio: nombre,
+        monto: Number(monto),
+        mediopago: medio,
+        cuenta,
+        estado
+      })
+    });
+    const out = await res.json();
+    if (out.success) {
+      msgEl.textContent = "Servicio registrado correctamente ✅";
+      msgEl.className = "mt-2 text-[11px] text-emerald-400";
+      await loadAll();   // recarga ERP_DATA
+      renderServicios(); // vuelve a pintar
+    } else {
+      msgEl.textContent = "Error: " + (out.mensaje || "No se pudo guardar");
+      msgEl.className = "mt-2 text-[11px] text-rose-400";
+    }
+  } catch (e) {
+    console.error(e);
+    msgEl.textContent = "Error de conexión con la API";
+    msgEl.className = "mt-2 text-[11px] text-rose-400";
+  }
+}
+
+// ================== NAV ==================
+document.querySelectorAll(".nav-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("bg-slate-800","text-emerald-300","font-semibold"));
+    btn.classList.add("bg-slate-800","text-emerald-300","font-semibold");
+
+    const view = btn.getAttribute("data-view");
+    if (view === "dashboard") return renderDashboard();
+    if (view === "servicios") return renderServicios();
+
+    // tablas simples
+    if (view === "ventas")      return renderTableView("ventas", "Ventas", ["idventa","fecharegistro","cliente","canal","total","estadopago","estadopedido"], {
+      idventa: "ID",
+      fecharegistro: "F. Registro",
+      cliente: "Cliente",
+      canal: "Canal",
+      total: "Total",
+      estadopago: "Pago",
+      estadopedido: "Estado"
+    });
+    if (view === "inventario")  return renderTableView("inventario", "Inventario", ["codigo","nombreproducto","categoria","stockactual","stockminimo","precioventa"], {
+      codigo: "Código",
+      nombreproducto: "Producto",
+      categoria: "Categoría",
+      stockactual: "Stock",
+      stockminimo: "Mínimo",
+      precioventa: "P. Venta"
+    });
+    if (view === "insumos")     return renderTableView("insumos", "Insumos", ["codigo","nombre","categoria","stock","minimo","costounit","proveedor"], {
+      codigo: "Código",
+      nombre: "Nombre",
+      categoria: "Categoría",
+      stock: "Stock",
+      minimo: "Mínimo",
+      costounit: "Costo",
+      proveedor: "Proveedor"
+    });
+    if (view === "produccion")  return renderTableView("produccion", "Producción", ["id","fecha","producto","cantidad","estado","costo"], {
+      id: "ID",
+      fecha: "Fecha",
+      producto: "Producto",
+      cantidad: "Cantidad",
+      estado: "Estado",
+      costo: "Costo"
+    });
+    if (view === "compras")     return renderTableView("compras", "Compras", ["id","fecha","proveedor","total","estadopago","estadocompra"], {
+      id: "ID",
+      fecha: "Fecha",
+      proveedor: "Proveedor",
+      total: "Total",
+      estadopago: "Pago",
+      estadocompra: "Estado"
+    });
+    if (view === "proveedores") return renderTableView("proveedores", "Proveedores", ["id","nombre","ruc","telefono","email","categoria","calificacion","estado"], {
+      id: "ID",
+      nombre: "Nombre",
+      ruc: "RUC",
+      telefono: "Teléfono",
+      email: "Email",
+      categoria: "Categoría",
+      calificacion: "Rating",
+      estado: "Estado"
+    });
+    if (view === "gastos")      return renderTableView("gastos", "Gastos generales", ["id","fecha","categoria","descripcion","monto","metodopago","cuenta","estado"], {
+      id: "ID",
+      fecha: "Fecha",
+      categoria: "Categoría",
+      descripcion: "Descripción",
+      monto: "Monto",
+      metodopago: "Medio",
+      cuenta: "Cuenta",
+      estado: "Estado"
+    });
+    if (view === "facturas")    return renderTableView("facturas", "Facturas", ["id","tipo","numero","fecha","cliente","total","estado"], {
+      id: "ID",
+      tipo: "Tipo",
+      numero: "Número",
+      fecha: "Fecha",
+      cliente: "Cliente",
+      total: "Total",
+      estado: "Estado"
+    });
+    if (view === "clientes")    return renderTableView("clientes", "Clientes", ["id","nombre","documento","telefono","segmento","totalcompras","estado"], {
+      id: "ID",
+      nombre: "Nombre",
+      documento: "Doc",
+      telefono: "Teléfono",
+      segmento: "Segmento",
+      totalcompras: "Total compras",
+      estado: "Estado"
+    });
+    if (view === "delivery")    return renderTableView("delivery", "Delivery", ["id","fecha","cliente","direccion","distrito","repartidor","costo","estado"], {
+      id: "ID",
+      fecha: "Fecha",
+      cliente: "Cliente",
+      direccion: "Dirección",
+      distrito: "Distrito",
+      repartidor: "Repartidor",
+      costo: "Costo",
+      estado: "Estado"
+    });
+    if (view === "personal")    return renderTableView("personal", "Personal / RRHH", ["id","nombre","dni","cargo","telefono","sueldo","comision","estado"], {
+      id: "ID",
+      nombre: "Nombre",
+      dni: "DNI",
+      cargo: "Cargo",
+      telefono: "Teléfono",
+      sueldo: "Sueldo",
+      comision: "Comisión %",
+      estado: "Estado"
+    });
+    if (view === "reclamos")    return renderTableView("reclamos", "Reclamos", ["id","fecha","cliente","tipo","descripcion","prioridad","estado"], {
+      id: "ID",
+      fecha: "Fecha",
+      cliente: "Cliente",
+      tipo: "Tipo",
+      descripcion: "Descripción",
+      prioridad: "Prioridad",
+      estado: "Estado"
+    });
+  });
+});
+
+// Botón sincronizar
+document.getElementById("btn-sync").addEventListener("click", async () => {
+  setViewSubtitle("Sincronizando datos...");
+  try {
+    await fetch(API_URL + "?action=sync");
+    await loadAll();
+    setViewSubtitle("Datos sincronizados " + new Date().toLocaleString());
+  } catch (e) {
+    console.error(e);
+    setViewSubtitle("Error al sincronizar");
+  }
+});
+
+// Carga inicial
+loadAll();
+</script>
 </body>
 </html>
