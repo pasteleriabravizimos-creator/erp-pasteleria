@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bravizimos ERP - Sistema Completo</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6366f1; --primary-dark: #4f46e5; --secondary: #f59e0b;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+            --info: #3b82f6; --dark: #0f172a; --dark-2: #1e293b;
+            --border: rgba(148, 163, 184, 0.1); --glass: rgba(255, 255, 255, 0.05);
+        }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0; min-height: 100vh;
+        }
+        .loader-overlay {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.98);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; transition: opacity 0.5s;
+        }
+        .loader-overlay.hidden { opacity: 0; pointer-events: none; }
+        .loader {
+            width: 60px; height: 60px; border: 4px solid var(--border);
+            border-top-color: var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-text { margin-top: 1.5rem; color: #94a3b8; }
+        .app-container { display: flex; min-height: 100vh; }
+        .sidebar {
+            width: 280px; background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px); border-right: 1px solid var(--border);
+            padding: 2rem 0; position: fixed; height: 100vh; overflow-y: auto; z-index: 100;
+        }
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--glass); border-radius: 10px; }
+        .logo { padding: 0 2rem 2rem; border-bottom: 1px solid var(--border); }
+        .logo h1 {
+            font-size: 1.75rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .logo p { font-size: 0.75rem; color: #64748b; font-weight: 500; }
+        .nav-section { padding: 1.5rem 1rem 0.5rem; }
+        .nav-section-title {
+            font-size: 0.7rem; font-weight: 700; color: #64748b;
+            text-transform: uppercase; letter-spacing: 1px; padding: 0 1rem 0.75rem;
+        }
+        .nav-item {
+            display: flex; align-items: center; gap: 0.875rem;
+            padding: 0.875rem 1rem; margin: 0.25rem 0.5rem; border-radius: 12px;
+            color: #94a3b8; cursor: pointer; transition: all 0.3s;
+            font-size: 0.9rem; font-weight: 500;
+        }
+        .nav-item i { font-size: 1.1rem; width: 24px; }
+        .nav-item:hover {
+            background: var(--glass); color: #e2e8f0; transform: translateX(4px);
+        }
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+        .nav-badge {
+            margin-left: auto; padding: 0.25rem 0.625rem;
+            background: var(--danger); border-radius: 20px;
+            font-size: 0.7rem; font-weight: 700;
+        }
+        .main-content { flex: 1; margin-left: 280px; padding: 2rem; }
+        .page-header {
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 20px; padding: 2rem;
+            margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between;
+        }
+        .header-left h1 {
+            font-size: 2.25rem; font-weight: 800; margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #e2e8f0, #94a3b8);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .header-left p { color: #64748b; }
+        .btn {
+            padding: 0.875rem 1.75rem; border: none; border-radius: 12px;
+            font-weight: 600; font-size: 0.9rem; cursor: pointer;
+            transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-secondary { background: var(--secondary); color: white; }
+        .card {
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 20px;
+            padding: 2rem; margin-bottom: 2rem;
+        }
+        .card-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);
+        }
+        .card-title { font-size: 1.5rem; font-weight: 700; color: #e2e8f0; }
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem; margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 16px;
+            padding: 1.75rem; position: relative; overflow: hidden;
+        }
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+        .stat-header {
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;
+        }
+        .stat-label {
+            font-size: 0.85rem; color: #94a3b8; font-weight: 600; text-transform: uppercase;
+        }
+        .stat-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+        }
+        .stat-icon.primary { background: rgba(99, 102, 241, 0.2); color: var(--primary); }
+        .stat-icon.success { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .stat-icon.warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .stat-icon.danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .stat-value { font-size: 2.25rem; font-weight: 800; color: #e2e8f0; margin-bottom: 0.5rem; }
+        .search-filter-bar { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+        .search-box { flex: 1; min-width: 300px; position: relative; }
+        .search-box i {
+            position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: #64748b;
+        }
+        .search-box input {
+            width: 100%; padding: 1rem 1rem 1rem 3rem;
+            background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border);
+            border-radius: 12px; color: #e2e8f0; font-size: 0.95rem;
+        }
+        .search-box input:focus { outline: none; border-color: var(--primary); }
+        select {
+            padding: 1rem 1.25rem; background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--border); border-radius: 12px;
+            color: #e2e8f0; cursor: pointer;
+        }
+        .table-container { overflow-x: auto; border-radius: 16px; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        thead { background: rgba(51, 65, 85, 0.8); }
+        th {
+            padding: 1.25rem 1.5rem; text-align: left; font-weight: 600;
+            color: #e2e8f0; text-transform: uppercase; font-size: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        td { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); color: #cbd5e1; }
+        tbody tr:hover { background: rgba(51, 65, 85, 0.3); }
+        .badge {
+            display: inline-flex; padding: 0.5rem 1rem; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+        }
+        .badge-success { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .badge-warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .badge-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .badge-info { background: rgba(59, 130, 246, 0.2); color: var(--info); }
+        .badge-primary { background: rgba(99, 102, 241, 0.2); color: var(--primary); }
+        .charts-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 2rem;
+        }
+        .chart-card {
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 20px; padding: 2rem;
+        }
+        .chart-title {
+            font-size: 1.125rem; font-weight: 700; color: #e2e8f0; margin-bottom: 1.5rem;
+        }
+        .alert {
+            padding: 1.25rem 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;
+            display: flex; gap: 1rem; border-left: 4px solid;
+        }
+        .alert-info { background: rgba(59, 130, 246, 0.1); border-color: var(--info); }
+        .alert-warning { background: rgba(245, 158, 11, 0.1); border-color: var(--warning); }
+        .alert-success { background: rgba(16, 185, 129, 0.1); border-color: var(--success); }
+        .alert-danger { background: rgba(239, 68, 68, 0.1); border-color: var(--danger); }
+        .form-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem; margin-bottom: 2rem;
+        }
+        .form-group label {
+            display: block; margin-bottom: 0.5rem; font-weight: 600; color: #e2e8f0;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 1rem; background: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--border); border-radius: 12px; color: #e2e8f0;
+        }
+        textarea { resize: vertical; min-height: 120px; }
+        .sync-fab {
+            position: fixed; bottom: 2rem; right: 2rem; width: 64px; height: 64px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 1.5rem; cursor: pointer;
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4); z-index: 1000; border: none;
+        }
+        .sync-fab:hover { transform: scale(1.1) rotate(180deg); }
+        .sync-fab.syncing { animation: spin 1s linear infinite; }
+        .content-section { display: none; }
+        .content-section.active { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .empty-state { text-align: center; padding: 4rem 2rem; }
+        .empty-icon { font-size: 4rem; color: #475569; margin-bottom: 1rem; }
+        .actions-bar { display: flex; gap: 1rem; margin-bottom: 2rem; }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main-content { margin-left: 0; }
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="loader-overlay" id="loader">
+        <div class="loader"></div>
+        <div class="loader-text">Iniciando Bravizimos ERP...</div>
+    </div>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>Bravizimos</h1>
+                <p>Sistema ERP Completo</p>
+            </div>
+            <nav>
+                <div class="nav-section">
+                    <div class="nav-section-title">Principal</div>
+                    <div class="nav-item active" onclick="navegar('dashboard')">
+                        <i class="fas fa-home"></i><span>Dashboard</span>
+                    </div>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Ventas</div>
+                    <div class="nav-item" onclick="navegar('ventas')">
+                        <i class="fas fa-shopping-cart"></i><span>Ventas / Pedidos</span>
+                    </div>
+                    <div class="nav-item" onclick="navegar('clientes')">
+                        <i class="fas fa-users"></i><span>Clientes</span>
+                    </div>
+                    <div class="nav-item" onclick="navegar('delivery')">
+                        <i class="fas fa-truck"></i><span>Delivery</span>
+                    </div>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Producción</div>
+                    <div class="nav-item" onclick="navegar('productos')">
+                        <i class="fas fa-box"></i><span>Productos</span>
+                    </div>
+                    <div class="nav-item" onclick="navegar('recetas')">
+                        <i class="fas fa-book"></i><span>Recetas</span>
+                    </div>
+                    <div class="nav-item" onclick="navegar('insumos')">
+                        <i class="fas fa-cubes"></i><span>Inventario Insumos</span>
+                        <span class="nav-badge" id="badgeInsumos" style="display:none;">0</span>
+                    </div>
+                    <div class="nav-item" onclick="navegar('produccion')">
+                        <i class="fas fa-clipboard-list"></i><span>Lista de Producción</span>
+                    </div>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Compras y Gastos</div>
+                    <div class="nav-item" onclick="navegar('proveedores')">
+                        <i class="fas fa-building"></i><span>Proveedores</span>
+                    </div>
+                    <div class="nav-item" onclick="navegar('compras')">
+                        <i class="fas fa-file-invoice"></i><span>Compras / Facturas</span>
+                    </div>
+                    <div class="nav-item" onclick="navegar('servicios')">
+                        <i class="fas fa-receipt"></i><span>Servicios</span>
+                    </div>
+                    <div class="nav-item" onclick="navegar('gastos')">
+                        <i class="fas fa-money-bill-wave"></i><span>Gastos</span>
+                    </div>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Finanzas</div>
+                    <div class="nav-item" onclick="navegar('yape')">
+                        <i class="fas fa-mobile-alt"></i><span>Yape</span>
+                    </div>
+                    <div class="nav-item" onclick="navegar('banco')">
+                        <i class="fas fa-university"></i><span>Banco BCP</span>
+                    </div>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Recursos Humanos</div>
+                    <div class="nav-item" onclick="navegar('personal')">
+                        <i class="fas fa-user-tie"></i><span>Personal</span>
+                    </div>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Análisis</div>
+                    <div class="nav-item" onclick="navegar('reportes')">
+                        <i class="fas fa-chart-line"></i><span>Reportes</span>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <!-- DASHBOARD -->
+            <section id="dashboard" class="content-section active">
+                <div class="page-header">
+                    <div class="header-left"><h1>Dashboard</h1><p>Vista general de tu negocio</p></div>
+                    <button class="btn btn-primary" onclick="sync()"><i class="fas fa-sync-alt"></i> Sincronizar</button>
+                </div>
+                <div id="alerts"></div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">Ventas del Mes</span>
+                            <div class="stat-icon primary"><i class="fas fa-shopping-cart"></i></div>
+                        </div>
+                        <div class="stat-value" id="statVentas">S/ 0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">Total Clientes</span>
+                            <div class="stat-icon success"><i class="fas fa-users"></i></div>
+                        </div>
+                        <div class="stat-value" id="statClientes">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">Productos</span>
+                            <div class="stat-icon warning"><i class="fas fa-box"></i></div>
+                        </div>
+                        <div class="stat-value" id="statProductos">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">Ticket Promedio</span>
+                            <div class="stat-icon primary"><i class="fas fa-receipt"></i></div>
+                        </div>
+                        <div class="stat-value" id="statTicket">S/ 0</div>
+                    </div>
+                </div>
+                <div class="charts-grid">
+                    <div class="chart-card"><h3 class="chart-title">Ventas por Mes</h3><canvas id="chartVentas"></canvas></div>
+                    <div class="chart-card"><h3 class="chart-title">Top Clientes</h3><canvas id="chartClientes"></canvas></div>
+                </div>
+            </section>
+
+            <!-- VENTAS -->
+            <section id="ventas" class="content-section">
+                <div class="page-header">
+                    <div class="header-left"><h1>Ventas / Pedidos</h1><p>Gestión completa de ventas</p></div>
+                </div>
+                <div class="search-filter-bar">
+                    <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchVentas" placeholder="Buscar..." onkeyup="filterTable('tablaVentas', this.value)"></div>
+                </div>
+                <div class="card">
+                    <div class="table-container">
+                        <table><thead><tr><th>#</th><th>Pedido</th><th>Cliente</th><th>Distrito</th><th>Monto</th><th>Estado</th></tr></thead>
+                        <tbody id="tablaVentas"></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CLIENTES -->
+            <section id="clientes" class="content-section">
+                <div class="page-header">
+                    <div class="header-left"><h1>Clientes</h1><p>Base de datos de clientes</p></div>
+                </div>
+                <div class="search-filter-bar">
+                    <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="Buscar..." onkeyup="filterTable('tablaClientes', this.value)"></div>
+                </div>
+                <div class="card">
+                    <div class="table-container">
+                        <table><thead><tr><th>Cliente</th><th>Documento</th><th>Teléfono</th><th>Distrito</th><th>Compras</th><th>Total</th><th>Clasificación</th></tr></thead>
+                        <tbody id="tablaClientes"></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DELIVERY -->
+            <section id="delivery" class="content-section">
+                <div class="page-header">
+                    <div class="header-left"><h1>Delivery</h1><p>Control de entregas</p></div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">Entregas Hoy</span>
+                            <div class="stat-icon primary"><i class="fas fa-truck"></i></div>
+                        </div>
+                        <div class="stat-value" id="statEntregas">0</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Entregas Programadas</h3>
+                        <button class="btn btn-success"><i class="fas fa-plus"></i> Nueva Entrega</button>
+                    </div>
+                    <div class="table-container">
+                        <table><thead><tr><th>Pedido</th><th>Cliente</th><th>Dirección</th><th>Fecha</th><th>Estado</th></tr></thead>
+                        <tbody id="tablaDelivery"><tr><td colspan="5" class="empty-state"><div class="empty-icon"><i class="fas fa-truck"></i></div><p>No hay entregas programadas</p></td></tr></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PRODUCTOS -->
+            <section id="productos" class="content-section">
+                <div class="page-header">
+                    <div class="header-left"><h1>Productos</h1><p>Catálogo de productos</p></div>
+                </div>
+                <div class="search-filter-bar">
+                    <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="Buscar..." onkeyup="filterTable('tablaProductos', this.value)"></div>
+                </div>
+                <div class="card">
+                    <div class="table-container">
+                        <table><thead><tr><th>Código</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Estado</th></tr></thead>
+                        <tbody id="tablaProductos"></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RECETAS -->
+            <section id="recetas" class="content-section">
+                <div class="page-header">
+                    <div class="header-left"><h1>Recetas</h1><p>Fichas técnicas y costos</p></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Fichas Técnicas</h3>
+                        <button class="btn btn-success"><i class="fas fa-plus"></i> Nueva Receta</button>
+                    </div>
+                    <div class="table-container">
+                        <table><thead><tr><th>Producto</th><th>Insumo</th><th>Cantidad</th><th>Costo</th><th>Rendimiento</th></tr></thead>
+                        <tbody id="tablaRecetas"></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- INSUMOS -->
+            <section id="insumos" class="content-section">
+                <div class="page-header">
+                    <div class="header-left"><h1>Inventario de Insumos</h1><p>Control de stock</p></div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">Total Insumos</span>
+                            <div class="stat-icon primary"><i class="fas fa-cubes"></i></div>
+                        </div>
+                        <div class="stat-value" id="statInsumos">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">Stock Bajo</span>
+                            <div class="stat-icon warning"><i class="fas fa-exclamation-triangle"></i></div>
+                        </div>
+                        <div class="stat-value" id="statStockBajo">0</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="table-container">
+                        <table><thead><tr><th>Código</th><th>Nombre</th><th>Categoría</th><th>Stock</th><th>Mínimo</th><th>Costo</th><th>Estado</th></tr></thead>
+                        <tbody id="tablaInsumos"></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PRODUCCION -->
+            <section id="produccion" class="content-section">
+                <div class="page-header">
+                    <div class="header-left"><h1>Lista de Producción</h1><p>Picking list inteligente</p></div>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <div><strong>Lista automática</strong><p>Basada en pedidos y recetas</p></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Insumos Necesarios</h3>
+                        <button class="btn btn-primary"><i class="fas fa-calendar"></i> Filtrar Fecha</button>
+                    </div>
+                    <div class="table-container">
+                        <table><thead><tr><th>Insumo</th><th>Requerido</th><th>Disponible</th><th>Faltante</th><th>Estado</th></tr></thead>
+                        <tbody><tr><td colspan="5" class="empty-state"><div class="empty-icon"><i class="fas fa-clipboard-list"></i></div><p>No hay producción programada</p></td></tr></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PROVEEDORES -->
+            <section id="proveedores" class="content-section">
+                <div class="page-header">
+                    <div class="header-left"><h1>Proveedores</h1><p>Base de datos de proveedores</p></div>
+                </div>
+                <div class="actions-bar">
+                    <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="Buscar..." onkeyup="filterTable('tablaProveedores', this.value)"></div>
+                    <button class="btn btn-success"><i class="fas fa-plus"></i> Nuevo</button>
+                </div>
+                <div class="card">
+                    <div class="table-container">
+                        <table><thead><tr><th>Código</th><th>Nombre</th><th>RUC</th><th>Teléfono</th><th>Categoría</th><th>Estado</th></tr></thead>
+                        <tbody id="tablaProveedores"></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- COMPRAS -->
+            <section id="compras" class="content-section">
+                <div class="page-header">
+                    <div class="header-left"><h1>Compras / Facturas</h1><p>Registro de compras</p></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Registro de Compras</h3>
+                        <button class="btn btn-success"><i class="fas fa-plus"></i> Nueva Compra</button>
+                    </div>
+                    <div class="table-container">
+                        <table><thead><tr><th>Fecha</th><th>Proveedor</th><th>Factura</th><th>Monto</th><th>Estado</th></tr></thead>
+                        <tbody><tr><td colspan="5" class="empty-state"><div class="empty-icon"><i class="fas fa-file-invoice"></i></div><p>No hay compras</p></td></tr></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SERVICIOS -->
+            <section id="servicios" class="content-section">
+                <div class="page-header">
+                    <div class="header-left"><h1>Servicios</h1><p>Control de pagos recurrentes</p></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Servicios Recurrentes</h3>
+                        <button class="btn btn-success"><i class="fas fa-plus"></i> Nuevo</button>
+                    </div>
+                    <div class="table-container">
+                        <table><thead><tr><th>Servicio</th><th>Proveedor</th><th>Monto</th><th>Vencimiento</th><th>Estado</th></tr></thead>
+                        <tbody id="tablaServicios"></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- GASTOS -->
+            <section id="gastos" class="content-section">
+                <div class="page-header">
+                    <div class="header-left"><h1>Gastos</h1><p>Control de egresos</p></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Registro de Gastos</h3>
+                        <button class="btn btn-success"><i class="fas fa-plus"></i> Nuevo</button>
+                    </div>
+                    <div class="table-container">
+                        <table><thead><tr><th>Fecha</th><th>Categoría</th><th>Descripción</th><th>Monto</th><th>Estado</th></tr></thead>
+                        <tbody id="tablaGastos"></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- YAPE -->
+            <section id="yape" class="content-section">
+                <div class="page-header">
+                    <div class="header-left"><h1>Yape</h1><p>Pagos digitales</p></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Transacciones Yape</h3>
+                        <button class="btn btn-success"><i class="fas fa-plus"></i> Registrar</button>
+                    </div>
+                    <div class="table-container">
+                        <table><thead><tr><th>Fecha</th><th>Cliente</th><th>Pedido</th><th>Monto</th><th>Estado</th></tr></thead>
+                        <tbody><tr><td colspan="5" class="empty-state"><div class="empty-icon"><i class="fas fa-mobile-alt"></i></div><p>No hay pagos Yape</p></td></tr></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BANCO -->
+            <section id="banco" class="content-section">
+                <div class="page-header">
+                    <div class="header-left"><h1>Banco BCP</h1><p>Movimientos bancarios</p></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Movimientos</h3>
+                        <button class="btn btn-success"><i class="fas fa-plus"></i> Registrar</button>
+                    </div>
+                    <div class="table-container">
+                        <table><thead><tr><th>Fecha</th><th>Tipo</th><th>Descripción</th><th>Monto</th><th>Saldo</th></tr></thead>
+                        <tbody><tr><td colspan="5" class="empty-state"><div class="empty-icon"><i class="fas fa-university"></i></div><p>No hay movimientos</p></td></tr></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PERSONAL -->
+            <section id="personal" class="content-section">
+                <div class="page-header">
+                    <div class="header-left"><h1>Personal / RRHH</h1><p>Gestión de empleados</p></div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-label">Empleados</span>
+                            <div class="stat-icon primary"><i class="fas fa-users"></i></div>
+                        </div>
+                        <div class="stat-value" id="statEmpleados">0</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Lista de Personal</h3>
+                        <button class="btn btn-success"><i class="fas fa-plus"></i> Nuevo</button>
+                    </div>
+                    <div class="table-container">
+                        <table><thead><tr><th>Código</th><th>Nombre</th><th>Cargo</th><th>Sueldo</th><th>Estado</th></tr></thead>
+                        <tbody id="tablaPersonal"></tbody></table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- REPORTES -->
+            <section id="reportes" class="content-section">
+                <div class="page-header">
+                    <div class="header-left"><h1>Reportes</h1><p>Análisis del negocio</p></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">Reportes Disponibles</h3></div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                        <div class="stat-card" style="cursor: pointer;">
+                            <div class="stat-header">
+                                <span class="stat-label">Ventas por Producto</span>
+                                <div class="stat-icon primary"><i class="fas fa-chart-bar"></i></div>
+                            </div>
+                            <p style="color: #94a3b8;">Análisis detallado</p>
+                        </div>
+                        <div class="stat-card" style="cursor: pointer;">
+                            <div class="stat-header">
+                                <span class="stat-label">Rentabilidad</span>
+                                <div class="stat-icon success"><i class="fas fa-dollar-sign"></i></div>
+                            </div>
+                            <p style="color: #94a3b8;">Margen de utilidad</p>
+                        </div>
+                        <div class="stat-card" style="cursor: pointer;">
+                            <div class="stat-header">
+                                <span class="stat-label">Clientes Top</span>
+                                <div class="stat-icon warning"><i class="fas fa-star"></i></div>
+                            </div>
+                            <p style="color: #94a3b8;">Mejores clientes</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="charts-grid">
+                    <div class="chart-card"><h3 class="chart-title">Evolución</h3><canvas id="chartEvolucion"></canvas></div>
+                    <div class="chart-card"><h3 class="chart-title">Categorías</h3><canvas id="chartCategoria"></canvas></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <button class="sync-fab" onclick="sync()"><i class="fas fa-sync-alt"></i></button>
+
+    <script>
+        const CFG = { URL: 'https://script.google.com/macros/s/AKfycbwMYALbMOOQDVfG9CW59lfIDEHvW3xPAT-QSyQJmX5ohaJcMiLBgmBO9VIcFu4v23OR/exec', KEY: 'bravi_data' }; // ⚠️ PASO 4: Pegar tu URL de Apps Script aquí // ⚠️ PEGAR URL AQUÍ
+        let D = { ventas: [], productos: [], clientes: [], insumos: [], recetas: [], proveedores: [], gastos: [], personal: [], delivery: [], estadisticas: {} };
+        let CH = {};
+
+        window.onload = () => {
+            setTimeout(() => document.getElementById('loader').classList.add('hidden'), 1000);
+            loadCache();
+            if (CFG.URL) sync(); else alert('⚙️ Configure URL de Apps Script (línea 1)');
+        };
+
+        function navegar(s) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+            document.querySelectorAll('.content-section').forEach(i => i.classList.remove('active'));
+            document.getElementById(s).classList.add('active');
+            render(s);
+        }
+
+        function render(s) {
+            switch(s) {
+                case 'dashboard': renderDash(); break;
+                case 'ventas': renderVentas(); break;
+                case 'clientes': renderClientes(); break;
+                case 'productos': renderProductos(); break;
+                case 'insumos': renderInsumos(); break;
+                case 'recetas': renderRecetas(); break;
+                case 'proveedores': renderProveedores(); break;
+                case 'gastos': renderGastos(); break;
+                case 'personal': renderPersonal(); break;
+                case 'servicios': renderServicios(); break;
+            }
+        }
+
+        async function sync() {
+            if (!CFG.URL) return alert('Configure URL');
+            const fab = document.querySelector('.sync-fab');
+            fab.classList.add('syncing');
+            try {
+                const r = await fetch(CFG.URL + '?action=getAll');
+                const d = await r.json();
+                if (d.error) throw new Error(d.mensaje);
+                D = d;
+                D.ultimaActualizacion = new Date();
+                localStorage.setItem(CFG.KEY, JSON.stringify(D));
+                updateUI();
+                alerta('success', '✓ Sincronizado');
+            } catch (e) {
+                console.error(e);
+                alerta('warning', '✗ Error: ' + e.message);
+                loadCache();
+            } finally {
+                fab.classList.remove('syncing');
+            }
+        }
+
+        function loadCache() {
+            const c = localStorage.getItem(CFG.KEY);
+            if (c) { D = JSON.parse(c); updateUI(); }
+        }
+
+        function updateUI() {
+            renderDash(); renderVentas(); renderClientes(); renderProductos();
+            renderInsumos(); renderProveedores(); renderGastos(); renderPersonal();
+            renderRecetas(); renderServicios();
+        }
+
+        function renderDash() {
+            const s = D.estadisticas || {};
+            document.getElementById('statVentas').textContent = 'S/ ' + (s.ventasMes || 0).toFixed(2);
+            document.getElementById('statClientes').textContent = s.totalClientes || 0;
+            document.getElementById('statProductos').textContent = s.totalProductos || 0;
+            document.getElementById('statTicket').textContent = 'S/ ' + (s.ticketPromedio || 0).toFixed(2);
+
+            const alertsCont = document.getElementById('alerts');
+            alertsCont.innerHTML = '';
+            if (D.ventas.length === 0) {
+                alertsCont.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i><div><strong>Sin datos</strong><p>Sincronice con Google Sheets</p></div></div>';
+            }
+            if (s.insumosSinStock > 0) {
+                alertsCont.innerHTML += `<div class="alert alert-danger"><i class="fas fa-times-circle"></i><div><strong>${s.insumosSinStock} insumos sin stock</strong></div></div>`;
+            }
+
+            chartVentasMes();
+            chartTopClientes();
+        }
+
+        function chartVentasMes() {
+            const ctx = document.getElementById('chartVentas');
+            if (!ctx || !window.Chart) return;
+            if (CH.ventas) CH.ventas.destroy();
+
+            const meses = {};
+            D.ventas.forEach(v => {
+                const f = new Date(v.fechaEmision);
+                const m = `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}`;
+                meses[m] = (meses[m] || 0) + (v.monto || 0);
+            });
+
+            const labels = Object.keys(meses).sort();
+            const data = labels.map(l => meses[l]);
+
+            CH.ventas = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Ventas (S/)',
+                        data: data,
+                        backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                        borderRadius: 8
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+            });
+        }
+
+        function chartTopClientes() {
+            const ctx = document.getElementById('chartClientes');
+            if (!ctx || !window.Chart) return;
+            if (CH.clientes) CH.clientes.destroy();
+
+            const top5 = [...D.clientes].sort((a, b) => b.montoTotal - a.montoTotal).slice(0, 5);
+
+            CH.clientes = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: top5.map(c => c.nombre),
+                    datasets: [{
+                        data: top5.map(c => c.montoTotal),
+                        backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6']
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        function renderVentas() {
+            const tb = document.getElementById('tablaVentas');
+            if (!tb) return;
+            if (D.ventas.length === 0) {
+                tb.innerHTML = '<tr><td colspan="6" class="empty-state"><div class="empty-icon"><i class="fas fa-shopping-cart"></i></div><p>Sin ventas</p></td></tr>';
+                return;
+            }
+            tb.innerHTML = D.ventas.map(v => `
+                <tr>
+                    <td>${v.numero}</td>
+                    <td><strong>${v.numeroPedido}</strong></td>
+                    <td>${v.cliente}</td>
+                    <td>${v.distrito}</td>
+                    <td><strong>S/ ${(v.monto || 0).toFixed(2)}</strong></td>
+                    <td>${badge(v.estado)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderClientes() {
+            const tb = document.getElementById('tablaClientes');
+            if (!tb) return;
+            if (D.clientes.length === 0) {
+                tb.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-icon"><i class="fas fa-users"></i></div><p>Sin clientes</p></td></tr>';
+                return;
+            }
+            tb.innerHTML = D.clientes.map(c => `
+                <tr>
+                    <td><strong>${c.nombre}</strong></td>
+                    <td>${c.tipoDocumento}: ${c.numDocumento}</td>
+                    <td>${c.telefono}</td>
+                    <td>${c.distrito}</td>
+                    <td>${c.totalCompras}</td>
+                    <td><strong>S/ ${(c.montoTotal || 0).toFixed(2)}</strong></td>
+                    <td>${badgeClasif(c.clasificacion)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderProductos() {
+            const tb = document.getElementById('tablaProductos');
+            if (!tb) return;
+            if (D.productos.length === 0) {
+                tb.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Sin productos</p></td></tr>';
+                return;
+            }
+            tb.innerHTML = D.productos.map(p => `
+                <tr>
+                    <td>${p.codigo}</td>
+                    <td><strong>${p.nombre}</strong></td>
+                    <td>${p.categoria}</td>
+                    <td><strong>S/ ${(p.precioVenta || 0).toFixed(2)}</strong></td>
+                    <td>${p.estado === 'Activo' ? '<span class="badge badge-success">Activo</span>' : '<span class="badge badge-warning">Inactivo</span>'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderInsumos() {
+            const tb = document.getElementById('tablaInsumos');
+            if (!tb) return;
+            document.getElementById('statInsumos').textContent = D.insumos.length;
+            const stockBajo = D.insumos.filter(i => (i.stockActual || 0) <= (i.stockMinimo || 0)).length;
+            document.getElementById('statStockBajo').textContent = stockBajo;
+            if (stockBajo > 0) {
+                const badge = document.getElementById('badgeInsumos');
+                badge.textContent = stockBajo;
+                badge.style.display = 'block';
+            }
+
+            if (D.insumos.length === 0) {
+                tb.innerHTML = '<tr><td colspan="7" class="empty-state"><p>Sin insumos</p></td></tr>';
+                return;
+            }
+            tb.innerHTML = D.insumos.map(i => {
+                const stockOk = (i.stockActual || 0) > (i.stockMinimo || 0);
+                return `
+                    <tr>
+                        <td>${i.codigo}</td>
+                        <td><strong>${i.nombre}</strong></td>
+                        <td>${i.categoria}</td>
+                        <td>${i.stockActual || 0} ${i.unidad}</td>
+                        <td>${i.stockMinimo || 0}</td>
+                        <td>S/ ${(i.costoUnitario || 0).toFixed(2)}</td>
+                        <td>${stockOk ? '<span class="badge badge-success">OK</span>' : '<span class="badge badge-warning">Bajo</span>'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderRecetas() {
+            const tb = document.getElementById('tablaRecetas');
+            if (!tb) return;
+            if (D.recetas.length === 0) {
+                tb.innerHTML = '<tr><td colspan="5" class="empty-state"><div class="empty-icon"><i class="fas fa-book"></i></div><p>Sin recetas</p></td></tr>';
+                return;
+            }
+            tb.innerHTML = D.recetas.map(r => `
+                <tr>
+                    <td><strong>${r.producto}</strong></td>
+                    <td>${r.insumo}</td>
+                    <td>${r.cantidad} ${r.unidad}</td>
+                    <td>S/ ${(r.costoTotal || 0).toFixed(2)}</td>
+                    <td>${r.rendimiento || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderProveedores() {
+            const tb = document.getElementById('tablaProveedores');
+            if (!tb) return;
+            if (D.proveedores.length === 0) {
+                tb.innerHTML = '<tr><td colspan="6" class="empty-state"><p>Sin proveedores</p></td></tr>';
+                return;
+            }
+            tb.innerHTML = D.proveedores.map(p => `
+                <tr>
+                    <td>${p.codigo}</td>
+                    <td><strong>${p.nombre}</strong></td>
+                    <td>${p.ruc}</td>
+                    <td>${p.telefono}</td>
+                    <td>${p.categoria}</td>
+                    <td><span class="badge badge-success">${p.estado}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderGastos() {
+            const tb = document.getElementById('tablaGastos');
+            if (!tb) return;
+            if (D.gastos.length === 0) {
+                tb.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Sin gastos</p></td></tr>';
+                return;
+            }
+            tb.innerHTML = D.gastos.map(g => `
+                <tr>
+                    <td>${g.fecha}</td>
+                    <td>${g.categoria}</td>
+                    <td>${g.descripcion}</td>
+                    <td><strong>S/ ${(g.monto || 0).toFixed(2)}</strong></td>
+                    <td>${badge(g.estado)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderPersonal() {
+            const tb = document.getElementById('tablaPersonal');
+            if (!tb) return;
+            document.getElementById('statEmpleados').textContent = D.personal.length;
+            if (D.personal.length === 0) {
+                tb.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Sin personal</p></td></tr>';
+                return;
+            }
+            tb.innerHTML = D.personal.map(p => `
+                <tr>
+                    <td>${p.codigo}</td>
+                    <td><strong>${p.nombreCompleto}</strong></td>
+                    <td>${p.cargo}</td>
+                    <td>S/ ${(p.sueldoBase || 0).toFixed(2)}</td>
+                    <td><span class="badge badge-success">${p.estado}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderServicios() {
+            const tb = document.getElementById('tablaServicios');
+            if (!tb) return;
+            tb.innerHTML = '<tr><td colspan="5" class="empty-state"><p>Sincronice para ver servicios</p></td></tr>';
+        }
+
+        function badge(estado) {
+            const map = {
+                'PROCESADO': 'success', 'PENDIENTE': 'warning',
+                'CANCELADO': 'danger', 'EN PROCESO': 'info'
+            };
+            const tipo = map[estado] || 'info';
+            return `<span class="badge badge-${tipo}">${estado}</span>`;
+        }
+
+        function badgeClasif(c) {
+            const map = { 'Frecuente': 'success', 'Recurrente': 'info', 'Nuevo': 'warning' };
+            return `<span class="badge badge-${map[c] || 'info'}">${c}</span>`;
+        }
+
+        function filterTable(id, val) {
+            const filas = document.querySelectorAll('#' + id + ' tr');
+            filas.forEach(f => {
+                const txt = f.textContent.toLowerCase();
+                f.style.display = txt.includes(val.toLowerCase()) ? '' : 'none';
+            });
+        }
+
+        function alerta(tipo, msg) {
+            const cont = document.getElementById('alerts');
+            if (!cont) return alert(msg);
+            const icons = { 'success': 'check-circle', 'warning': 'exclamation-triangle', 'danger': 'times-circle', 'info': 'info-circle' };
+            const al = document.createElement('div');
+            al.className = `alert alert-${tipo}`;
+            al.innerHTML = `<i class="fas fa-${icons[tipo]}"></i><div>${msg}</div>`;
+            cont.appendChild(al);
+            setTimeout(() => al.remove(), 5000);
+        }
+    </script>
+</body>
+</html>
