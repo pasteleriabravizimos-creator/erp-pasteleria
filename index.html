@@ -627,22 +627,13 @@
 <body>
     <!-- LOGIN SCREEN -->
     <script>
-function handleLogin(event) {
-  event.preventDefault();
-
-  const email = document.getElementById("nombredeusuario").value.trim();
-  const password = document.getElementById("contraseña").value.trim();
-
-  const validEmail = "admin@bravizimos.com";
-  const validPassword = "admin123";
-
-  if (email === validEmail && password === validPassword) {
-    alert("Login exitoso 🎉");
-    window.location.href = "dashboard.html";
-  } else {
-    alert("Credenciales incorrectas. Revisa mayúsculas, números y espacios.");
-  }
-}
+sessionStorage.setItem('currentUser', JSON.stringify({
+    username: 'admin@bravizimos.com',
+    name: 'Administrador',
+    role: 'admin',
+    modules: ['all']
+}));
+location.reload();
 </script>
 
 
