@@ -307,6 +307,10 @@
                         <i class="fas fa-shopping-bag"></i>
                         <span>Compras</span>
                     </div>
+                    <div class="nav-item" onclick="navigateTo('servicios')">
+                        <i class="fas fa-bolt"></i>
+                        <span>Servicios</span>
+                    </div>
                     <div class="nav-item" onclick="navigateTo('gastos')">
                         <i class="fas fa-money-bill-wave"></i>
                         <span>Gastos</span>
@@ -356,7 +360,7 @@
         </aside>
 
         <main class="main-content" id="mainContent">
-            <!-- Aquí se carga el contenido -->
+            <!-- contenido dinámico -->
         </main>
     </div>
 
@@ -365,10 +369,8 @@
     </button>
 
     <script>
-        // URL de tu Apps Script (API)
         const API_URL = 'https://script.google.com/macros/s/AKfycbwM6jN82P7YEslJw1X-rW44w0mVmbx-86hJbaCVp-pACcGSAjFeeIYXwfoGHPxIRrq7/exec';
 
-        // Datos globales
         let DATA = {
             ventas: [],
             cotizaciones: [],
@@ -396,23 +398,18 @@
             document.getElementById('loader').classList.add('hidden');
         });
 
-        // Alertas tipo "toast"
         function showAlert(message, type = 'success') {
             const container = document.getElementById('alertContainer');
             const div = document.createElement('div');
             div.className = `alert alert-${type}`;
             div.innerHTML = `<span>${message}</span>`;
             container.appendChild(div);
-            setTimeout(() => {
-                div.remove();
-            }, 4000);
+            setTimeout(() => div.remove(), 4000);
         }
 
-        // Sincronizar con la API
         async function syncData() {
             const btn = document.getElementById('syncBtn');
-            if (!btn) return;
-            btn.classList.add('syncing');
+            if (btn) btn.classList.add('syncing');
 
             try {
                 const response = await fetch(`${API_URL}?action=getAll`);
@@ -426,32 +423,24 @@
                 DATA = data;
                 localStorage.setItem('bravizimos_data', JSON.stringify(DATA));
                 showAlert('✓ Datos sincronizados correctamente', 'success');
-
                 navigateTo(currentView);
             } catch (err) {
                 console.error(err);
                 showAlert('Error de conexión. Usando datos locales si existen.', 'warning');
                 const cached = localStorage.getItem('bravizimos_data');
-                if (cached) {
-                    DATA = JSON.parse(cached);
-                }
+                if (cached) DATA = JSON.parse(cached);
             } finally {
-                btn.classList.remove('syncing');
+                if (btn) btn.classList.remove('syncing');
             }
         }
 
-        // Navegación
         function navigateTo(view) {
             currentView = view;
 
-            // actualizar activo en el menú
             document.querySelectorAll('.nav-item').forEach(item => {
                 const onclick = item.getAttribute('onclick') || '';
-                if (onclick.includes(`'${view}'`)) {
-                    item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
-                }
+                if (onclick.includes(`'${view}'`)) item.classList.add('active');
+                else item.classList.remove('active');
             });
 
             const content = document.getElementById('mainContent');
@@ -462,55 +451,25 @@
                     content.innerHTML = renderDashboard();
                     setTimeout(renderCharts, 50);
                     break;
-                case 'ventas':
-                    content.innerHTML = renderVentas();
-                    break;
-                case 'cotizaciones':
-                    content.innerHTML = renderCotizaciones();
-                    break;
-                case 'clientes':
-                    content.innerHTML = renderClientes();
-                    break;
-                case 'delivery':
-                    content.innerHTML = renderDelivery();
-                    break;
+                case 'ventas':       content.innerHTML = renderVentas(); break;
+                case 'cotizaciones': content.innerHTML = renderCotizaciones(); break;
+                case 'clientes':     content.innerHTML = renderClientes(); break;
+                case 'delivery':     content.innerHTML = renderDelivery(); break;
                 case 'productos':
-                case 'inventario':
-                    content.innerHTML = renderProductos();
-                    break;
-                case 'produccion':
-                    content.innerHTML = renderProduccion();
-                    break;
-                case 'insumos':
-                    content.innerHTML = renderInsumos();
-                    break;
-                case 'proveedores':
-                    content.innerHTML = renderProveedores();
-                    break;
-                case 'compras':
-                    content.innerHTML = renderCompras();
-                    break;
-                case 'gastos':
-                    content.innerHTML = renderGastos();
-                    break;
-                case 'facturas':
-                    content.innerHTML = renderFacturas();
-                    break;
-                case 'personal':
-                    content.innerHTML = renderPersonal();
-                    break;
-                case 'kpi':
-                    content.innerHTML = renderKPI();
-                    break;
-                case 'marketing':
-                    content.innerHTML = renderMarketing();
-                    break;
-                case 'reclamos':
-                    content.innerHTML = renderReclamos();
-                    break;
-                case 'ia-voz':
-                    content.innerHTML = renderIAVoz();
-                    break;
+                case 'inventario':   content.innerHTML = renderProductos(); break;
+                case 'produccion':   content.innerHTML = renderProduccion(); break;
+                case 'recetas':      content.innerHTML = renderRecetas(); break;
+                case 'insumos':      content.innerHTML = renderInsumos(); break;
+                case 'proveedores':  content.innerHTML = renderProveedores(); break;
+                case 'compras':      content.innerHTML = renderCompras(); break;
+                case 'servicios':    content.innerHTML = renderServicios(); break;
+                case 'gastos':       content.innerHTML = renderGastos(); break;
+                case 'facturas':     content.innerHTML = renderFacturas(); break;
+                case 'personal':     content.innerHTML = renderPersonal(); break;
+                case 'kpi':          content.innerHTML = renderKPI(); break;
+                case 'marketing':    content.innerHTML = renderMarketing(); break;
+                case 'reclamos':     content.innerHTML = renderReclamos(); break;
+                case 'ia-voz':       content.innerHTML = renderIAVoz(); break;
                 default:
                     content.innerHTML = renderDashboard();
             }
@@ -518,10 +477,12 @@
 
         // DASHBOARD
         function renderDashboard() {
-            const stats = DATA.estadisticas || {};
-            const ventas = DATA.ventas || [];
+            const stats      = DATA.estadisticas || {};
+            const ventas     = DATA.ventas || [];
             const inventario = DATA.inventario || [];
-            const insumos = DATA.insumos || [];
+            const insumos    = DATA.insumos || [];
+            const delivery   = DATA.delivery || [];
+            const kpi        = DATA.kpiVendedoras || [];
 
             const hoy = new Date();
             const ventasHoy = ventas.filter(v => {
@@ -530,9 +491,10 @@
             });
             const totalHoy = ventasHoy.reduce((s, v) => s + parseFloat(v.total || 0), 0);
 
+            // Alertas de insumos (stock <= mínimo)
             const alertas = [];
             insumos.forEach(i => {
-                const stock = parseFloat(i.stockactual || i.stock || 0);
+                const stock  = parseFloat(i.stockactual || i.stock || 0);
                 const minimo = parseFloat(i.stockminimo || i.minimo || 0);
                 if (minimo > 0 && stock <= minimo) {
                     alertas.push({
@@ -544,32 +506,103 @@
 
             let alertasHTML = '';
             if (alertas.length > 0) {
-                alertasHTML =
-                    `<div class="card">
+                alertasHTML = `
+                    <div class="card">
                         <h3 style="margin-bottom: 1rem;">🔔 Alertas</h3>
-                        ${alertas.map(a =>
-                            `<div class="alert alert-${a.tipo}">
+                        ${alertas.map(a => `
+                            <div class="alert alert-${a.tipo}">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <span>${a.mensaje}</span>
-                            </div>`
-                        ).join('')}
-                    </div>`;
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
             }
 
-            const top = inventario.slice(0, 5);
-            const topRows = top.length > 0
-                ? top.map(p => {
-                    const nombre = p.nombreproducto || p.nombre || '-';
+            // Top productos por valor de inventario
+            const topProductos = [...inventario]
+                .map(p => {
                     const stock = parseFloat(p.stockactual || 0);
                     const precio = parseFloat(p.precioventa || 0);
-                    const total = stock * precio;
-                    return `<tr>
-                        <td>${nombre}</td>
-                        <td>${stock}</td>
-                        <td>S/ ${total.toFixed(2)}</td>
-                    </tr>`;
-                }).join('')
+                    return {
+                        nombre: p.nombreproducto || p.nombre || '-',
+                        stock,
+                        valor: stock * precio
+                    };
+                })
+                .sort((a, b) => b.valor - a.valor)
+                .slice(0, 5);
+
+            const topProdRows = topProductos.length > 0
+                ? topProductos.map(p => `
+                    <tr>
+                        <td>${p.nombre}</td>
+                        <td>${p.stock}</td>
+                        <td>S/ ${p.valor.toFixed(2)}</td>
+                    </tr>
+                `).join('')
                 : `<tr><td colspan="3" style="text-align:center;color:#64748b;">Sin datos de productos.</td></tr>`;
+
+            // Top vendedoras (por ventas)
+            const topVend = [...kpi]
+                .map(r => ({
+                    nombre: r.vendedora || '-',
+                    ventas: parseFloat(r.ventas || 0),
+                    pedidos: parseInt(r.pedidos || 0, 10) || 0
+                }))
+                .sort((a, b) => b.ventas - a.ventas)
+                .slice(0, 5);
+
+            const topVendRows = topVend.length > 0
+                ? topVend.map(v => `
+                    <tr>
+                        <td>${v.nombre}</td>
+                        <td>S/ ${v.ventas.toFixed(2)}</td>
+                        <td>${v.pedidos}</td>
+                    </tr>
+                `).join('')
+                : `<tr><td colspan="3" style="text-align:center;color:#64748b;">Sin datos de vendedoras.</td></tr>`;
+
+            // Top delivery por repartidor
+            const deliveryPorRepartidor = {};
+            delivery.forEach(d => {
+                const rep = d.repartidor || 'Sin asignar';
+                if (!deliveryPorRepartidor[rep]) {
+                    deliveryPorRepartidor[rep] = { repartidor: rep, pedidos: 0, total: 0 };
+                }
+                deliveryPorRepartidor[rep].pedidos += 1;
+                deliveryPorRepartidor[rep].total += parseFloat(d.costo || 0);
+            });
+            const topDelivery = Object.values(deliveryPorRepartidor)
+                .sort((a, b) => b.pedidos - a.pedidos)
+                .slice(0, 5);
+
+            const topDelRows = topDelivery.length > 0
+                ? topDelivery.map(d => `
+                    <tr>
+                        <td>${d.repartidor}</td>
+                        <td>${d.pedidos}</td>
+                        <td>S/ ${d.total.toFixed(2)}</td>
+                    </tr>
+                `).join('')
+                : `<tr><td colspan="3" style="text-align:center;color:#64748b;">Sin datos de delivery.</td></tr>`;
+
+            // Insumos que se acaban (lista)
+            const insumosCriticos = insumos.filter(i => {
+                const stock  = parseFloat(i.stockactual || i.stock || 0);
+                const minimo = parseFloat(i.stockminimo || i.minimo || 0);
+                return minimo > 0 && stock <= minimo;
+            });
+
+            const insumosRows = insumosCriticos.length > 0
+                ? insumosCriticos.map(i => `
+                    <tr>
+                        <td>${i.nombre || '-'}</td>
+                        <td>${i.stockactual || i.stock || 0}</td>
+                        <td>${i.stockminimo || i.minimo || 0}</td>
+                    </tr>
+                `).join('')
+                : `<tr><td colspan="3" style="text-align:center;color:#64748b;">Sin insumos críticos.</td></tr>`;
 
             return `
                 <div class="page-header">
@@ -620,66 +653,161 @@
                 </div>
 
                 <div class="chart-container">
-                    <h3 style="margin-bottom: 1rem;">📈 Ventas Últimos 7 Días</h3>
+                    <h3 style="margin-bottom: 1rem;">📈 Ventas Últimos 7 Días (demo)</h3>
                     <canvas id="chartVentas" style="max-height: 300px;"></canvas>
                 </div>
 
-                <div class="card">
-                    <h3 style="margin-bottom: 1rem;">🏆 Top 5 Productos (Stock)</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Cantidad (Stock)</th>
-                                <th>Valor en Inventario</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${topRows}
-                        </tbody>
-                    </table>
+                <div class="stats-grid">
+                    <div class="card">
+                        <h3 style="margin-bottom: 1rem;">🏅 Ranking Vendedoras</h3>
+                        <canvas id="chartVendedoras" style="max-height: 260px;"></canvas>
+                        <table style="margin-top:1rem;">
+                            <thead>
+                                <tr>
+                                    <th>Vendedora</th>
+                                    <th>Ventas (S/)</th>
+                                    <th>Pedidos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${topVendRows}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-bottom: 1rem;">🚚 Top Delivery por Repartidor</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Repartidor</th>
+                                    <th>Pedidos</th>
+                                    <th>Total Delivery</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${topDelRows}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="card">
+                        <h3 style="margin-bottom: 1rem;">🏆 Top 5 Productos (Stock)</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad (Stock)</th>
+                                    <th>Valor en Inventario</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${topProdRows}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-bottom: 1rem;">🧂 Insumos que se acaban</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Insumo</th>
+                                    <th>Stock</th>
+                                    <th>Mínimo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${insumosRows}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             `;
         }
 
         function renderCharts() {
             const ctx = document.getElementById('chartVentas');
-            if (!ctx) return;
-
-            // Por ahora gráfico dummy (puedes adaptarlo a tus datos)
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-                    datasets: [{
-                        label: 'Ventas (S/)',
-                        data: [850, 920, 1100, 980, 1250, 1400, 950],
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(148, 163, 184, 0.1)' },
-                            ticks: { color: '#94a3b8' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#94a3b8' }
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                        datasets: [{
+                            label: 'Ventas (S/)',
+                            data: [850, 920, 1100, 980, 1250, 1400, 950],
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#94a3b8' }
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
+
+            const ctxVend = document.getElementById('chartVendedoras');
+            if (ctxVend) {
+                const kpi = DATA.kpiVendedoras || [];
+                const topVend = [...kpi]
+                    .map(r => ({
+                        nombre: r.vendedora || '-',
+                        ventas: parseFloat(r.ventas || 0)
+                    }))
+                    .sort((a, b) => b.ventas - a.ventas)
+                    .slice(0, 5);
+
+                const labels = topVend.map(v => v.nombre);
+                const values = topVend.map(v => v.ventas);
+
+                new Chart(ctxVend, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Ventas S/',
+                            data: values,
+                            backgroundColor: 'rgba(129, 140, 248, 0.8)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#94a3b8' }
+                            }
+                        }
+                    }
+                });
+            }
         }
 
-        // Helper para tablas
+        // Helpers tablas
         function formatValue(value, format) {
             if (value == null || value === '') return '-';
 
@@ -692,9 +820,9 @@
                 const text = String(value);
                 let type = 'info';
                 const lower = text.toLowerCase();
-                if (['pagado', 'activo', 'emitida', 'completado', 'aceptada'].some(t => lower.includes(t))) type = 'success';
+                if (['pagado', 'activo', 'emitida', 'completado', 'aceptada', 'sí'].some(t => lower.includes(t))) type = 'success';
                 else if (['pendiente', 'por agotar', 'ordenada', 'vigente'].some(t => lower.includes(t))) type = 'warning';
-                else if (['anulado', 'vencido', 'cancelado'].some(t => lower.includes(t))) type = 'danger';
+                else if (['anulado', 'vencido', 'cancelado', 'no'].some(t => lower.includes(t))) type = 'danger';
                 return `<span class="badge badge-${type}">${text}</span>`;
             }
 
@@ -744,7 +872,7 @@
             `;
         }
 
-        // VISTAS PRINCIPALES (usando renderTable)
+        // VISTAS
 
         function renderVentas() {
             return renderTable('Ventas / Pedidos', DATA.ventas, [
@@ -818,6 +946,19 @@
             ]);
         }
 
+        function renderRecetas() {
+            // en el futuro puedes exponer RECETAS_MAESTRO desde Apps Script como "recetasMaestro"
+            const recetas = DATA.recetasMaestro || DATA.recetas_maestro || [];
+            return renderTable('Recetas', recetas, [
+                { key: 'codigo',     label: 'Código' },
+                { key: 'producto',   label: 'Producto' },
+                { key: 'rendimiento',label: 'Rendimiento' },
+                { key: 'tiempomin',  label: 'Tiempo (min)' },
+                { key: 'dificultad', label: 'Dificultad' },
+                { key: 'activo',     label: 'Activo', format: 'badge' }
+            ]);
+        }
+
         function renderInsumos() {
             return renderTable('Insumos', DATA.insumos, [
                 { key: 'codigo',    label: 'Código' },
@@ -851,6 +992,21 @@
                 { key: 'total',       label: 'Total', format: 'currency' },
                 { key: 'estadopago',  label: 'Estado Pago', format: 'badge' },
                 { key: 'estadocompra',label: 'Estado Compra', format: 'badge' }
+            ]);
+        }
+
+        function renderServicios() {
+            const servicios = (DATA.gastos || []).filter(g =>
+                (g.categoria || '').toLowerCase().includes('servicio')
+            );
+            return renderTable('Servicios', servicios, [
+                { key: 'id',          label: 'ID' },
+                { key: 'fecha',       label: 'Fecha' },
+                { key: 'categoria',   label: 'Categoría' },
+                { key: 'descripcion', label: 'Descripción' },
+                { key: 'monto',       label: 'Monto', format: 'currency' },
+                { key: 'metodopago',  label: 'Método Pago' },
+                { key: 'estado',      label: 'Estado', format: 'badge' }
             ]);
         }
 
@@ -905,7 +1061,6 @@
         }
 
         function renderMarketing() {
-            // Por ahora no viene en la API, así que mostramos mensaje simple
             return `
                 <div class="page-header">
                     <div>
@@ -965,7 +1120,6 @@
             `;
         }
 
-        // Stub para no romper al hacer clic
         function startRecording() {
             showAlert('La función de IA de voz aún no está configurada. 🔧', 'warning');
         }
