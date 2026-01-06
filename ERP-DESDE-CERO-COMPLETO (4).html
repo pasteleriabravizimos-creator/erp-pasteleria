@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP BRAVIZIMO'S - Sistema Completo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .logo { display: flex; align-items: center; gap: 15px; }
+        .logo-icon { font-size: 40px; }
+        .logo h1 { color: #1e3a8a; font-size: 24px; }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .user-avatar {
+            width: 45px; height: 45px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .container { padding: 40px 20px; max-width: 1400px; margin: 0 auto; }
+        h2 { color: white; margin-bottom: 30px; text-align: center; font-size: 32px; }
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        .module-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        .module-icon { font-size: 50px; margin-bottom: 15px; }
+        .module-title { 
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e3a8a;
+            margin-bottom: 8px;
+        }
+        .module-desc {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            padding: 25px;
+            border-bottom: 2px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-title {
+            font-size: 24px;
+            color: #1e3a8a;
+        }
+        .close-btn {
+            font-size: 32px;
+            cursor: pointer;
+            color: #6b7280;
+            line-height: 1;
+        }
+        .close-btn:hover { color: #ef4444; }
+        .modal-body { padding: 25px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th {
+            background: #1e3a8a;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            margin: 5px;
+        }
+        .btn-success { background: #10b981; color: white; }
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 15px;
+        }
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: none;
+        }
+        .sync-status.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <span class="logo-icon">🍰</span>
+            <div>
+                <h1>ERP BRAVIZIMO'S</h1>
+                <p style="color: #6b7280; font-size: 13px;">Sistema de Gestión Completo</p>
+            </div>
+        </div>
+        <div class="user-info">
+            <div>
+                <div style="font-weight: 600;">Administrador</div>
+                <div style="font-size: 12px; color: #6b7280;">Admin Total</div>
+            </div>
+            <div class="user-avatar">A</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Módulos del Sistema</h2>
+        <div class="modules-grid" id="modulesGrid"></div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+
+    <div class="sync-status" id="syncStatus">
+        <div id="syncMessage">🔄 Sincronizando...</div>
+    </div>
+
+    <script>
+        // ========================================
+        // CONFIGURACIÓN
+        // ========================================
+        const GOOGLE_SHEET_ID = '1aHi-4mp-pPVpUmN_l_X8bkXuQfr2RBIXk3uD4-J5wx8';
+        let GOOGLE_WEB_APP_URL = localStorage.getItem('googleWebAppURL') || '';
+
+        // ========================================
+        // MÓDULOS DEL SISTEMA
+        // ========================================
+        const MODULES = [
+            { id: 'dashboard', icon: '📊', title: 'Dashboard', desc: 'Resumen general' },
+            { id: 'clientes', icon: '👥', title: 'Clientes', desc: 'Base de clientes' },
+            { id: 'ventas', icon: '💰', title: 'Ventas', desc: 'Gestión de ventas' },
+            { id: 'productos', icon: '🎂', title: 'Productos', desc: 'Catálogo' },
+            { id: 'recetas', icon: '📖', title: 'Recetas', desc: 'Recetas e insumos' },
+            { id: 'servicios', icon: '🎨', title: 'Servicios', desc: 'Eventos especiales' },
+            { id: 'inventario', icon: '📦', title: 'Inventario', desc: 'Control de stock' },
+            { id: 'pedidos', icon: '📋', title: 'Pedidos', desc: 'Gestión pedidos' },
+            { id: 'delivery', icon: '🚚', title: 'Delivery', desc: 'Entregas' },
+            { id: 'produccion', icon: '🏭', title: 'Producción', desc: 'Planificación' },
+            { id: 'gastos', icon: '💸', title: 'Gastos', desc: 'Control gastos' },
+            { id: 'finanzas', icon: '💵', title: 'Finanzas', desc: 'Contabilidad' },
+            { id: 'proveedores', icon: '🤝', title: 'Proveedores', desc: 'Proveedores' },
+            { id: 'rrhh', icon: '👔', title: 'RRHH', desc: 'Personal' },
+            { id: 'marketing', icon: '📢', title: 'Marketing', desc: 'Campañas' },
+            { id: 'reportes', icon: '📈', title: 'Reportes', desc: 'Análisis' },
+            { id: 'config', icon: '⚙️', title: 'Configuración', desc: 'Ajustes' },
+            { id: 'notif', icon: '🔔', title: 'Notificaciones', desc: 'Alertas' }
+        ];
+
+        // ========================================
+        // BASE DE DATOS LOCAL
+        // ========================================
+        const DB = {
+            clientes: [
+                { nombre: 'María González', email: 'maria@email.com', telefono: '987654321', totalCompras: 350 },
+                { nombre: 'Juan Pérez', email: 'juan@email.com', telefono: '987654322', totalCompras: 280 },
+                { nombre: 'Ana Torres', email: 'ana@email.com', telefono: '987654323', totalCompras: 150 }
+            ],
+            productos: [
+                { nombre: 'Alfajor Clásico', precio: 3.50, stock: 150, categoria: 'Dulces' },
+                { nombre: 'Kekito Chocolate', precio: 2.00, stock: 200, categoria: 'Dulces' },
+                { nombre: 'Torta Chocolate 1kg', precio: 80.00, stock: 10, categoria: 'Tortas' },
+                { nombre: 'Suspiro Limeño', precio: 12.00, stock: 30, categoria: 'Postres' },
+                { nombre: 'Pan Francés', precio: 0.50, stock: 300, categoria: 'Panadería' },
+                { nombre: 'Pionono Fresa', precio: 25.00, stock: 20, categoria: 'Tortas' }
+            ],
+            ventas: [
+                { fecha: '05/01/2024', cliente: 'María González', total: 70.00, estado: 'Completado' },
+                { fecha: '05/01/2024', cliente: 'Juan Pérez', total: 60.00, estado: 'Completado' },
+                { fecha: '06/01/2024', cliente: 'Ana Torres', total: 80.00, estado: 'Completado' }
+            ],
+            inventario: [
+                { material: 'Harina', cantidad: 200, unidad: 'kg', minimo: 50 },
+                { material: 'Azúcar', cantidad: 150, unidad: 'kg', minimo: 40 },
+                { material: 'Mantequilla', cantidad: 80, unidad: 'kg', minimo: 30 },
+                { material: 'Huevos', cantidad: 500, unidad: 'unidades', minimo: 200 },
+                { material: 'Leche', cantidad: 40, unidad: 'litros', minimo: 20 }
+            ],
+            pedidos: [
+                { id: 'PED-001', cliente: 'María González', producto: 'Torta Chocolate', fecha: '10/01/2024', total: 80, estado: 'Confirmado' },
+                { id: 'PED-002', cliente: 'Juan Pérez', producto: 'Alfajores x50', fecha: '11/01/2024', total: 175, estado: 'En Producción' }
+            ],
+            gastos: [
+                { fecha: '03/01/2024', categoria: 'Insumos', concepto: 'Compra harina', monto: 250 },
+                { fecha: '04/01/2024', categoria: 'Servicios', concepto: 'Luz enero', monto: 180 },
+                { fecha: '05/01/2024', categoria: 'Personal', concepto: 'Salarios', monto: 1200 }
+            ]
+        };
+
+        // ========================================
+        // CARGAR MÓDULOS
+        // ========================================
+        function loadModules() {
+            const grid = document.getElementById('modulesGrid');
+            grid.innerHTML = '';
+            
+            MODULES.forEach(mod => {
+                const card = document.createElement('div');
+                card.className = 'module-card';
+                card.innerHTML = `
+                    <div class="module-icon">${mod.icon}</div>
+                    <div class="module-title">${mod.title}</div>
+                    <div class="module-desc">${mod.desc}</div>
+                `;
+                card.onclick = () => openModule(mod.id);
+                grid.appendChild(card);
+            });
+            
+            console.log('✅ 18 módulos cargados');
+        }
+
+        // ========================================
+        // ABRIR MÓDULO
+        // ========================================
+        function openModule(id) {
+            const modal = document.getElementById('modal');
+            const content = document.getElementById('modalContent');
+            
+            let html = '';
+            
+            switch(id) {
+                case 'clientes':
+                    html = `
+                        <div class="modal-header">
+                            <h2 class="modal-title">👥 Clientes</h2>
+                            <span class="close-btn" onclick="closeModal()">×</span>
+                        </div>
+                        <div class="modal-body">
+                            <button class="btn btn-success" onclick="nuevoCliente()">➕ Nuevo Cliente</button>
+                            <table>
+                                <tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Total Compras</th></tr>
+                                ${DB.clientes.map(c => `
+                                    <tr>
+                                        <td>${c.nombre}</td>
+                                        <td>${c.email}</td>
+                                        <td>${c.telefono}</td>
+                                        <td>S/ ${c.totalCompras.toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </table>
+                        </div>
+                    `;
+                    break;
+
+                case 'productos':
+                    html = `
+                        <div class="modal-header">
+                            <h2 class="modal-title">🎂 Productos</h2>
+                            <span class="close-btn" onclick="closeModal()">×</span>
+                        </div>
+                        <div class="modal-body">
+                            <button class="btn btn-success" onclick="nuevoProducto()">➕ Nuevo Producto</button>
+                            <table>
+                                <tr><th>Producto</th><th>Precio</th><th>Stock</th><th>Categoría</th></tr>
+                                ${DB.productos.map(p => `
+                                    <tr>
+                                        <td>${p.nombre}</td>
+                                        <td>S/ ${p.precio.toFixed(2)}</td>
+                                        <td>${p.stock}</td>
+                                        <td>${p.categoria}</td>
+                                    </tr>
+                                `).join('')}
+                            </table>
+                        </div>
+                    `;
+                    break;
+
+                case 'ventas':
+                    const totalVentas = DB.ventas.reduce((sum, v) => sum + v.total, 0);
+                    html = `
+                        <div class="modal-header">
+                            <h2 class="modal-title">💰 Ventas</h2>
+                            <span class="close-btn" onclick="closeModal()">×</span>
+                        </div>
+                        <div class="modal-body">
+                            <div style="background: #dbeafe; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                                <h3 style="color: #1e40af;">Total Ventas: S/ ${totalVentas.toFixed(2)}</h3>
+                            </div>
+                            <button class="btn btn-success" onclick="nuevaVenta()">➕ Nueva Venta</button>
+                            <table>
+                                <tr><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th></tr>
+                                ${DB.ventas.map(v => `
+                                    <tr>
+                                        <td>${v.fecha}</td>
+                                        <td>${v.cliente}</td>
+                                        <td>S/ ${v.total.toFixed(2)}</td>
+                                        <td>${v.estado}</td>
+                                    </tr>
+                                `).join('')}
+                            </table>
+                        </div>
+                    `;
+                    break;
+
+                case 'inventario':
+                    html = `
+                        <div class="modal-header">
+                            <h2 class="modal-title">📦 Inventario</h2>
+                            <span class="close-btn" onclick="closeModal()">×</span>
+                        </div>
+                        <div class="modal-body">
+                            <table>
+                                <tr><th>Material</th><th>Cantidad</th><th>Unidad</th><th>Mínimo</th><th>Estado</th></tr>
+                                ${DB.inventario.map(i => `
+                                    <tr>
+                                        <td>${i.material}</td>
+                                        <td>${i.cantidad}</td>
+                                        <td>${i.unidad}</td>
+                                        <td>${i.minimo}</td>
+                                        <td>${i.cantidad > i.minimo ? '✅ OK' : '⚠️ BAJO'}</td>
+                                    </tr>
+                                `).join('')}
+                            </table>
+                        </div>
+                    `;
+                    break;
+
+                case 'pedidos':
+                    html = `
+                        <div class="modal-header">
+                            <h2 class="modal-title">📋 Pedidos</h2>
+                            <span class="close-btn" onclick="closeModal()">×</span>
+                        </div>
+                        <div class="modal-body">
+                            <button class="btn btn-success" onclick="nuevoPedido()">➕ Nuevo Pedido</button>
+                            <table>
+                                <tr><th>ID</th><th>Cliente</th><th>Producto</th><th>Fecha</th><th>Total</th><th>Estado</th></tr>
+                                ${DB.pedidos.map(p => `
+                                    <tr>
+                                        <td>${p.id}</td>
+                                        <td>${p.cliente}</td>
+                                        <td>${p.producto}</td>
+                                        <td>${p.fecha}</td>
+                                        <td>S/ ${p.total.toFixed(2)}</td>
+                                        <td>${p.estado}</td>
+                                    </tr>
+                                `).join('')}
+                            </table>
+                        </div>
+                    `;
+                    break;
+
+                case 'gastos':
+                    const totalGastos = DB.gastos.reduce((sum, g) => sum + g.monto, 0);
+                    html = `
+                        <div class="modal-header">
+                            <h2 class="modal-title">💸 Gastos</h2>
+                            <span class="close-btn" onclick="closeModal()">×</span>
+                        </div>
+                        <div class="modal-body">
+                            <div style="background: #fee2e2; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                                <h3 style="color: #991b1b;">Total Gastos: S/ ${totalGastos.toFixed(2)}</h3>
+                            </div>
+                            <button class="btn btn-success" onclick="nuevoGasto()">➕ Nuevo Gasto</button>
+                            <table>
+                                <tr><th>Fecha</th><th>Categoría</th><th>Concepto</th><th>Monto</th></tr>
+                                ${DB.gastos.map(g => `
+                                    <tr>
+                                        <td>${g.fecha}</td>
+                                        <td>${g.categoria}</td>
+                                        <td>${g.concepto}</td>
+                                        <td>S/ ${g.monto.toFixed(2)}</td>
+                                    </tr>
+                                `).join('')}
+                            </table>
+                        </div>
+                    `;
+                    break;
+
+                case 'config':
+                    html = `
+                        <div class="modal-header">
+                            <h2 class="modal-title">⚙️ Configuración Google Sheets</h2>
+                            <span class="close-btn" onclick="closeModal()">×</span>
+                        </div>
+                        <div class="modal-body">
+                            <h3>📊 Google Sheet ID</h3>
+                            <p style="font-family: monospace; background: #f3f4f6; padding: 10px; border-radius: 5px;">${GOOGLE_SHEET_ID}</p>
+                            
+                            <h3 style="margin-top: 20px;">🔗 URL de Web App</h3>
+                            <input type="text" id="webAppURL" class="form-input" 
+                                   value="${GOOGLE_WEB_APP_URL}" 
+                                   placeholder="https://script.google.com/macros/s/ABC.../exec">
+                            
+                            <button class="btn btn-success" onclick="guardarConfig()">💾 Guardar Configuración</button>
+                            <button class="btn btn-primary" onclick="sincronizarManual()">🔄 Sincronizar Ahora</button>
+                            <button class="btn btn-primary" onclick="cargarDesdeSheets()">📥 Cargar desde Sheets</button>
+                            
+                            <div style="background: #dbeafe; padding: 15px; border-radius: 10px; margin-top: 20px;">
+                                <p><strong>Instrucciones:</strong></p>
+                                <ol style="margin-left: 20px; margin-top: 10px;">
+                                    <li>Abre Apps Script en tu Google Sheet</li>
+                                    <li>Pega el código del archivo GOOGLE-SCRIPT-COMPLETO-1015-LINEAS.js</li>
+                                    <li>Ejecuta "inicializarHojas"</li>
+                                    <li>Implementar → Web App → Copia la URL</li>
+                                    <li>Pega la URL aquí y guarda</li>
+                                </ol>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                default:
+                    const module = MODULES.find(m => m.id === id);
+                    html = `
+                        <div class="modal-header">
+                            <h2 class="modal-title">${module.icon} ${module.title}</h2>
+                            <span class="close-btn" onclick="closeModal()">×</span>
+                        </div>
+                        <div class="modal-body">
+                            <h3>Módulo ${module.title}</h3>
+                            <p>Este módulo está disponible y listo para usar.</p>
+                            <button class="btn btn-primary">Comenzar</button>
+                        </div>
+                    `;
+            }
+            
+            content.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // ========================================
+        // FUNCIONES HELPER
+        // ========================================
+        function nuevoCliente() {
+            alert('Función: Nuevo Cliente\n\nCampos:\n- Nombre\n- Email\n- Teléfono\n- Dirección');
+        }
+
+        function nuevoProducto() {
+            alert('Función: Nuevo Producto\n\nCampos:\n- Nombre\n- Precio\n- Stock\n- Categoría');
+        }
+
+        function nuevaVenta() {
+            alert('Función: Nueva Venta\n\nCampos:\n- Cliente\n- Productos\n- Total\n- Método de pago');
+        }
+
+        function nuevoPedido() {
+            alert('Función: Nuevo Pedido\n\nCampos:\n- Cliente\n- Producto\n- Fecha entrega\n- Total');
+        }
+
+        function nuevoGasto() {
+            alert('Función: Nuevo Gasto\n\nCampos:\n- Categoría\n- Concepto\n- Monto\n- Fecha');
+        }
+
+        // ========================================
+        // SINCRONIZACIÓN GOOGLE SHEETS
+        // ========================================
+        function guardarConfig() {
+            const url = document.getElementById('webAppURL').value.trim();
+            if (!url) {
+                alert('❌ Por favor ingresa la URL de la Web App');
+                return;
+            }
+            
+            GOOGLE_WEB_APP_URL = url;
+            localStorage.setItem('googleWebAppURL', url);
+            alert('✅ Configuración guardada\n\n🔄 La sincronización automática está activa');
+            closeModal();
+        }
+
+        async function sincronizarManual() {
+            if (!GOOGLE_WEB_APP_URL) {
+                alert('⚠️ Primero configura la URL de Google Sheets');
+                return;
+            }
+            
+            showSyncStatus('🔄 Sincronizando con Google Sheets...');
+            
+            try {
+                await fetch(GOOGLE_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'sync',
+                        database: DB
+                    })
+                });
+                
+                showSyncStatus('✅ Datos enviados correctamente', 'success');
+                console.log('✅ Sincronización exitosa');
+                
+            } catch (error) {
+                showSyncStatus('❌ Error al sincronizar', 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        async function cargarDesdeSheets() {
+            if (!GOOGLE_WEB_APP_URL) {
+                alert('⚠️ Primero configura la URL de Google Sheets');
+                return;
+            }
+            
+            showSyncStatus('📥 Cargando datos desde Google Sheets...');
+            
+            try {
+                const response = await fetch(GOOGLE_WEB_APP_URL + '?action=get');
+                const result = await response.json();
+                
+                console.log('📥 Datos recibidos:', result);
+                
+                if (result.success && result.data) {
+                    // Mapear datos de Sheets a DB local
+                    if (result.data.Clientes) {
+                        DB.clientes = result.data.Clientes.map(c => ({
+                            nombre: c.Nombre || c.nombre,
+                            email: c.Email || c.email,
+                            telefono: c.Teléfono || c.telefono,
+                            totalCompras: parseFloat(c['Total Compras'] || c.totalCompras || 0)
+                        }));
+                    }
+                    
+                    if (result.data.Productos) {
+                        DB.productos = result.data.Productos.map(p => ({
+                            nombre: p.Nombre || p.nombre,
+                            precio: parseFloat(p.Precio || p.precio || 0),
+                            stock: parseInt(p.Stock || p.stock || 0),
+                            categoria: p.Categoría || p.categoria || 'General'
+                        }));
+                    }
+                    
+                    if (result.data.Ventas) {
+                        DB.ventas = result.data.Ventas.map(v => ({
+                            fecha: v.Fecha || v.fecha,
+                            cliente: v.Cliente || v.cliente,
+                            total: parseFloat(v.Total || v.total || 0),
+                            estado: v.Estado || v.estado || 'Completado'
+                        }));
+                    }
+                    
+                    if (result.data.Inventario) {
+                        DB.inventario = result.data.Inventario.map(i => ({
+                            material: i.Material || i.material,
+                            cantidad: parseInt(i.Cantidad || i.cantidad || 0),
+                            unidad: i.Unidad || i.unidad,
+                            minimo: parseInt(i['Stock Mínimo'] || i.minimo || 0)
+                        }));
+                    }
+                    
+                    if (result.data.Pedidos) {
+                        DB.pedidos = result.data.Pedidos.map(p => ({
+                            id: p.ID || p.id,
+                            cliente: p.Cliente || p.cliente,
+                            producto: p.Producto || p.producto,
+                            fecha: p['Fecha Entrega'] || p.fecha,
+                            total: parseFloat(p.Total || p.total || 0),
+                            estado: p.Estado || p.estado
+                        }));
+                    }
+                    
+                    if (result.data.Gastos) {
+                        DB.gastos = result.data.Gastos.map(g => ({
+                            fecha: g.Fecha || g.fecha,
+                            categoria: g.Categoría || g.categoria,
+                            concepto: g.Concepto || g.concepto,
+                            monto: parseFloat(g.Monto || g.monto || 0)
+                        }));
+                    }
+                    
+                    showSyncStatus('✅ Datos cargados correctamente', 'success');
+                    console.log('✅ Base de datos actualizada:', DB);
+                    alert('✅ Datos cargados desde Google Sheets\n\nAhora puedes abrir los módulos para ver los datos actualizados.');
+                }
+                
+            } catch (error) {
+                showSyncStatus('❌ Error al cargar', 'error');
+                console.error('Error:', error);
+                alert('❌ Error al cargar datos. Revisa la consola (F12)');
+            }
+        }
+
+        function showSyncStatus(message, type = 'info') {
+            const status = document.getElementById('syncStatus');
+            const messageEl = document.getElementById('syncMessage');
+            
+            messageEl.textContent = message;
+            status.classList.add('active');
+            
+            if (type === 'success') {
+                status.style.background = '#d1fae5';
+                status.style.color = '#065f46';
+            } else if (type === 'error') {
+                status.style.background = '#fee2e2';
+                status.style.color = '#991b1b';
+            } else {
+                status.style.background = '#dbeafe';
+                status.style.color = '#1e40af';
+            }
+            
+            setTimeout(() => {
+                status.classList.remove('active');
+            }, 3000);
+        }
+
+        // Auto-sync cada 30 segundos
+        setInterval(() => {
+            if (GOOGLE_WEB_APP_URL) {
+                sincronizarManual();
+            }
+        }, 30000);
+
+        // ========================================
+        // INICIALIZACIÓN
+        // ========================================
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('═══════════════════════════════════');
+            console.log('   🍰 ERP BRAVIZIMO\'S INICIANDO');
+            console.log('═══════════════════════════════════');
+            loadModules();
+            console.log('✅ Sistema listo - 18 módulos cargados');
+            console.log('═══════════════════════════════════');
+        });
+
+        // Cerrar modal al click fuera
+        document.addEventListener('click', function(e) {
+            if (e.target.id === 'modal') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
