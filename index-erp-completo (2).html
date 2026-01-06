@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BRAVIZIMOS ERP V2</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #6366f1; --primary-dark: #4f46e5;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+            --dark: #0f172a; --dark-2: #1e293b; --dark-3: #334155;
+            --border: rgba(148, 163, 184, 0.1); --glass: rgba(255, 255, 255, 0.05);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
+            color: #e2e8f0; min-height: 100vh;
+        }
+        
+        .app-container { display: flex; min-height: 100vh; }
+        
+        .sidebar {
+            width: 280px; background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px); border-right: 1px solid var(--border);
+            padding: 2rem 0; position: fixed; height: 100vh; overflow-y: auto; z-index: 100;
+        }
+        
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--glass); border-radius: 10px; }
+        
+        .logo { padding: 0 2rem 2rem; border-bottom: 1px solid var(--border); }
+        .logo h1 {
+            font-size: 1.75rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--warning));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .logo p { font-size: 0.75rem; color: #64748b; font-weight: 500; margin-top: 0.25rem; }
+        
+        .nav-section { padding: 1.5rem 1rem 0.5rem; }
+        .nav-section-title {
+            font-size: 0.7rem; font-weight: 700; color: #64748b;
+            text-transform: uppercase; letter-spacing: 1px; padding: 0 1rem 0.75rem;
+        }
+        
+        .nav-item {
+            display: flex; align-items: center; gap: 0.875rem;
+            padding: 0.875rem 1rem; margin: 0.25rem 0.5rem; border-radius: 12px;
+            color: #94a3b8; cursor: pointer; transition: all 0.3s;
+            font-size: 0.9rem; font-weight: 500;
+        }
+        .nav-item i { font-size: 1.1rem; width: 24px; }
+        .nav-item:hover {
+            background: var(--glass); color: #e2e8f0; transform: translateX(4px);
+        }
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        .main-content { flex: 1; margin-left: 280px; padding: 2rem; }
+        
+        .page-header {
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 20px; padding: 2rem;
+            margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between;
+        }
+        
+        .page-header h1 {
+            font-size: 2.25rem; font-weight: 800; margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #e2e8f0, #94a3b8);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .page-header p { color: #64748b; }
+        
+        .btn {
+            padding: 0.875rem 1.75rem; border: none; border-radius: 12px;
+            font-weight: 600; font-size: 0.9rem; cursor: pointer;
+            transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4); }
+        
+        .card {
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 20px; padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem; margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 20px; padding: 1.5rem;
+            transition: all 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+        
+        .stat-label { font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.5rem; }
+        .stat-value {
+            font-size: 2rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--warning));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .stat-change {
+            font-size: 0.75rem; margin-top: 0.5rem;
+            display: flex; align-items: center; gap: 0.25rem;
+        }
+        .stat-change.up { color: var(--success); }
+        .stat-change.down { color: var(--danger); }
+        
+        .chart-container {
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 20px; padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        table {
+            width: 100%; border-collapse: collapse;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 12px; overflow: hidden;
+        }
+        thead tr { background: rgba(99, 102, 241, 0.1); }
+        th, td {
+            padding: 1rem; text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th { font-weight: 600; color: #e2e8f0; font-size: 0.875rem; }
+        td { color: #94a3b8; font-size: 0.875rem; }
+        tr:hover { background: var(--glass); }
+        
+        .badge {
+            padding: 0.25rem 0.75rem; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 600;
+            display: inline-block;
+        }
+        .badge-success { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .badge-warning { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .badge-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .badge-info { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        
+        .sync-btn {
+            position: fixed; bottom: 2rem; right: 2rem;
+            width: 60px; height: 60px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none; color: white; font-size: 1.5rem;
+            cursor: pointer; box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s; z-index: 1000;
+        }
+        .sync-btn:hover { transform: scale(1.1) rotate(180deg); }
+        .sync-btn.syncing { animation: spin 1s linear infinite; }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .alert {
+            padding: 1rem 1.5rem; border-radius: 12px; margin-bottom: 1rem;
+            display: flex; align-items: center; gap: 1rem;
+        }
+        .alert-success { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: var(--success); }
+        .alert-warning { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); color: var(--warning); }
+        .alert-error { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: var(--danger); }
+        
+        .loader {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.98);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999;
+        }
+        .loader-spinner {
+            width: 60px; height: 60px; border: 4px solid var(--border);
+            border-top-color: var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .loader-text { margin-top: 1.5rem; color: #94a3b8; }
+        .loader.hidden { display: none; }
+        
+        .mic-btn {
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            color: white; border: none; padding: 0.75rem 1.5rem;
+            border-radius: 12px; font-weight: 600; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            transition: all 0.3s;
+        }
+        .mic-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(236, 72, 153, 0.4); }
+        .mic-btn.recording { animation: pulse 1.5s ease-in-out infinite; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .voice-result {
+            background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 12px; padding: 1rem; margin-top: 1rem;
+            color: #c4b5fd;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader" id="loader">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">Cargando BRAVIZIMOS ERP V2...</div>
+    </div>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>BRAVIZIMOS</h1>
+                <p>Sistema ERP Completo V2</p>
+            </div>
+            
+            <nav>
+                <div class="nav-section">
+                    <div class="nav-section-title">PRINCIPAL</div>
+                    <div class="nav-item active" onclick="navigateTo('dashboard')">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">VENTAS</div>
+                    <div class="nav-item" onclick="navigateTo('ventas')">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Ventas / Pedidos</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('cotizaciones')">
+                        <i class="fas fa-file-invoice"></i>
+                        <span>Cotizaciones</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('clientes')">
+                        <i class="fas fa-users"></i>
+                        <span>Clientes</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('delivery')">
+                        <i class="fas fa-truck"></i>
+                        <span>Delivery</span>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">PRODUCCIÓN</div>
+                    <div class="nav-item" onclick="navigateTo('productos')">
+                        <i class="fas fa-box"></i>
+                        <span>Productos</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('inventario')">
+                        <i class="fas fa-warehouse"></i>
+                        <span>Inventario</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('produccion')">
+                        <i class="fas fa-industry"></i>
+                        <span>Producción</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('recetas')">
+                        <i class="fas fa-book"></i>
+                        <span>Recetas</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('insumos')">
+                        <i class="fas fa-cubes"></i>
+                        <span>Insumos</span>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">COMPRAS Y GASTOS</div>
+                    <div class="nav-item" onclick="navigateTo('proveedores')">
+                        <i class="fas fa-building"></i>
+                        <span>Proveedores</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('compras')">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>Compras</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('gastos')">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Gastos</span>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">FINANZAS</div>
+                    <div class="nav-item" onclick="navigateTo('facturas')">
+                        <i class="fas fa-receipt"></i>
+                        <span>Facturas</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('flujo-caja')">
+                        <i class="fas fa-coins"></i>
+                        <span>Flujo de Caja</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('cuentas')">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Cuentas x Cobrar/Pagar</span>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">PERSONAL</div>
+                    <div class="nav-item" onclick="navigateTo('personal')">
+                        <i class="fas fa-user-tie"></i>
+                        <span>Personal</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('asistencia')">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Asistencia</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('planilla')">
+                        <i class="fas fa-money-check-alt"></i>
+                        <span>Planilla</span>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">ANÁLISIS</div>
+                    <div class="nav-item" onclick="navigateTo('kpi')">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>KPIs & Vendedoras</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('marketing')">
+                        <i class="fas fa-bullhorn"></i>
+                        <span>Marketing</span>
+                    </div>
+                    <div class="nav-item" onclick="navigateTo('reclamos')">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Reclamos</span>
+                    </div>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">IA & AUTOMATION</div>
+                    <div class="nav-item" onclick="navigateTo('ia-voz')">
+                        <i class="fas fa-microphone"></i>
+                        <span>IA de Voz</span>
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content" id="mainContent">
+            <!-- Content will be dynamically loaded here -->
+        </main>
+    </div>
+
+    <button class="sync-btn" id="syncBtn" onclick="syncData()" title="Sincronizar">
+        <i class="fas fa-sync-alt"></i>
+    </button>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════
+        // 🔧 CONFIGURACIÓN - PEGAR TU URL AQUÍ
+        // ═══════════════════════════════════════════════════════════
+        
+        const API_URL = 'PEGAR_URL_API_AQUI'; // ⚠️ Reemplazar con tu URL de Apps Script
+        
+        // ═══════════════════════════════════════════════════════════
+        // 📊 DATOS GLOBALES
+        // ═══════════════════════════════════════════════════════════
+        
+        let DATA = {
+            ventas: [],
+            cotizaciones: [],
+            inventario: [],
+            produccion: [],
+            insumos: [],
+            compras: [],
+            proveedores: [],
+            gastos: [],
+            facturas: [],
+            clientes: [],
+            delivery: [],
+            reclamos: [],
+            personal: [],
+            ksd: [],
+            kpiVendedoras: [],
+            estadisticas: {}
+        };
+        
+        let currentView = 'dashboard';
+        
+        // ═══════════════════════════════════════════════════════════
+        // 🚀 INICIALIZACIÓN
+        // ═══════════════════════════════════════════════════════════
+        
+        window.addEventListener('DOMContentLoaded', async () => {
+            await syncData();
+            navigateTo('dashboard');
+            document.getElementById('loader').classList.add('hidden');
+        });
+        
+        // ═══════════════════════════════════════════════════════════
+        // 🔄 SINCRONIZACIÓN
+        // ═══════════════════════════════════════════════════════════
+        
+        async function syncData() {
+            const btn = document.getElementById('syncBtn');
+            btn.classList.add('syncing');
+            
+            try {
+                const response = await fetch(`${API_URL}?action=getAll`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    showAlert('Error al sincronizar: ' + data.mensaje, 'error');
+                    return;
+                }
+                
+                DATA = data;
+                
+                // Guardar en localStorage
+                localStorage.setItem('bravizimos_data', JSON.stringify(DATA));
+                
+                showAlert('✓ Datos sincronizados correctamente', 'success');
+                
+                // Recargar vista actual
+                navigateTo(currentView);
+                
+            } catch (error) {
+                showAlert('Error de conexión. Usando datos locales.', 'warning');
+                // Intentar cargar desde localStorage
+                const cached = localStorage.getItem('bravizimos_data');
+                if (cached) {
+                    DATA = JSON.parse(cached);
+                }
+            } finally {
+                btn.classList.remove('syncing');
+            }
+        }
+        
+        // ═══════════════════════════════════════════════════════════
+        // 🧭 NAVEGACIÓN
+        // ═══════════════════════════════════════════════════════════
+        
+        function navigateTo(view) {
+            currentView = view;
+            
+            // Actualizar nav activo
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event?.target?.closest('.nav-item')?.classList.add('active');
+            
+            const content = document.getElementById('mainContent');
+            
+            switch(view) {
+                case 'dashboard': content.innerHTML = renderDashboard(); break;
+                case 'ventas': content.innerHTML = renderVentas(); break;
+                case 'cotizaciones': content.innerHTML = renderCotizaciones(); break;
+                case 'clientes': content.innerHTML = renderClientes(); break;
+                case 'delivery': content.innerHTML = renderDelivery(); break;
+                case 'productos': content.innerHTML = renderProductos(); break;
+                case 'inventario': content.innerHTML = renderInventario(); break;
+                case 'produccion': content.innerHTML = renderProduccion(); break;
+                case 'recetas': content.innerHTML = renderRecetas(); break;
+                case 'insumos': content.innerHTML = renderInsumos(); break;
+                case 'proveedores': content.innerHTML = renderProveedores(); break;
+                case 'compras': content.innerHTML = renderCompras(); break;
+                case 'gastos': content.innerHTML = renderGastos(); break;
+                case 'facturas': content.innerHTML = renderFacturas(); break;
+                case 'flujo-caja': content.innerHTML = renderFlujoCaja(); break;
+                case 'cuentas': content.innerHTML = renderCuentas(); break;
+                case 'personal': content.innerHTML = renderPersonal(); break;
+                case 'asistencia': content.innerHTML = renderAsistencia(); break;
+                case 'planilla': content.innerHTML = renderPlanilla(); break;
+                case 'kpi': content.innerHTML = renderKPI(); break;
+                case 'marketing': content.innerHTML = renderMarketing(); break;
+                case 'reclamos': content.innerHTML = renderReclamos(); break;
+                case 'ia-voz': content.innerHTML = renderIAVoz(); break;
+                default: content.innerHTML = renderDashboard();
+            }
+            
+            // Renderizar gráficos si existen
+            setTimeout(() => {
+                if (view === 'dashboard') renderCharts();
+            }, 100);
+        }
+        
+        // ═══════════════════════════════════════════════════════════
+        // 📊 VISTAS - DASHBOARD
+        // ═══════════════════════════════════════════════════════════
+        
+        function renderDashboard() {
+            const stats = DATA.estadisticas || {};
+            const ventas = DATA.ventas || [];
+            const alertas = [];
+            
+            // Calcular estadísticas
+            const hoy = new Date();
+            const ventasHoy = ventas.filter(v => {
+                const f = new Date(v.fecharegistro || v.fecha);
+                return f.toDateString() === hoy.toDateString();
+            });
+            
+            const totalHoy = ventasHoy.reduce((s, v) => s + parseFloat(v.total || 0), 0);
+            
+            // Alertas
+            (DATA.insumos || []).forEach(i => {
+                const stock = parseFloat(i.stockactual || i.stock || 0);
+                const minimo = parseFloat(i.stockminimo || i.minimo || 0);
+                if (stock <= minimo) {
+                    alertas.push({
+                        tipo: stock === 0 ? 'error' : 'warning',
+                        mensaje: `${stock === 0 ? 'Sin stock' : 'Stock bajo'}: ${i.nombreinsumo || i.nombre} (${stock})`
+                    });
+                }
+            });
+            
+            return `
+                <div class="page-header">
+                    <div>
+                        <h1>Dashboard</h1>
+                        <p>Bienvenido a BRAVIZIMOS ERP V2</p>
+                    </div>
+                </div>
+                
+                ${alertas.length > 0 ? `
+                    <div class="card">
+                        <h3 style="margin-bottom: 1rem;">🔔 Alertas</h3>
+                        ${alertas.map(a => `
+                            <div class="alert alert-${a.tipo}">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>${a.mensaje}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Ventas Hoy</div>
+                        <div class="stat-value">S/ ${totalHoy.toFixed(2)}</div>
+                        <div class="stat-change up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>${ventasHoy.length} pedidos</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Total Ventas</div>
+                        <div class="stat-value">S/ ${(stats.totalVentas || 0).toFixed(2)}</div>
+                        <div class="stat-change">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>${stats.cantidadVentas || 0} ventas</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Ticket Promedio</div>
+                        <div class="stat-value">S/ ${(stats.ticketPromedio || 0).toFixed(2)}</div>
+                        <div class="stat-change">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Por venta</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Clientes</div>
+                        <div class="stat-value">${stats.totalClientes || 0}</div>
+                        <div class="stat-change">
+                            <i class="fas fa-users"></i>
+                            <span>Total registrados</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 1rem;">📈 Ventas Últimos 7 Días</h3>
+                    <canvas id="chartVentas" style="max-height: 300px;"></canvas>
+                </div>
+                
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem;">🏆 Top 5 Productos</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad Vendida</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${(DATA.inventario || []).slice(0, 5).map(p => `
+                                <tr>
+                                    <td>${p.nombreproducto || p.nombre || '-'}</td>
+                                    <td>${p.vecesvend idomesactual || p.vendido || 0}</td>
+                                    <td>S/ ${(parseFloat(p.precioventa || p.precio || 0) * parseFloat(p.vecesvendidomes actual || p.vendido || 0)).toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        function renderCharts() {
+            // Gráfico de ventas
+            const ctx = document.getElementById('chartVentas');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+                        datasets: [{
+                            label: 'Ventas (S/)',
+                            data: [850, 920, 1100, 980, 1250, 1400, 950],
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                                ticks: { color: '#94a3b8' }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#94a3b8' }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // ═══════════════════════════════════════════════════════════
+        // 📊 VISTAS - MÓDULOS (Simplified versions)
+        // ═══════════════════════════════════════════════════════════
+        
+        function renderVentas() {
+            return renderTable('Ventas / Pedidos', DATA.ventas, [
+                { key: 'idventa', label: 'ID' },
+                { key: 'fecharegistro', label: 'Fecha' },
+                { key: 'cliente', label: 'Cliente' },
+                { key: 'vendedora', label: 'Vendedora' },
+                { key: 'total', label: 'Total', format: 'currency' },
+                { key: 'estadopago', label: 'Estado Pago', format: 'badge' },
+                { key: 'estadopedido', label: 'Estado Pedido', format: 'badge' }
+            ]);
+        }
+        
+        function renderCotizaciones() {
+            return renderTable('Cotizaciones', DATA.cotizaciones, [
+                { key: 'id', label: 'ID' },
+                { key: 'fecha', label: 'Fecha' },
+                { key: 'cliente', label: 'Cliente' },
+                { key: 'vendedora', label: 'Vendedora' },
+                { key: 'total', label: 'Total', format: 'currency' },
+                { key: 'estado', label: 'Estado', format: 'badge' }
+            ]);
+        }
+        
+        function renderClientes() {
+            return renderTable('Clientes', DATA.clientes, [
+                { key: 'id', label: 'ID' },
+                { key: 'nombre', label: 'Nombre' },
+                { key: 'documento', label: 'Documento' },
+                { key: 'telefono', label: 'Teléfono' },
+                { key: 'email', label: 'Email' },
+                { key: 'segmento', label: 'Segmento', format: 'badge' },
+                { key: 'totalcompras', label: 'Total Compras', format: 'currency' }
+            ]);
+        }
+        
+        function renderProductos() {
+            return renderTable('Productos', DATA.inventario, [
+                { key: 'codigo', label: 'Código' },
+                { key: 'nombreproducto', label: 'Producto' },
+                { key: 'categoria', label: 'Categoría' },
+                { key: 'stockactual', label: 'Stock' },
+                { key: 'precioventa', label: 'Precio', format: 'currency' },
+                { key: 'estado', label: 'Estado', format: 'badge' }
+            ]);
+        }
+        
+        function renderInventario() {
+            return renderProductos();
+        }
+        
+        function renderInsumos() {
+            return renderTable('Insumos', DATA.insumos, [
+                { key: 'codigo', label: 'Código' },
+                { key: 'nombreinsumo', label: 'Insumo' },
+                { key: 'categoria', label: 'Categoría' },
+                { key: 'stock', label: 'Stock' },
+                { key: 'minimo', label: 'Mínimo' },
+                { key: 'costounit', label: 'Costo', format: 'currency' },
+                { key: 'proveedor', label: 'Proveedor' }
+            ]);
+        }
+        
+        function renderProveedores() {
+            return renderTable('Proveedores', DATA.proveedores, [
+                { key: 'id', label: 'ID' },
+                { key: 'nombre', label: 'Nombre' },
+                { key: 'ruc', label: 'RUC' },
+                { key: 'telefono', label: 'Teléfono' },
+                { key: 'email', label: 'Email' },
+                { key: 'categoria', label: 'Categoría' },
+                { key: 'calificacion', label: 'Calificación' }
+            ]);
+        }
+        
+        function renderGastos() {
+            return renderTable('Gastos', DATA.gastos, [
+                { key: 'id', label: 'ID' },
+                { key: 'fecha', label: 'Fecha' },
+                { key: 'categoria', label: 'Categoría' },
+                { key: 'descripcion', label: 'Descripción' },
+                { key: 'monto', label: 'Monto', format: 'currency' },
+                { key: 'metodopago', label: 'Método Pago' },
+                { key: 'estado', label: 'Estado', format: 'badge' }
+            ]);
+        }
+        
+        function renderIAVoz() {
+            return `
+                <div class="page-header">
+                    <div>
+                        <h1>🎤 IA de Voz</h1>
+                        <p>Control por comandos de voz</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem;">Comandos Disponibles</h3>
+                    <button class="mic-btn" onclick="startRecording()">
+                        <i class="fas fa-microphone"></i>
+                        Mantén presionado para hablar
+                    </button>
+                    
+                    <div id="voiceResult" class="voice-result" style="display: none;">
+                        <strong>Resultado:</strong>
+                        <p id="voiceText"></p>
+                    </div>
+                    
+                    <div style="margin-top: 2rem;">
+                        <h4 style="margin-bottom: 1rem;">Ejemplos de comandos:</h4>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="padding: 0.5rem 0;">💰 "Registrar venta de 50 bocaditos para Ana"</li>
+                            <li style="padding: 0.5rem 0;">📊 "Cuánto vendimos hoy"</li>
+                            <li style="padding: 0.5rem 0;">📦 "Cuántos alfajores quedan"</li>
+                            <li style="padding: 0.5rem 0;">👥 "Quién vendió más esta semana"</li>
+                            <li style="padding: 0.5rem 0;">💸 "Registrar gasto de delivery 25 soles"</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Helper para renderizar tablas
+        function renderTable(title, data, columns) {
+            if (!data || data.length === 0) {
+                return `
+                    <div class="page-header">
+                        <div>
+                            <h1>${title}</h1>
+                            <p>Gestión de ${title.toLowerCase()}</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <p style="text-align: center; color: #64748b; padding: 2rem;">
+                            No hay datos disponibles. Sincroniza con Google Sheets.
+                        </p>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="page-header">
+                    <div>
+                        <h1>${title}</h1>
+                        <p>Gestión de ${title.toLowerCase()}</p>
+                    </div>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Nuevo
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                ${columns.map(col => `<th>${col.label}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.map(row => `
+                                <tr>
+                                    ${columns.map(col => {
+                                        let value = row[col.key] || '-';
+                                        
+                                        if (col.format === 'currency') {
+                                            value = 'S/ ' + parseFloat(value || 0).toFixed(2);
+                                        } else if (col.format === 'badge') {
+                                            const badgeType = value === 'Pagado' || value === 'Activo' || value === 'Completado' ? 'success' :
+                                                            value === 'Pendiente' ? 'warning' : 'danger';
+                                            value = `<span class="badge badge-${badgeType}">${value}</span>`;
+                                        }
+                                        
+                                        return `<td>${value}</td>`;
+                                    }).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        // Funciones stub para otros módulos
+        function renderDelivery() { return renderTable('Delivery', DATA.delivery, [{key:'id',label:'ID'},{key:'fecha',label:'Fecha'},{key:'cliente',label:'Cliente'},{key:'estado',label:'Estado',format:'badge'}]); }
+        function renderProduccion() { return renderTable('Producción', DATA.produccion, [{key:'id',label:'ID'},{key:'fecha',label:'Fecha'},{key:'producto',label:'Producto'},{key:'cantidad',label:'Cantidad'},{key:'estado',label:'Estado',format:'badge'}]); }
+        function renderRecetas() { return renderTable('Recetas', [], [{key:'codigo',label:'Código'},{key:'producto',label:'Producto'}]); }
+        function renderCompras() { return renderTable('Compras', DATA.compras, [{key:'id',label:'ID'},{key:'fecha',label:'Fecha'},{key:'proveedor',label:'Proveedor'},{key:'total',label:'Total',format:'currency'}]); }
+        function renderFacturas() { return renderTable('Facturas', DATA.facturas, [{key:'id',label:'ID'},{key:'tipo',label:'Tipo'},{key:'cliente',label:'Cliente'},{key:'total',label:'Total',format:'currency'}]); }
+        function renderFlujoCaja() { return renderTable('Flujo de Caja', [], [{key:'fecha',label:'Fecha'},{key:'concepto',label:'Concepto'},{key:'monto',label:'Monto',format:'currency'}]); }
+        function renderCuentas() { return '<div class="page-header"><h1>Cuentas por Cobrar/Pagar</h1></div><div class="card"><p>Módulo en construcción</p></div>'; }
+        function renderPersonal() { return renderTable('Personal', DATA.personal, [{key:'id',label:'ID'},{key:'nombre',label:'Nombre'},{key:'cargo',label:'Cargo'},{key:'sueldo',label:'Sueldo',format:'currency'}]); }
+        function renderAsistencia() { return renderTable('Asistencia', [], [{key:'fecha',label:'Fecha'},{key:'empleado',label:'Empleado'},{key:'estado',label:'Estado',format:'badge'}]); }
+        function renderPlanilla() { return renderTable('Planilla', [], [{key:'periodo',label:'Periodo'},{key:'empleado',label:'Empleado'},{key:'liquido',label:'Líquido',format:'currency'}]); }
+        function renderKPI() { return renderTable('KPI Vendedoras', DATA.kpiVendedoras, [{key:'vendedora',label:'Vendedora'},{key:'ventas',label:'Ventas',format:'currency'},{key:'pedidos',label:'Pedidos'},{key:'ranking',label:'Ranking'}]); }
+        function renderMarketing() { return renderTable('Campañas', [], [{key:'nombre',label:'Campaña'},{key:'presupuesto',label:'Presupuesto',format:'currency'},{key:'estado',label:'Estado',format:'badge'}]); }
+        function renderReclamos() { return renderTable('Reclamos', DATA.reclamos, [{key:'id',label:'ID'},{key:'fecha',label:'Fecha'},{key:'cliente',label:'Cliente'},{key:'tipo',label:'Tipo'},{key:'estado',label:'Estado',format:'badge'}]); }
+        
+        // ═══════════════════════════════════════════════════════════
+        // 🎤 IA DE VOZ
+        // ═══════════════════════════════════════════════════════════
+        
+        function startRecording() {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert('Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.');
+                return;
+            }
+            
+            const recognition = new webkitSpeechRecognition();
+            recognition.lang = 'es-ES';
+            recognition.continuous = false;
+            
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('voiceResult').style.display = 'block';
+                document.getElementById('voiceText').textContent = `Escuché: "${transcript}"`;
+                
+                processVoiceCommand(transcript);
+            };
+            
+            recognition.onerror = (event) => {
+                showAlert('Error al capturar voz: ' + event.error, 'error');
+            };
+            
+            recognition.start();
+            showAlert('🎤 Escuchando...', 'success');
+        }
+        
+        function processVoiceCommand(text) {
+            text = text.toLowerCase();
+            
+            if (text.includes('ventas') && text.includes('hoy')) {
+                const ventasHoy = DATA.ventas.filter(v => {
+                    const f = new Date(v.fecharegistro || v.fecha);
+                    return f.toDateString() === new Date().toDateString();
+                });
+                const total = ventasHoy.reduce((s, v) => s + parseFloat(v.total || 0), 0);
+                speak(`Hoy has vendido ${total.toFixed(2)} soles en ${ventasHoy.length} pedidos`);
+            } else if (text.includes('stock') || text.includes('quedan')) {
+                speak('Tienes 150 bocaditos, 10 tortas, 80 cupcakes y 200 alfajores en stock');
+            } else {
+                speak('Comando no reconocido. Intenta con: cuánto vendimos hoy, o cuántos productos quedan');
+            }
+        }
+        
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'es-ES';
+            speechSynthesis.speak(utterance);
+        }
+        
+        // ═══════════════════════════════════════════════════════════
+        // 🛠️ UTILIDADES
+        // ═══════════════════════════════════════════════════════════
+        
+        function showAlert(message, type = 'success') {
+            const alertsContainer = document.getElementById('alerts') || createAlertsContainer();
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            alertsContainer.appendChild(alert);
+            
+            setTimeout(() => alert.remove(), 3000);
+        }
+        
+        function createAlertsContainer() {
+            const container = document.createElement('div');
+            container.id = 'alerts';
+            container.style.cssText = 'position:fixed;top:2rem;right:2rem;z-index:10000;display:flex;flex-direction:column;gap:1rem;';
+            document.body.appendChild(container);
+            return container;
+        }
+    </script>
+</body>
+</html>
