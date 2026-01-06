@@ -1,223 +1,664 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>BRAVIZIMO’S ERP</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <meta charset="UTF-8" />
+  <title>BRAVIZIMOS ERP · Operación diaria V2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fuente -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
-    body{margin:0;font-family:system-ui, -apple-system, BlinkMacSystemFont, sans-serif;background:#020617;color:#e2e8f0;display:flex;min-height:100vh}
-    .sidebar{width:250px;border-right:1px solid #1e293b;padding:1rem;display:flex;flex-direction:column;gap:.5rem}
-    .main{flex:1;padding:1rem 1.5rem}
-    .nav-item{padding:.35rem .55rem;border-radius:.5rem;font-size:.85rem;cursor:pointer;color:#94a3b8}
-    .nav-item:hover{background:#020617;color:#e2e8f0}
-    .nav-item.active{background:rgba(79,70,229,.2);color:#e2e8f0;border:1px solid rgba(79,70,229,.6)}
-    .card{border-radius:.8rem;border:1px solid #1e293b;padding:.9rem 1rem;margin-bottom:.75rem;background:#020617}
-    table{width:100%;border-collapse:collapse;font-size:.8rem}
-    th,td{padding:.4rem .5rem;border-bottom:1px solid #020617;text-align:left}
-    th{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:#64748b;background:#020617}
-    .badge{display:inline-flex;padding:.1rem .45rem;border-radius:999px;font-size:.65rem;border:1px solid #4b5563}
-    .badge.green{border-color:rgba(22,163,74,.6);color:#4ade80;background:rgba(22,163,74,.15)}
-    .badge.red{border-color:rgba(248,113,113,.7);color:#fecaca;background:rgba(248,113,113,.12)}
-    .loader{text-align:center;padding:2rem 0;color:#64748b;font-size:.85rem}
+    :root {
+      --bg: #050814;
+      --bg-elevated: #0c1020;
+      --border: #20263e;
+      --accent: #ff4b8a;
+      --accent-soft: rgba(255,75,138,0.15);
+      --accent-strong: #ff8ab0;
+      --text: #f5f5ff;
+      --text-soft: #a5adc8;
+      --danger: #ff5252;
+      --radius-lg: 16px;
+      --radius-xl: 22px;
+      --shadow-soft: 0 18px 40px rgba(0,0,0,0.65);
+    }
+
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #171d3f 0, #050814 40%);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .app-shell {
+      display:grid;
+      grid-template-columns:260px minmax(0,1fr);
+      height:100vh;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      background: linear-gradient(180deg, #121629 0, #070915 60%, #040511 100%);
+      border-right:1px solid rgba(255,255,255,0.06);
+      padding:18px 16px 18px;
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+    .brand {
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding:4px 6px 10px;
+    }
+    .brand-logo {
+      width:36px;height:36px;border-radius:12px;
+      background:radial-gradient(circle at 30% 0,#ffe082 0,#ff4b8a 40%,#9c27b0 100%);
+      display:flex;align-items:center;justify-content:center;
+      font-weight:800;font-size:18px;color:#fff;
+      box-shadow:0 10px 26px rgba(0,0,0,0.55);
+    }
+    .brand-meta { display:flex;flex-direction:column;gap:2px;}
+    .brand-title { font-size:15px;font-weight:600;letter-spacing:0.04em;}
+    .brand-subtitle { font-size:11px;color:var(--text-soft);}
+    .sidebar-section-label {
+      font-size:11px;letter-spacing:0.18em;text-transform:uppercase;
+      color:rgba(165,173,200,0.68);margin:8px 6px 2px;
+    }
+    .nav-group { display:flex;flex-direction:column;gap:4px; }
+    .nav-button {
+      width:100%;border:0;outline:0;background:transparent;
+      padding:8px 10px;border-radius:999px;
+      display:flex;align-items:center;gap:9px;
+      font-size:13px;color:var(--text-soft);
+      cursor:pointer;
+      transition:background .15s,color .15s,transform .05s;
+    }
+    .nav-button span.nav-icon {
+      width:22px;height:22px;border-radius:999px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:11px;
+      border:1px solid rgba(255,255,255,0.06);
+      background:rgba(255,255,255,0.03);
+    }
+    .nav-button.nav-active {
+      background:var(--accent-soft);
+      color:#fff;
+      box-shadow:0 0 0 1px rgba(255,75,138,0.7);
+      transform:translateY(-1px);
+    }
+    .nav-button:hover:not(.nav-active) {
+      background:rgba(255,255,255,0.03);color:#fff;
+    }
+    .sidebar-footer {
+      margin-top:auto;padding-top:10px;
+      border-top:1px solid rgba(255,255,255,0.08);
+      font-size:11px;color:var(--text-soft);
+      display:flex;justify-content:space-between;align-items:center;
+    }
+    .status-dot {
+      width:8px;height:8px;border-radius:999px;
+      background:#00e676;
+      box-shadow:0 0 0 4px rgba(0,230,118,0.16);
+    }
+
+    /* MAIN */
+    .main {
+      padding:18px 20px 20px;
+      display:flex;flex-direction:column;gap:16px;
+      overflow:hidden;
+    }
+    .topbar { display:flex;align-items:center;gap:14px; }
+    .topbar-main { flex:1; }
+    .topbar-title { font-size:20px;font-weight:600;letter-spacing:0.03em;margin-bottom:2px;}
+    .topbar-subtitle { font-size:12px;color:var(--text-soft);}
+    .pill {
+      border-radius:999px;padding:4px 10px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(4,7,18,0.95);
+      display:inline-flex;align-items:center;gap:6px;
+      font-size:12px;color:var(--text-soft);
+    }
+    .pill strong { color:var(--text);font-weight:500;}
+    .btn-primary {
+      border-radius:999px;border:0;
+      padding:7px 14px;
+      background:linear-gradient(135deg,var(--accent),#ff9800);
+      color:#050814;font-size:13px;font-weight:600;
+      display:inline-flex;gap:8px;align-items:center;
+      cursor:pointer;box-shadow:0 14px 30px rgba(0,0,0,0.7);
+    }
+    .btn-primary:disabled { opacity:.6;cursor:default;box-shadow:none;}
+    .btn-primary span.icon { font-size:14px; }
+
+    .content-shell {
+      flex:1;border-radius:var(--radius-xl);
+      background:radial-gradient(circle at top left,rgba(144,202,249,0.08)0,rgba(4,5,16,0.97)55%);
+      box-shadow:var(--shadow-soft);
+      padding:18px;
+      display:flex;flex-direction:column;gap:14px;
+      overflow:hidden;
+    }
+    .view-header {display:flex;justify-content:space-between;align-items:center;gap:10px;}
+    .view-title {font-size:17px;font-weight:600;}
+    .view-subtitle {font-size:12px;color:var(--text-soft);}
+    .view-badges {display:flex;gap:8px;font-size:11px;}
+    .badge {
+      padding:3px 8px;border-radius:999px;font-size:11px;
+      border:1px solid rgba(255,255,255,0.16);
+      background:rgba(6,9,24,0.95);
+    }
+
+    .view { display:none;flex:1;min-height:0;flex-direction:column;gap:12px;}
+    .view.view-active { display:flex; }
+
+    .card {
+      background:rgba(4,7,20,0.98);
+      border-radius:var(--radius-lg);
+      border:1px solid rgba(255,255,255,0.06);
+      padding:12px 12px 14px;
+      display:flex;flex-direction:column;gap:8px;
+      min-height:0;
+    }
+    .card-header {display:flex;justify-content:space-between;align-items:center;font-size:12px;}
+    .card-header h3 {font-size:13px;font-weight:600;}
+    .metrics-row {
+      display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;
+    }
+    .metric-pill {
+      border-radius:14px;
+      background:radial-gradient(circle at top,rgba(255,255,255,0.06)0,rgba(7,9,24,0.97)34%);
+      border:1px solid rgba(255,255,255,0.08);
+      padding:8px 9px;
+      display:flex;flex-direction:column;gap:3px;
+      font-size:11px;
+    }
+    .metric-label {color:var(--text-soft);}
+    .metric-value {font-size:15px;font-weight:600;}
+
+    .scrollable-table {
+      flex:1;overflow:auto;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.06);
+      background:radial-gradient(circle at top,rgba(255,255,255,0.03)0,rgba(4,5,16,0.98)40%);
+    }
+    table {width:100%;border-collapse:collapse;font-size:12px;}
+    th,td {padding:6px 9px;border-bottom:1px solid rgba(255,255,255,0.04);white-space:nowrap;}
+    th {text-align:left;font-weight:500;font-size:11px;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.04em;background:rgba(8,11,30,0.98);position:sticky;top:0;z-index:1;}
+
+    .center-placeholder {
+      flex:1;display:flex;align-items:center;justify-content:center;
+      font-size:12px;color:var(--text-soft);text-align:center;
+    }
+
+    @media (max-width:960px){
+      .app-shell{grid-template-columns:80px minmax(0,1fr);}
+      .brand-meta{display:none;}
+      .sidebar-section-label{display:none;}
+      .nav-button span.nav-label{display:none;}
+      .metrics-row{grid-template-columns:repeat(2,minmax(0,1fr));}
+    }
   </style>
 </head>
 <body>
+<div class="app-shell">
+  <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div style="font-weight:700;font-size:.95rem;margin-bottom:.5rem;">BRAVIZIMO’S ERP</div>
-    <div class="nav-item active" data-page="dashboard" onclick="go('dashboard',this)">Dashboard</div>
-    <div class="nav-item" data-page="ventas" onclick="go('ventas',this)">Ventas</div>
-    <div class="nav-item" data-page="inventario" onclick="go('inventario',this)">Inventario</div>
-    <div class="nav-item" data-page="recetas" onclick="go('recetas',this)">Recetario</div>
-    <div class="nav-item" data-page="produccion" onclick="go('produccion',this)">Producción</div>
-    <div class="nav-item" data-page="compras" onclick="go('compras',this)">Compras</div>
-    <div class="nav-item" data-page="gastos" onclick="go('gastos',this)">Gastos</div>
-    <div class="nav-item" data-page="servicios" onclick="go('servicios',this)">Servicios</div>
-    <div class="nav-item" data-page="facturas" onclick="go('facturas',this)">Facturas</div>
-    <div class="nav-item" data-page="delivery" onclick="go('delivery',this)">Delivery</div>
-    <div class="nav-item" data-page="clientes" onclick="go('clientes',this)">Clientes</div>
-    <div class="nav-item" data-page="personal" onclick="go('personal',this)">RRHH / Personal</div>
-    <div class="nav-item" data-page="reclamos" onclick="go('reclamos',this)">Reclamos</div>
+    <div class="brand">
+      <div class="brand-logo">BR</div>
+      <div class="brand-meta">
+        <div class="brand-title">BRAVIZIMOS ERP</div>
+        <div class="brand-subtitle">Operación diaria · V2</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sidebar-section-label">Panel</div>
+      <div class="nav-group">
+        <button class="nav-button nav-active" data-view="dashboard">
+          <span class="nav-icon">D</span><span class="nav-label">Dashboard</span>
+        </button>
+      </div>
+    </div>
+
+    <div>
+      <div class="sidebar-section-label">Ventas</div>
+      <div class="nav-group">
+        <button class="nav-button" data-view="ventas"><span class="nav-icon">V</span><span class="nav-label">Ventas / Pedidos</span></button>
+        <button class="nav-button" data-view="cotizaciones"><span class="nav-icon">C</span><span class="nav-label">Cotizaciones</span></button>
+        <button class="nav-button" data-view="clientes"><span class="nav-icon">👤</span><span class="nav-label">Clientes</span></button>
+        <button class="nav-button" data-view="delivery"><span class="nav-icon">🚚</span><span class="nav-label">Delivery</span></button>
+      </div>
+    </div>
+
+    <div>
+      <div class="sidebar-section-label">Producción</div>
+      <div class="nav-group">
+        <button class="nav-button" data-view="productos"><span class="nav-icon">🍰</span><span class="nav-label">Productos</span></button>
+        <button class="nav-button" data-view="inventario"><span class="nav-icon">📦</span><span class="nav-label">Inventario</span></button>
+        <button class="nav-button" data-view="produccion"><span class="nav-icon">🧁</span><span class="nav-label">Producción</span></button>
+        <button class="nav-button" data-view="recetas"><span class="nav-icon">📖</span><span class="nav-label">Recetas</span></button>
+        <button class="nav-button" data-view="insumos"><span class="nav-icon">🧂</span><span class="nav-label">Insumos</span></button>
+      </div>
+    </div>
+
+    <div>
+      <div class="sidebar-section-label">Compras & Gastos</div>
+      <div class="nav-group">
+        <button class="nav-button" data-view="proveedores"><span class="nav-icon">🏭</span><span class="nav-label">Proveedores</span></button>
+        <button class="nav-button" data-view="compras"><span class="nav-icon">🧾</span><span class="nav-label">Compras</span></button>
+        <button class="nav-button" data-view="servicios"><span class="nav-icon">⚙</span><span class="nav-label">Servicios</span></button>
+        <button class="nav-button" data-view="gastos"><span class="nav-icon">💸</span><span class="nav-label">Gastos</span></button>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <span style="display:flex;align-items:center;gap:6px;">
+        <span class="status-dot"></span> En línea
+      </span>
+      <span style="opacity:.8;">Hoy: <span id="etiqueta-hoy">--/--/----</span></span>
+    </div>
   </aside>
+
+  <!-- MAIN -->
   <main class="main">
-    <div id="app"></div>
+    <header class="topbar">
+      <div class="topbar-main">
+        <div class="topbar-title" id="topbar-title">Dashboard de impacto</div>
+        <div class="topbar-subtitle" id="topbar-subtitle">Visión rápida de ventas, producción, caja y salud financiera del día.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="pill">Meta mensual ventas <strong>S/ 50,000</strong></div>
+        <button class="btn-primary" id="sync-all-btn" onclick="syncAll()">
+          <span class="icon">⟳</span><span>Sincronizar con Google Sheets</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="content-shell">
+      <!-- DASHBOARD -->
+      <section class="view view-active" data-view-id="dashboard">
+        <div class="view-header">
+          <div>
+            <div class="view-title">Resumen general de la operación</div>
+            <div class="view-subtitle">Datos consolidados desde tus hojas de Google Sheets.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Impacto del día</h3>
+            <span>Actualizado: <span id="dashboard-updated">—</span></span>
+          </div>
+          <div class="metrics-row">
+            <div class="metric-pill">
+              <div class="metric-label">Ventas (S/)</div>
+              <div class="metric-value" id="kpi-ventas-hoy">—</div>
+            </div>
+            <div class="metric-pill">
+              <div class="metric-label">Pedidos</div>
+              <div class="metric-value" id="kpi-pedidos-hoy">—</div>
+            </div>
+            <div class="metric-pill">
+              <div class="metric-label">Ingresos netos</div>
+              <div class="metric-value" id="kpi-ingresos-netos">—</div>
+            </div>
+            <div class="metric-pill">
+              <div class="metric-label">Gastos netos</div>
+              <div class="metric-value" id="kpi-gastos-netos">—</div>
+            </div>
+          </div>
+          <div class="metrics-row" style="margin-top:8px;">
+            <div class="metric-pill">
+              <div class="metric-label">IGV a declarar (referencial)</div>
+              <div class="metric-value" id="kpi-igv">—</div>
+            </div>
+            <div class="metric-pill">
+              <div class="metric-label">Pedidos (últimos 7 días)</div>
+              <div class="metric-value" id="kpi-pedidos-7d">—</div>
+            </div>
+            <div class="metric-pill">
+              <div class="metric-label">Clientes registrados</div>
+              <div class="metric-value" id="kpi-clientes-total">—</div>
+            </div>
+            <div class="metric-pill">
+              <div class="metric-label">Productos activos</div>
+              <div class="metric-value" id="kpi-productos-total">—</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VISTA TABLA GENÉRICA -->
+      <section class="view" data-view-id="clientes">
+        <div class="view-header">
+          <div>
+            <div class="view-title">Clientes</div>
+            <div class="view-subtitle">Listado de clientes finales y corporativos, por canal y frecuencia.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Tabla de clientes</h3>
+            <span id="clientes-count">— registros</span>
+          </div>
+          <div class="scrollable-table" id="clientes-table"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view-id="ventas">
+        <div class="view-header">
+          <div>
+            <div class="view-title">Ventas / Pedidos</div>
+            <div class="view-subtitle">Registro de pedidos con filtros por fecha, canal y estado.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Tabla de ventas</h3>
+            <span id="ventas-count">— registros</span>
+          </div>
+          <div class="scrollable-table" id="ventas-table"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view-id="productos">
+        <div class="view-header">
+          <div>
+            <div class="view-title">Productos</div>
+            <div class="view-subtitle">Catálogo de productos, combos y packs.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Tabla de productos</h3>
+            <span id="productos-count">— registros</span>
+          </div>
+          <div class="scrollable-table" id="productos-table"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view-id="inventario">
+        <div class="view-header">
+          <div>
+            <div class="view-title">Inventario</div>
+            <div class="view-subtitle">Stock de insumos y productos terminados.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Tabla de inventario</h3>
+            <span id="inventario-count">— registros</span>
+          </div>
+          <div class="scrollable-table" id="inventario-table"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view-id="insumos">
+        <div class="view-header">
+          <div>
+            <div class="view-title">Insumos</div>
+            <div class="view-subtitle">Maestro de insumos, unidades y proveedores principales.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Tabla de insumos</h3>
+            <span id="insumos-count">— registros</span>
+          </div>
+          <div class="scrollable-table" id="insumos-table"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view-id="servicios">
+        <div class="view-header">
+          <div>
+            <div class="view-title">Servicios</div>
+            <div class="view-subtitle">Agua, luz, internet, alquiler, marketing, etc.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Tabla de servicios</h3>
+            <span id="servicios-count">— registros</span>
+          </div>
+          <div class="scrollable-table" id="servicios-table"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view-id="gastos">
+        <div class="view-header">
+          <div>
+            <div class="view-title">Gastos</div>
+            <div class="view-subtitle">Gastos operativos por categoría y subcategoría.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Tabla de gastos</h3>
+            <span id="gastos-count">— registros</span>
+          </div>
+          <div class="scrollable-table" id="gastos-table"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view-id="proveedores">
+        <div class="view-header">
+          <div>
+            <div class="view-title">Proveedores</div>
+            <div class="view-subtitle">Ficha de proveedores y condiciones de pago.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Tabla de proveedores</h3>
+            <span id="proveedores-count">— registros</span>
+          </div>
+          <div class="scrollable-table" id="proveedores-table"></div>
+        </div>
+      </section>
+
+      <section class="view" data-view-id="compras">
+        <div class="view-header">
+          <div>
+            <div class="view-title">Compras</div>
+            <div class="view-subtitle">Compras de insumos y otros gastos de operación.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h3>Tabla de compras</h3>
+            <span id="compras-count">— registros</span>
+          </div>
+          <div class="scrollable-table" id="compras-table"></div>
+        </div>
+      </section>
+
+      <!-- placeholders simples para módulos todavía no conectados -->
+      <section class="view" data-view-id="cotizaciones"><div class="center-placeholder">(Pendiente conectar cotizaciones)</div></section>
+      <section class="view" data-view-id="delivery"><div class="center-placeholder">(Pendiente conectar delivery)</div></section>
+      <section class="view" data-view-id="produccion"><div class="center-placeholder">(Pendiente conectar producción diaria)</div></section>
+      <section class="view" data-view-id="recetas"><div class="center-placeholder">(Pendiente conectar recetas maestro/detalle)</div></section>
+    </section>
   </main>
+</div>
 
 <script>
-  // ⚠️ Cambia esto por la URL del Web App del Apps Script
-  const API_URL = 'TU_WEB_APP_URL_AQUI';
+  // ========= CONFIGURACIÓN API =========
+  const API_BASE = "PEGAR_AQUI_URL_DEL_WEB_APP"; // <-- cambia esto
 
-  let DATA = null;
-  let DASH = null;
-  let page = 'dashboard';
+  // ========= UTILIDADES =========
+  function formatoSoles(n) {
+    const v = Number(n || 0);
+    return "S/ " + v.toFixed(2);
+  }
 
-  async function init() {
+  function setTodayLabel() {
+    const el = document.getElementById("etiqueta-hoy");
+    const hoy = new Date();
+    el.textContent = hoy.toLocaleDateString("es-PE");
+  }
+
+  function setUpdatedLabel() {
+    const el = document.getElementById("dashboard-updated");
+    const ahora = new Date();
+    el.textContent = ahora.toLocaleTimeString("es-PE", { hour:"2-digit", minute:"2-digit" });
+  }
+
+  // ========= SINCRONIZACIÓN DASHBOARD =========
+  async function syncAll() {
+    if (!API_BASE) {
+      alert("Falta configurar API_BASE en el index.");
+      return;
+    }
+    const btn = document.getElementById("sync-all-btn");
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Sincronizando...";
+
     try {
-      showLoader('Cargando ERP...');
-      const [d, all] = await Promise.all([
-        fetch(API_URL + '?action=dashboard').then(r => r.json()),
-        fetch(API_URL + '?action=getAll').then(r => r.json())
-      ]);
-      DASH = d;
-      DATA = all;
-      render();
+      const res = await fetch(API_BASE + "?action=sync_all");
+      const data = await res.json();
+      console.log("sync_all:", data);
+
+      if (data.status !== "ok") {
+        alert("Error desde servidor: " + (data.error || "desconocido"));
+      } else {
+        const d = data.dashboard || {};
+        document.getElementById("kpi-ventas-hoy").textContent   = formatoSoles(d.ventasHoy);
+        document.getElementById("kpi-pedidos-hoy").textContent  = d.pedidosHoy || 0;
+        document.getElementById("kpi-ingresos-netos").textContent = formatoSoles(d.ingresosNetosHoy);
+        document.getElementById("kpi-gastos-netos").textContent = formatoSoles(d.gastosNetosHoy);
+        document.getElementById("kpi-igv").textContent          = formatoSoles(d.igvADeclarar);
+        document.getElementById("kpi-pedidos-7d").textContent   = d.pedidos7d || 0;
+        document.getElementById("kpi-clientes-total").textContent = d.totalClientes || 0;
+        document.getElementById("kpi-productos-total").textContent = d.totalProductos || 0;
+        setUpdatedLabel();
+      }
     } catch (e) {
       console.error(e);
-      showLoader('Error al conectar con el ERP. Revisa la URL del Web App.');
+      alert("Ocurrió un error al sincronizar con Google Sheets.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
     }
   }
 
-  function showLoader(msg) {
-    document.getElementById('app').innerHTML = '<div class="loader">'+msg+'</div>';
+  // ========= RENDER TABLA GENÉRICA =========
+  async function loadTable(action, tableContainerId, counterId) {
+    const cont = document.getElementById(tableContainerId);
+    cont.innerHTML = "<div style='padding:10px;font-size:12px;'>Cargando...</div>";
+
+    try {
+      const res = await fetch(API_BASE + "?action=" + action);
+      const data = await res.json();
+      console.log(action, data);
+
+      if (data.status !== "ok") {
+        cont.innerHTML = "<div style='padding:10px;font-size:12px;color:#ffb3b3;'>Error: " + (data.error || "desconocido") + "</div>";
+        if (counterId) document.getElementById(counterId).textContent = "0 registros";
+        return;
+      }
+
+      const rows = data.rows || [];
+      const headers = data.headers || Object.keys(rows[0] || {});
+      if (counterId) document.getElementById(counterId).textContent = rows.length + " registros";
+
+      if (!headers.length) {
+        cont.innerHTML = "<div style='padding:10px;font-size:12px;'>Sin datos.</div>";
+        return;
+      }
+
+      let html = "<table><thead><tr>";
+      headers.forEach(h => { html += "<th>" + h + "</th>"; });
+      html += "</tr></thead><tbody>";
+
+      rows.forEach(r => {
+        html += "<tr>";
+        headers.forEach(h => {
+          let val = r[h];
+          if (val instanceof Object && val.date) { val = val.date; }
+          html += "<td>" + (val === undefined ? "" : val) + "</td>";
+        });
+        html += "</tr>";
+      });
+
+      html += "</tbody></table>";
+      cont.innerHTML = html;
+
+    } catch (e) {
+      console.error(e);
+      cont.innerHTML = "<div style='padding:10px;font-size:12px;color:#ffb3b3;'>Error de conexión.</div>";
+      if (counterId) document.getElementById(counterId).textContent = "0 registros";
+    }
   }
 
-  function go(p, el) {
-    page = p;
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    if (el) el.classList.add('active');
-    render();
+  // ========= NAVEGACIÓN =========
+  function setupNavigation() {
+    const buttons = document.querySelectorAll(".nav-button");
+    const views = document.querySelectorAll(".view");
+
+    const loaders = {
+      "dashboard": () => syncAll(),
+      "clientes": () => loadTable("list_clientes", "clientes-table", "clientes-count"),
+      "ventas": () => loadTable("list_ventas", "ventas-table", "ventas-count"),
+      "productos": () => loadTable("list_productos", "productos-table", "productos-count"),
+      "inventario": () => loadTable("list_inventario", "inventario-table", "inventario-count"),
+      "insumos": () => loadTable("list_insumos", "insumos-table", "insumos-count"),
+      "servicios": () => loadTable("list_servicios", "servicios-table", "servicios-count"),
+      "gastos": () => loadTable("list_gastos", "gastos-table", "gastos-count"),
+      "proveedores": () => loadTable("list_proveedores", "proveedores-table", "proveedores-count"),
+      "compras": () => loadTable("list_compras", "compras-table", "compras-count"),
+    };
+
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const viewKey = btn.getAttribute("data-view");
+
+        buttons.forEach(b => b.classList.remove("nav-active"));
+        btn.classList.add("nav-active");
+
+        views.forEach(v => {
+          v.classList.toggle("view-active", v.getAttribute("data-view-id") === viewKey);
+        });
+
+        // título
+        const titles = {
+          "dashboard": "Dashboard de impacto",
+          "ventas": "Ventas / Pedidos",
+          "cotizaciones": "Cotizaciones",
+          "clientes": "Clientes",
+          "delivery": "Delivery",
+          "productos": "Productos",
+          "inventario": "Inventario",
+          "produccion": "Producción",
+          "recetas": "Recetas",
+          "insumos": "Insumos",
+          "proveedores": "Proveedores",
+          "compras": "Compras",
+          "servicios": "Servicios",
+          "gastos": "Gastos"
+        };
+        document.getElementById("topbar-title").textContent = titles[viewKey] || "BRAVIZIMOS ERP";
+
+        // cargar datos si hay loader
+        if (loaders[viewKey]) loaders[viewKey]();
+      });
+    });
   }
 
-  function render() {
-    if (!DATA || !DASH) { showLoader('Cargando datos...'); return; }
-    const app = document.getElementById('app');
-    if (page === 'dashboard') return app.innerHTML = renderDashboard();
-    if (page === 'ventas')    return app.innerHTML = renderVentas();
-    if (page === 'inventario')return app.innerHTML = renderInventario();
-    if (page === 'recetas')   return app.innerHTML = renderRecetas();
-    if (page === 'produccion')return app.innerHTML = renderProduccion();
-    if (page === 'compras')   return app.innerHTML = renderCompras();
-    if (page === 'gastos')    return app.innerHTML = renderGastos();
-    if (page === 'servicios') return app.innerHTML = renderServicios();
-    if (page === 'facturas')  return app.innerHTML = renderFacturas();
-    if (page === 'delivery')  return app.innerHTML = renderDelivery();
-    if (page === 'clientes')  return app.innerHTML = renderClientes();
-    if (page === 'personal')  return app.innerHTML = renderPersonal();
-    if (page === 'reclamos')  return app.innerHTML = renderReclamos();
-  }
-
-  function money(v){v=parseFloat(v||0);return 'S/ '+v.toFixed(2);}
-
-  // ---- Dashboard simple ----
-  function renderDashboard() {
-    return `
-      <div class="card">
-        <h3>Resumen general</h3>
-        <p style="font-size:.8rem;color:#64748b;">Ventas, pedidos y alertas de inventario/servicios</p>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-top:.75rem;">
-          <div>
-            <div style="font-size:.75rem;color:#64748b;">Ventas hoy</div>
-            <div style="font-size:1.3rem;font-weight:600;">${money(DASH.ventasHoy.total)}</div>
-            <div style="font-size:.75rem;color:#64748b;">${DASH.ventasHoy.cantidad||0} pedidos</div>
-          </div>
-          <div>
-            <div style="font-size:.75rem;color:#64748b;">Ventas mes</div>
-            <div style="font-size:1.3rem;font-weight:600;">${money(DASH.ventasMes.total)}</div>
-            <div style="font-size:.75rem;color:#64748b;">${DASH.ventasMes.cantidad||0} pedidos</div>
-          </div>
-          <div>
-            <div style="font-size:.75rem;color:#64748b;">Ticket promedio</div>
-            <div style="font-size:1.3rem;font-weight:600;">${money(DATA.estadisticas.ticketPromedio||0)}</div>
-            <div style="font-size:.75rem;color:#64748b;">${DATA.estadisticas.cantidadVentas||0} ventas históricas</div>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <h3>Alertas rápidas</h3>
-        <ul style="margin:.4rem 0 0;padding-left:1.1rem;font-size:.78rem;color:#e2e8f0;max-height:220px;overflow:auto;">
-          ${(DASH.alertas||[]).map(a => '<li>'+a.mensaje+'</li>').join('') || '<li style="color:#64748b;">Sin alertas por ahora.</li>'}
-        </ul>
-      </div>
-    `;
-  }
-
-  // ---- Módulos ejemplo (ventas / inventario / servicios…) ----
-  function renderVentas() {
-    const v = DATA.ventas || [];
-    const filas = v.slice(0,80).map(r => `
-      <tr>
-        <td>${r.idventa||''}</td>
-        <td>${r.fecharegistro||''}</td>
-        <td>${r.cliente||''}</td>
-        <td>${r.canal||''}</td>
-        <td>${money(r.total||0)}</td>
-        <td><span class="badge ${String(r.estadopago||'').toLowerCase()==='pagado'?'green':'red'}">${r.estadopago||''}</span></td>
-      </tr>
-    `).join('') || '<tr><td colspan="6" style="text-align:center;color:#64748b;padding:.6rem;">Sin ventas.</td></tr>';
-
-    return `
-      <div class="card">
-        <h3>Ventas</h3>
-        <div style="max-height:430px;overflow:auto;margin-top:.5rem;">
-          <table>
-            <thead>
-              <tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Canal</th><th>Total</th><th>Pago</th></tr>
-            </thead>
-            <tbody>${filas}</tbody>
-          </table>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderInventario() {
-    const inv = DATA.inventario || [];
-    const filas = inv.slice(0,120).map(p => `
-      <tr>
-        <td>${p.codigo||''}</td>
-        <td>${p.nombreproducto||''}</td>
-        <td>${p.categoria||''}</td>
-        <td>${p.stockactual||''}</td>
-        <td>${p.stockminimo||''}</td>
-        <td>${money(p.precioventa||0)}</td>
-      </tr>
-    `).join('') || '<tr><td colspan="6" style="text-align:center;color:#64748b;padding:.6rem;">Sin productos.</td></tr>';
-    return `
-      <div class="card">
-        <h3>Inventario productos</h3>
-        <div style="max-height:430px;overflow:auto;margin-top:.5rem;">
-          <table>
-            <thead>
-              <tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Mínimo</th><th>Precio</th></tr>
-            </thead>
-            <tbody>${filas}</tbody>
-          </table>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderRecetas() {
-    const maestro = DATA.recetasMaestro || [];
-    const filas = maestro.slice(0,80).map(r => `
-      <tr>
-        <td>${r.codigo||''}</td><td>${r.producto||''}</td><td>${r.rendimiento||''}</td><td>${r.tiempomin||''}</td>
-      </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;color:#64748b;padding:.6rem;">Sin recetas.</td></tr>';
-    return `
-      <div class="card">
-        <h3>Recetas maestras</h3>
-        <div style="max-height:430px;overflow:auto;margin-top:.5rem;">
-          <table>
-            <thead><tr><th>Código</th><th>Producto</th><th>Rendimiento</th><th>Tiempo (min)</th></tr></thead>
-            <tbody>${filas}</tbody>
-          </table>
-        </div>
-      </div>
-    `;
-  }
-
-  // El resto de módulos: mismos patrones
-  function renderProduccion(){return '<div class="card"><h3>Producción</h3><p style="font-size:.8rem;color:#64748b;">Aquí listarás órdenes de producción.</p></div>';}
-  function renderCompras(){return '<div class="card"><h3>Compras</h3><p style="font-size:.8rem;color:#64748b;">Lista de compras a proveedores.</p></div>';}
-  function renderGastos(){return '<div class="card"><h3>Gastos</h3><p style="font-size:.8rem;color:#64748b;">Gastos por categoría / cuenta.</p></div>';}
-  function renderServicios(){return '<div class="card"><h3>Servicios</h3><p style="font-size:.8rem;color:#64748b;">Servicios por pagar y pagados.</p></div>'; }
-  function renderFacturas(){return '<div class="card"><h3>Facturas</h3><p style="font-size:.8rem;color:#64748b;">Facturas y boletas emitidas.</p></div>'; }
-  function renderDelivery(){return '<div class="card"><h3>Delivery</h3><p style="font-size:.8rem;color:#64748b;">Entregas por distrito y repartidor.</p></div>'; }
-  function renderClientes(){return '<div class="card"><h3>Clientes</h3><p style="font-size:.8rem;color:#64748b;">Ranking de clientes y datos.</p></div>'; }
-  function renderPersonal(){return '<div class="card"><h3>RRHH / Personal</h3><p style="font-size:.8rem;color:#64748b;">Colaboradores, sueldos y asistencia.</p></div>'; }
-  function renderReclamos(){return '<div class="card"><h3>Reclamos</h3><p style="font-size:.8rem;color:#64748b;">Historial de reclamos por pedido.</p></div>'; }
-
-  init();
+  // ========= INIT =========
+  window.addEventListener("DOMContentLoaded", () => {
+    setTodayLabel();
+    setupNavigation();
+    syncAll(); // primera carga del dashboard
+  });
 </script>
+
 </body>
 </html>
