@@ -634,27 +634,33 @@
                 <p>Sistema Inteligente con IA de Voz</p>
             </div>
 
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label class="form-label">Usuario o Email</label>
-                    <input type="text" class="form-input" id="username" required placeholder="admin@bravizimos.com">
-                </div>
+         <script>
+  function handleLogin(event) {
+    event.preventDefault(); // evita que se recargue la página
 
-                <div class="form-group">
-                    <label class="form-label">Contraseña</label>
-                    <input type="password" class="form-input" id="password" required placeholder="admin123">
-                </div>
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
 
-                <button type="submit" class="btn btn-primary">Iniciar Sesión 🔐</button>
-            </form>
+    // Usuarios válidos
+    const users = [
+      { role: 'admin',     email: 'admin@bravizimos.com',     password: 'admin123',  redirect: 'admin.html' },
+      { role: 'vendedor',  email: 'vendedor@bravizimos.com',  password: 'vende123',  redirect: 'vendedor.html' },
+      { role: 'logistica', email: 'logistica@bravizimos.com', password: 'logis123',  redirect: 'logistica.html' }
+    ];
 
-            <div class="login-footer">
-                <p><strong>Usuarios de Prueba:</strong></p>
-                <p>👑 Admin: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ed8c89808483ad8f9f8c9b84978480829ec38e8280">[email&#160;protected]</a> / admin123</p>
-                <p>🛒 Vendedora: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="cfb9aaa1abaaaba0bdae8fadbdaeb9a6b5a6a2a0bce1aca0a2">[email&#160;protected]</a> / vende123</p>
-                <p>📦 Logística: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1975767e706a6d707a78597b6b786f70637074766a377a7674">[email&#160;protected]</a> / logis123</p>
-            </div>
-        </div>
+    // Buscar si existe un usuario con ese correo y contraseña
+    const user = users.find(u => u.email === username && u.password === password);
+
+    if (!user) {
+      alert('Usuario o contraseña incorrectos');
+      return;
+    }
+
+    // Redirigir según el rol
+    window.location.href = user.redirect;
+  }
+</script>
+
     </div>
 
     <!-- MAIN APP -->
