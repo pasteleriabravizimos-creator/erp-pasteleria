@@ -1,1227 +1,223 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>BRAVIZIMOS ERP - Operación diaria V2</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Fuente base -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+  <meta charset="UTF-8">
+  <title>BRAVIZIMO’S ERP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
-    :root {
-      --color-bg: #050814;
-      --color-bg-elevated: #0c1020;
-      --color-border: #22263a;
-      --color-accent: #ff4b8a;
-      --color-accent-soft: rgba(255,75,138,0.15);
-      --color-accent-strong: #ff8ab0;
-      --color-text: #f5f5ff;
-      --color-text-soft: #a5adc8;
-      --color-badge-green: #0f9d58;
-      --color-badge-orange: #f9ab00;
-      --color-danger: #f44336;
-      --radius-lg: 18px;
-      --radius-xl: 24px;
-      --shadow-soft: 0 18px 35px rgba(0,0,0,0.55);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top left, #161b3a 0, #050814 40%);
-      color: var(--color-text);
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    .app-shell {
-      display: grid;
-      grid-template-columns: 260px minmax(0, 1fr);
-      height: 100vh;
-    }
-
-    /* SIDEBAR */
-
-    .sidebar {
-      background: linear-gradient(180deg, #111528 0%, #070915 60%, #040510 100%);
-      border-right: 1px solid rgba(255,255,255,0.04);
-      padding: 18px 18px 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 22px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 7px 10px 12px;
-    }
-
-    .brand-logo {
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
-      background: radial-gradient(circle at 30% 0, #ffe082 0, #ff4b8a 40%, #9c27b0 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-weight: 800;
-      font-size: 18px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.55);
-    }
-
-    .brand-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .brand-title {
-      font-size: 15px;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-    }
-
-    .brand-subtitle {
-      font-size: 11px;
-      color: var(--color-text-soft);
-    }
-
-    .sidebar-section-label {
-      font-size: 11px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: rgba(165,173,200,0.68);
-      margin: 6px 8px 4px;
-    }
-
-    .nav-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .nav-button {
-      width: 100%;
-      border: 0;
-      outline: 0;
-      text-align: left;
-      background: transparent;
-      color: var(--color-text-soft);
-      font-size: 13px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      transition: background 0.15s ease, color 0.15s ease, transform 0.05s ease;
-    }
-
-    .nav-button span.nav-icon {
-      width: 22px;
-      height: 22px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.04);
-    }
-
-    .nav-button span.nav-label {
-      flex: 1;
-      white-space: nowrap;
-    }
-
-    .nav-button.nav-active {
-      background: radial-gradient(circle at 0 0, rgba(255,255,255,0.08) 0, rgba(255,255,255,0) 45%),
-                  var(--color-accent-soft);
-      color: #fff;
-      box-shadow: 0 0 0 1px rgba(255,75,138,0.6);
-      transform: translateY(-1px);
-    }
-
-    .nav-button:hover:not(.nav-active) {
-      background: rgba(255,255,255,0.03);
-      color: #fff;
-    }
-
-    .sidebar-footer {
-      margin-top: auto;
-      padding-top: 10px;
-      border-top: 1px solid rgba(255,255,255,0.06);
-      font-size: 11px;
-      color: var(--color-text-soft);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: #00e676;
-      box-shadow: 0 0 0 4px rgba(0,230,118,0.16);
-    }
-
-    /* MAIN AREA */
-
-    .main {
-      padding: 18px 22px 22px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      overflow: hidden;
-    }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .topbar-main {
-      flex: 1;
-    }
-
-    .topbar-title {
-      font-size: 20px;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      margin-bottom: 2px;
-    }
-
-    .topbar-subtitle {
-      font-size: 12px;
-      color: var(--color-text-soft);
-    }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 12px;
-    }
-
-    .pill {
-      border-radius: 999px;
-      padding: 4px 10px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(10,20,50,0.9);
-      border: 1px solid rgba(255,255,255,0.04);
-      color: var(--color-text-soft);
-    }
-
-    .pill strong {
-      color: var(--color-text);
-      font-weight: 500;
-    }
-
-    .btn-primary {
-      border-radius: 999px;
-      border: 0;
-      padding: 7px 14px;
-      background: linear-gradient(135deg, var(--color-accent), #ff9800);
-      color: #050814;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 12px 26px rgba(0,0,0,0.65);
-    }
-
-    .btn-primary:disabled {
-      opacity: 0.6;
-      cursor: default;
-      box-shadow: none;
-    }
-
-    .btn-primary span.icon {
-      font-size: 14px;
-    }
-
-    .content-shell {
-      flex: 1;
-      border-radius: var(--radius-xl);
-      background: radial-gradient(circle at top left, rgba(144,202,249,0.08) 0, rgba(4,5,16,0.97) 55%);
-      box-shadow: var(--shadow-soft);
-      padding: 18px 18px 20px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .view-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .view-title {
-      font-size: 17px;
-      font-weight: 600;
-    }
-
-    .view-subtitle {
-      font-size: 12px;
-      color: var(--color-text-soft);
-    }
-
-    .view-badges {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      font-size: 11px;
-    }
-
-    .badge {
-      padding: 3px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(8,12,26,0.9);
-    }
-
-    .badge.badge-green {
-      border-color: rgba(15,157,88,0.7);
-      color: #b9f6ca;
-    }
-
-    .badge.badge-orange {
-      border-color: rgba(249,171,0,0.7);
-      color: #ffe0b2;
-    }
-
-    /* DASHBOARD GRID */
-
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: 2.1fr 1.3fr;
-      gap: 14px;
-      height: 100%;
-      min-height: 0;
-    }
-
-    .card {
-      background: rgba(4,7,20,0.95);
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(255,255,255,0.05);
-      padding: 14px 14px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      font-size: 12px;
-    }
-
-    .card-header h3 {
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .card-header span {
-      color: var(--color-text-soft);
-    }
-
-    .metrics-row {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .metric-pill {
-      padding: 9px 10px;
-      border-radius: 14px;
-      background: radial-gradient(circle at top, rgba(255,255,255,0.05) 0, rgba(9,10,32,0.95) 34%);
-      border: 1px solid rgba(255,255,255,0.06);
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      font-size: 11px;
-      min-height: 60px;
-    }
-
-    .metric-label {
-      color: var(--color-text-soft);
-    }
-
-    .metric-value {
-      font-size: 15px;
-      font-weight: 600;
-    }
-
-    .metric-trend-up {
-      font-size: 11px;
-      color: #b9f6ca;
-    }
-
-    .metric-trend-down {
-      font-size: 11px;
-      color: #ffab91;
-    }
-
-    .kpi-list {
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-      font-size: 12px;
-    }
-
-    .kpi-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .kpi-item-label {
-      color: var(--color-text-soft);
-    }
-
-    .kpi-item-value {
-      font-weight: 500;
-    }
-
-    .kpi-item-pill {
-      border-radius: 999px;
-      padding: 3px 8px;
-      font-size: 11px;
-      background: rgba(0,0,0,0.5);
-    }
-
-    .scrollable-table {
-      flex: 1;
-      overflow: auto;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.06);
-      background: radial-gradient(circle at top, rgba(255,255,255,0.03) 0, rgba(3,4,15,0.97) 40%);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-
-    thead {
-      background: rgba(10,15,40,0.95);
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-
-    th, td {
-      padding: 6px 10px;
-      white-space: nowrap;
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-    }
-
-    th {
-      text-align: left;
-      font-weight: 500;
-      color: var(--color-text-soft);
-      font-size: 11px;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-    }
-
-    tbody tr:nth-child(even) {
-      background: rgba(255,255,255,0.01);
-    }
-
-    /* GENERIC VIEW LAYOUTS */
-
-    .view {
-      display: none;
-      flex: 1;
-      min-height: 0;
-      flex-direction: column;
-    }
-
-    .view-active {
-      display: flex;
-    }
-
-    .view-body {
-      flex: 1;
-      min-height: 0;
-      border-radius: 14px;
-      border: 1px dashed rgba(255,255,255,0.1);
-      padding: 12px;
-      font-size: 12px;
-      color: var(--color-text-soft);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-
-    .view-body p {
-      max-width: 360px;
-      line-height: 1.5;
-    }
-
-    .view-body code {
-      font-size: 11px;
-      padding: 2px 4px;
-      border-radius: 6px;
-      background: rgba(0,0,0,0.6);
-      border: 1px solid rgba(255,255,255,0.18);
-      color: #e3f2fd;
-    }
-
-    @media (max-width: 960px) {
-      .app-shell {
-        grid-template-columns: 80px minmax(0, 1fr);
-      }
-      .brand-meta {
-        display: none;
-      }
-      .sidebar-section-label {
-        display: none;
-      }
-      .nav-button span.nav-label {
-        display: none;
-      }
-      .topbar-title {
-        font-size: 18px;
-      }
-      .dashboard-grid {
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: auto auto;
-      }
-    }
-
+    body{margin:0;font-family:system-ui, -apple-system, BlinkMacSystemFont, sans-serif;background:#020617;color:#e2e8f0;display:flex;min-height:100vh}
+    .sidebar{width:250px;border-right:1px solid #1e293b;padding:1rem;display:flex;flex-direction:column;gap:.5rem}
+    .main{flex:1;padding:1rem 1.5rem}
+    .nav-item{padding:.35rem .55rem;border-radius:.5rem;font-size:.85rem;cursor:pointer;color:#94a3b8}
+    .nav-item:hover{background:#020617;color:#e2e8f0}
+    .nav-item.active{background:rgba(79,70,229,.2);color:#e2e8f0;border:1px solid rgba(79,70,229,.6)}
+    .card{border-radius:.8rem;border:1px solid #1e293b;padding:.9rem 1rem;margin-bottom:.75rem;background:#020617}
+    table{width:100%;border-collapse:collapse;font-size:.8rem}
+    th,td{padding:.4rem .5rem;border-bottom:1px solid #020617;text-align:left}
+    th{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:#64748b;background:#020617}
+    .badge{display:inline-flex;padding:.1rem .45rem;border-radius:999px;font-size:.65rem;border:1px solid #4b5563}
+    .badge.green{border-color:rgba(22,163,74,.6);color:#4ade80;background:rgba(22,163,74,.15)}
+    .badge.red{border-color:rgba(248,113,113,.7);color:#fecaca;background:rgba(248,113,113,.12)}
+    .loader{text-align:center;padding:2rem 0;color:#64748b;font-size:.85rem}
   </style>
 </head>
 <body>
-<div class="app-shell">
-  <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-logo">BR</div>
-      <div class="brand-meta">
-        <div class="brand-title">BRAVIZIMOS ERP</div>
-        <div class="brand-subtitle">Operación diaria · V2</div>
-      </div>
-    </div>
-
-    <div>
-      <div class="sidebar-section-label">Panel</div>
-      <div class="nav-group">
-        <button class="nav-button nav-active" data-view="dashboard">
-          <span class="nav-icon">D</span>
-          <span class="nav-label">Dashboard</span>
-        </button>
-      </div>
-    </div>
-
-    <div>
-      <div class="sidebar-section-label">Ventas</div>
-      <div class="nav-group">
-        <button class="nav-button" data-view="ventas_pedidos">
-          <span class="nav-icon">V</span>
-          <span class="nav-label">Ventas / Pedidos</span>
-        </button>
-        <button class="nav-button" data-view="cotizaciones">
-          <span class="nav-icon">C</span>
-          <span class="nav-label">Cotizaciones</span>
-        </button>
-        <button class="nav-button" data-view="clientes">
-          <span class="nav-icon">👤</span>
-          <span class="nav-label">Clientes</span>
-        </button>
-        <button class="nav-button" data-view="delivery">
-          <span class="nav-icon">🚚</span>
-          <span class="nav-label">Delivery</span>
-        </button>
-      </div>
-    </div>
-
-    <div>
-      <div class="sidebar-section-label">Producción</div>
-      <div class="nav-group">
-        <button class="nav-button" data-view="productos">
-          <span class="nav-icon">🍰</span>
-          <span class="nav-label">Productos</span>
-        </button>
-        <button class="nav-button" data-view="inventario">
-          <span class="nav-icon">📦</span>
-          <span class="nav-label">Inventario</span>
-        </button>
-        <button class="nav-button" data-view="produccion">
-          <span class="nav-icon">🧁</span>
-          <span class="nav-label">Producción</span>
-        </button>
-        <button class="nav-button" data-view="recetas">
-          <span class="nav-icon">📖</span>
-          <span class="nav-label">Recetas</span>
-        </button>
-        <button class="nav-button" data-view="insumos">
-          <span class="nav-icon">🧂</span>
-          <span class="nav-label">Insumos</span>
-        </button>
-      </div>
-    </div>
-
-    <div>
-      <div class="sidebar-section-label">Compras y gastos</div>
-      <div class="nav-group">
-        <button class="nav-button" data-view="proveedores">
-          <span class="nav-icon">🏭</span>
-          <span class="nav-label">Proveedores</span>
-        </button>
-        <button class="nav-button" data-view="compras">
-          <span class="nav-icon">🧾</span>
-          <span class="nav-label">Compras</span>
-        </button>
-        <button class="nav-button" data-view="servicios">
-          <span class="nav-icon">⚙</span>
-          <span class="nav-label">Servicios</span>
-        </button>
-        <button class="nav-button" data-view="gastos">
-          <span class="nav-icon">💸</span>
-          <span class="nav-label">Gastos</span>
-        </button>
-      </div>
-    </div>
-
-    <div>
-      <div class="sidebar-section-label">Finanzas & KPIs</div>
-      <div class="nav-group">
-        <button class="nav-button" data-view="facturas">
-          <span class="nav-icon">📑</span>
-          <span class="nav-label">Facturas / Comprobantes</span>
-        </button>
-        <button class="nav-button" data-view="kpis_vendedoras">
-          <span class="nav-icon">⭐</span>
-          <span class="nav-label">KPI vendedoras</span>
-        </button>
-        <button class="nav-button" data-view="reclamos">
-          <span class="nav-icon">❗</span>
-          <span class="nav-label">Reclamos / Satisfacción</span>
-        </button>
-      </div>
-    </div>
-
-    <div class="sidebar-footer">
-      <div style="display:flex;align-items:center;gap:6px;">
-        <span class="status-dot"></span>
-        <span>En línea</span>
-      </div>
-      <span style="opacity:.7;">Hoy: <span id="etiqueta-hoy">-</span></span>
-    </div>
+    <div style="font-weight:700;font-size:.95rem;margin-bottom:.5rem;">BRAVIZIMO’S ERP</div>
+    <div class="nav-item active" data-page="dashboard" onclick="go('dashboard',this)">Dashboard</div>
+    <div class="nav-item" data-page="ventas" onclick="go('ventas',this)">Ventas</div>
+    <div class="nav-item" data-page="inventario" onclick="go('inventario',this)">Inventario</div>
+    <div class="nav-item" data-page="recetas" onclick="go('recetas',this)">Recetario</div>
+    <div class="nav-item" data-page="produccion" onclick="go('produccion',this)">Producción</div>
+    <div class="nav-item" data-page="compras" onclick="go('compras',this)">Compras</div>
+    <div class="nav-item" data-page="gastos" onclick="go('gastos',this)">Gastos</div>
+    <div class="nav-item" data-page="servicios" onclick="go('servicios',this)">Servicios</div>
+    <div class="nav-item" data-page="facturas" onclick="go('facturas',this)">Facturas</div>
+    <div class="nav-item" data-page="delivery" onclick="go('delivery',this)">Delivery</div>
+    <div class="nav-item" data-page="clientes" onclick="go('clientes',this)">Clientes</div>
+    <div class="nav-item" data-page="personal" onclick="go('personal',this)">RRHH / Personal</div>
+    <div class="nav-item" data-page="reclamos" onclick="go('reclamos',this)">Reclamos</div>
   </aside>
-
-  <!-- MAIN -->
   <main class="main">
-    <header class="topbar">
-      <div class="topbar-main">
-        <div class="topbar-title">Dashboard de impacto</div>
-        <div class="topbar-subtitle">Visión rápida de ventas, producción, caja y salud financiera del día.</div>
-      </div>
-      <div class="topbar-right">
-        <div class="pill">
-          <span>Meta mensual ventas</span>
-          <strong id="meta-mensual-pill">S/ 50,000</strong>
-        </div>
-        <button class="btn-primary" id="sync-all-btn" onclick="syncAll()">
-          <span class="icon">⟳</span>
-          <span>Sincronizar con Google Sheets</span>
-        </button>
-      </div>
-    </header>
-
-    <section class="content-shell">
-      <!-- DASHBOARD VIEW -->
-      <section class="view view-active" data-view-id="dashboard">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Resumen general de la operación</div>
-            <div class="view-subtitle">Ventas, pedidos, stock crítico, flujo de caja e impuestos del periodo.</div>
-          </div>
-          <div class="view-badges">
-            <span class="badge badge-green">Cierre de fin de semana</span>
-            <span class="badge badge-orange">IGV pendiente de declarar</span>
-          </div>
-        </div>
-
-        <div class="dashboard-grid">
-          <!-- LEFT: MAIN KPIs -->
-          <div class="card">
-            <div class="card-header">
-              <h3>Impacto del día</h3>
-              <span>Actualizado: <span id="dashboard-updated-label">—</span></span>
-            </div>
-
-            <div class="metrics-row" style="margin-bottom:8px;">
-              <div class="metric-pill">
-                <div class="metric-label">Ventas (S/)</div>
-                <div class="metric-value" id="kpi-ventas-hoy">3,250.00</div>
-                <div class="metric-trend-up" id="kpi-ventas-trend">+12% vs. semana pasada</div>
-              </div>
-              <div class="metric-pill">
-                <div class="metric-label">Pedidos</div>
-                <div class="metric-value" id="kpi-pedidos-hoy">18</div>
-                <div class="metric-trend-up" id="kpi-pedidos-trend">+4 pedidos</div>
-              </div>
-              <div class="metric-pill">
-                <div class="metric-label">Ticket promedio</div>
-                <div class="metric-value" id="kpi-ticket-prom">S/ 180.56</div>
-                <div class="metric-trend-up" id="kpi-ticket-trend">Objetivo: S/ 160</div>
-              </div>
-              <div class="metric-pill">
-                <div class="metric-label">Clientes nuevos</div>
-                <div class="metric-value" id="kpi-clientes-nuevos">3</div>
-                <div class="metric-trend-up" id="kpi-clientes-trend">Instagram / Referidos</div>
-              </div>
-            </div>
-
-            <div class="metrics-row">
-              <div class="metric-pill">
-                <div class="metric-label">Ingresos netos</div>
-                <div class="metric-value" id="kpi-ingresos-netos">S/ 2,750.00</div>
-                <div class="metric-trend-up">Después de delivery & comisiones</div>
-              </div>
-              <div class="metric-pill">
-                <div class="metric-label">Gastos netos</div>
-                <div class="metric-value" id="kpi-gastos-netos">S/ 1,200.00</div>
-                <div class="metric-trend-down">Servicios, insumos y personal</div>
-              </div>
-              <div class="metric-pill">
-                <div class="metric-label">Utilidad estimada</div>
-                <div class="metric-value" id="kpi-utilidad">S/ 1,550.00</div>
-                <div class="metric-trend-up">Margen 47% aproximado</div>
-              </div>
-              <div class="metric-pill">
-                <div class="metric-label">IGV a declarar</div>
-                <div class="metric-value" id="kpi-igv">S/ 420.00</div>
-                <div class="metric-trend-down">Ventas – Compras / 1.18</div>
-              </div>
-            </div>
-
-            <div style="margin-top:12px;display:grid;grid-template-columns:1.45fr 1.1fr;gap:10px;min-height:0;flex:1;">
-              <div class="card" style="padding:10px 10px 8px;">
-                <div class="card-header" style="margin-bottom:6px;">
-                  <h3>Top 5 productos vendidos</h3>
-                  <span>Últimos 7 días</span>
-                </div>
-                <div class="scrollable-table">
-                  <table>
-                    <thead>
-                    <tr>
-                      <th>Producto</th>
-                      <th>Unid.</th>
-                      <th>Ingresos</th>
-                      <th>Margen</th>
-                    </tr>
-                    </thead>
-                    <tbody id="tabla-top-productos">
-                    <tr>
-                      <td>Pack 100 bocaditos - Clásico</td>
-                      <td>22</td>
-                      <td>S/ 3,036</td>
-                      <td>52%</td>
-                    </tr>
-                    <tr>
-                      <td>Tequeños de queso + guacamole</td>
-                      <td>18</td>
-                      <td>S/ 2,160</td>
-                      <td>49%</td>
-                    </tr>
-                    <tr>
-                      <td>Mini cheeseburger</td>
-                      <td>14</td>
-                      <td>S/ 1,680</td>
-                      <td>46%</td>
-                    </tr>
-                    <tr>
-                      <td>Empanada de pollo</td>
-                      <td>26</td>
-                      <td>S/ 1,430</td>
-                      <td>44%</td>
-                    </tr>
-                    <tr>
-                      <td>Torta de chocolate con fudge</td>
-                      <td>9</td>
-                      <td>S/ 945</td>
-                      <td>55%</td>
-                    </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div class="card" style="padding:10px 10px 8px;">
-                <div class="card-header" style="margin-bottom:6px;">
-                  <h3>Indicadores clave</h3>
-                  <span>Por canal / medio de pago</span>
-                </div>
-                <div class="kpi-list">
-                  <div class="kpi-item">
-                    <div class="kpi-item-label">% ventas por canal digital</div>
-                    <div class="kpi-item-value">68% <span class="kpi-item-pill">IG / Web / WhatsApp</span></div>
-                  </div>
-                  <div class="kpi-item">
-                    <div class="kpi-item-label">Pendiente de pago clientes</div>
-                    <div class="kpi-item-value">S/ 1,120 <span class="kpi-item-pill" style="color:#ffccbc;">crédito / corporate</span></div>
-                  </div>
-                  <div class="kpi-item">
-                    <div class="kpi-item-label">Boletas vs facturas (ventas)</div>
-                    <div class="kpi-item-value">78% / 22%</div>
-                  </div>
-                  <div class="kpi-item">
-                    <div class="kpi-item-label">Boletas vs facturas (gastos)</div>
-                    <div class="kpi-item-value">35% / 65%</div>
-                  </div>
-                  <div class="kpi-item">
-                    <div class="kpi-item-label">Delivery: paga cliente / empresa</div>
-                    <div class="kpi-item-value">S/ 920 / S/ 310</div>
-                  </div>
-                  <div class="kpi-item">
-                    <div class="kpi-item-label">Clientes activos mes</div>
-                    <div class="kpi-item-value">126 <span class="kpi-item-pill" style="color:#c5e1a5;">18 corporativos</span></div>
-                  </div>
-                  <div class="kpi-item">
-                    <div class="kpi-item-label">Stock crítico de insumos</div>
-                    <div class="kpi-item-value">3 <span class="kpi-item-pill" style="color:#ffe082;">Revisar inventario</span></div>
-                  </div>
-                  <div class="kpi-item">
-                    <div class="kpi-item-label">Cumplimiento meta mensual</div>
-                    <div class="kpi-item-value">86% <span class="kpi-item-pill" style="color:#b3e5fc;">proyección cierre</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          <!-- RIGHT: PIPELINE & PENDINGS -->
-          <div class="card">
-            <div class="card-header">
-              <h3>Estado de pedidos y cobranzas</h3>
-              <span>Hoy y próximos 3 días</span>
-            </div>
-
-            <div class="scrollable-table" style="margin-bottom:10px;">
-              <table>
-                <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Cliente</th>
-                  <th>Canal</th>
-                  <th>Importe</th>
-                  <th>Estado pago</th>
-                </tr>
-                </thead>
-                <tbody id="tabla-pedidos-pendientes">
-                <tr>
-                  <td>Hoy</td>
-                  <td>María Torres</td>
-                  <td>Instagram</td>
-                  <td>S/ 380</td>
-                  <td><span style="color:#b9f6ca;">Pagado</span></td>
-                </tr>
-                <tr>
-                  <td>Hoy</td>
-                  <td>Corporación Dulce S.A.C.</td>
-                  <td>Corporativo</td>
-                  <td>S/ 1,250</td>
-                  <td><span style="color:#ffe082;">Pendiente</span></td>
-                </tr>
-                <tr>
-                  <td>Mañana</td>
-                  <td>Eventos Lima</td>
-                  <td>WhatsApp</td>
-                  <td>S/ 980</td>
-                  <td><span style="color:#ffab91;">Contra entrega</span></td>
-                </tr>
-                <tr>
-                  <td>+2 días</td>
-                  <td>Buffet San José</td>
-                  <td>Recomendado</td>
-                  <td>S/ 2,400</td>
-                  <td><span style="color:#b3e5fc;">Separación</span></td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="card" style="padding:8px 10px;">
-              <div class="card-header" style="margin-bottom:4px;">
-                <h3>Resumen rápido</h3>
-                <span>Indicadores operativos</span>
-              </div>
-              <div class="kpi-list">
-                <div class="kpi-item">
-                  <div class="kpi-item-label">Órdenes en producción ahora</div>
-                  <div class="kpi-item-value">6</div>
-                </div>
-                <div class="kpi-item">
-                  <div class="kpi-item-label">Pedidos para el fin de semana</div>
-                  <div class="kpi-item-value">34</div>
-                </div>
-                <div class="kpi-item">
-                  <div class="kpi-item-label">Pedidos con delivery tercerizado</div>
-                  <div class="kpi-item-value">12 (Rappi / PedidosYa)</div>
-                </div>
-                <div class="kpi-item">
-                  <div class="kpi-item-label">Pedidos con delivery propio</div>
-                  <div class="kpi-item-value">9</div>
-                </div>
-                <div class="kpi-item">
-                  <div class="kpi-item-label">Índice de reclamos del mes</div>
-                  <div class="kpi-item-value">1.2% (meta ≤ 2%)</div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      <!-- OTRAS VISTAS (PLACEHOLDER) -->
-
-      <section class="view" data-view-id="ventas_pedidos">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Ventas / Pedidos</div>
-            <div class="view-subtitle">Registro de pedidos, filtros por fecha, canal y estado de pago.</div>
-          </div>
-        </div>
-        <div class="view-body">
-          <p>
-            Aquí irá la tabla de pedidos con filtros (fecha, canal, medio de pago, estado, vendedora, etc.).
-            Desde el Apps Script puedes exponer una acción como <code>?action=list_pedidos</code> para llenar esta vista.
-          </p>
-        </div>
-      </section>
-
-      <section class="view" data-view-id="cotizaciones">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Cotizaciones</div>
-            <div class="view-subtitle">Propuestas enviadas a clientes, conversión a ventas y seguimiento.</div>
-          </div>
-        </div>
-        <div class="view-body">
-          <p>
-            Aquí podrás listar cotizaciones, marcar ganadas/perdidas y medir la tasa de conversión.
-          </p>
-        </div>
-      </section>
-
-      <section class="view" data-view-id="clientes">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Clientes</div>
-            <div class="view-subtitle">Listado de clientes finales y corporativos, por canal y frecuencia de compra.</div>
-          </div>
-        </div>
-        <div class="view-body">
-          <p>
-            Conecta esta vista a tu hoja <code>CLIENTES</code> usando una acción tipo
-            <code>?action=list_clientes</code> para ver canales, tickets y recurrencia.
-          </p>
-        </div>
-      </section>
-
-      <section class="view" data-view-id="delivery">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Delivery</div>
-            <div class="view-subtitle">Control de entregas y flota, costo vs. cobro al cliente.</div>
-          </div>
-        </div>
-        <div class="view-body">
-          <p>
-            Aquí puedes comparar cuánto paga el cliente por delivery vs. cuánto asume la empresa,
-            a partir de tu hoja <code>DELIVERY</code>.
-          </p>
-        </div>
-      </section>
-
-      <section class="view" data-view-id="productos">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Productos</div>
-            <div class="view-subtitle">Catálogo y precios, combos, packs y productos individuales.</div>
-          </div>
-        </div>
-        <div class="view-body">
-          <p>
-            Esta vista se alimenta de tu hoja <code>PRODUCTOS</code> (incluyendo packs, combos y unidades).
-          </p>
-        </div>
-      </section>
-
-      <section class="view" data-view-id="inventario">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Inventario</div>
-            <div class="view-subtitle">Stock de insumos y terminados, con alertas de stock crítico.</div>
-          </div>
-        </div>
-        <div class="view-body">
-          <p>Con tu hoja <code>INVENTARIO</code> puedes calcular stock disponible y alertas de ruptura.</p>
-        </div>
-      </section>
-
-      <section class="view" data-view-id="produccion">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Producción</div>
-            <div class="view-subtitle">Lotes producidos por día, por producto y por canal.</div>
-          </div>
-        </div>
-        <div class="view-body">
-          <p>Aquí veremos cuántas unidades se producen por día, por tipo de bocadito y por pedido.</p>
-        </div>
-      </section>
-
-      <section class="view" data-view-id="recetas">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Recetas</div>
-            <div class="view-subtitle">Fichas técnicas, costos por unidad y rendimiento por receta.</div>
-          </div>
-        </div>
-        <div class="view-body">
-          <p>
-            Conecta esta vista a <code>RECETAS_MAESTRO</code> y <code>RECETAS_DETALLE</code>
-            para calcular costos unitarios y margen.
-          </p>
-        </div>
-      </section>
-
-      <section class="view" data-view-id="insumos">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Insumos</div>
-            <div class="view-subtitle">Maestro de insumos con unidad de medida, costo y proveedor principal.</div>
-          </div>
-        </div>
-        <div class="view-body">
-          <p>Esta vista se alimenta desde tu hoja <code>INSUMOS</code>.</p>
-        </div>
-      </section>
-
-      <section class="view" data-view-id="proveedores">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Proveedores</div>
-            <div class="view-subtitle">Ficha de proveedores, condiciones de pago y contacto.</div>
-          </div>
-        </div>
-        <div class="view-body">
-          <p>Conecta a tu hoja <code>PROVEEDORES</code> para tener tu agenda de compras centralizada.</p>
-        </div>
-      </section>
-
-      <section class="view" data-view-id="compras">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Compras</div>
-            <div class="view-subtitle">Compras de insumos, materias primas y otros costos de producción.</div>
-          </div>
-        </div>
-        <div class="view-body">
-          <p>Aquí podemos cruzar <code>COMPRAS</code> con <code>INSUMOS</code> para analizar costos.</p>
-        </div>
-      </section>
-
-      <section class="view" data-view-id="servicios">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Servicios</div>
-            <div class="view-subtitle">Servicios contratados: agua, luz, internet, alquiler, marketing, etc.</div>
-          </div>
-        </div>
-        <div class="view-body">
-          <p>
-            Esta vista usa tu hoja <code>SERVICIOS</code> (como el registro de Sedapal que ya tienes) para ver
-            gastos fijos vs variables.
-          </p>
-        </div>
-      </section>
-
-      <section class="view" data-view-id="gastos">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Gastos operativos</div>
-            <div class="view-subtitle">Todos los gastos por categoría y subcategoría.</div>
-          </div>
-        </div>
-        <div class="view-body">
-          <p>
-            Aquí se cruza información de <code>COMPRAS</code>, <code>SERVICIOS</code> y otros gastos para
-            calcular tus gastos netos diarios y mensuales.
-          </p>
-        </div>
-      </section>
-
-      <section class="view" data-view-id="facturas">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Facturas y comprobantes</div>
-            <div class="view-subtitle">Boletas y facturas de ventas y gastos, con cálculo de IGV a declarar.</div>
-          </div>
-        </div>
-        <div class="view-body">
-          <p>
-            Desde aquí puedes ver cuántas boletas y facturas se emitieron en ventas y en gastos,
-            y cómo impactan en el IGV a declarar.
-          </p>
-        </div>
-      </section>
-
-      <section class="view" data-view-id="kpis_vendedoras">
-        <div class="view-header">
-          <div>
-            <div class="view-title">KPI vendedoras</div>
-            <div class="view-subtitle">Desempeño por vendedora, canal y ticket promedio.</div>
-          </div>
-        </div>
-        <div class="view-body">
-          <p>
-            Aquí podrás ver ventas por vendedora, metas cumplidas y comisiones, usando tu hoja
-            <code>KPIS_VENDEDORAS</code>.
-          </p>
-        </div>
-      </section>
-
-      <section class="view" data-view-id="reclamos">
-        <div class="view-header">
-          <div>
-            <div class="view-title">Reclamos y satisfacción</div>
-            <div class="view-subtitle">Gestión de reclamos, tiempos de respuesta y NPS.</div>
-          </div>
-        </div>
-        <div class="view-body">
-          <p>
-            Esta vista se alimenta de tu hoja <code>RECLAMOS</code> para monitorear la experiencia del cliente.
-          </p>
-        </div>
-      </section>
-
-    </section>
+    <div id="app"></div>
   </main>
-</div>
 
 <script>
-  // ======= CONFIGURACIÓN PARA SINCRONIZAR CON GOOGLE SHEETS =======
-  const API_BASE = "https://script.google.com/macros/s/AKfycbzDmaWHeYudtg0zdNgQwQmPvzUgELP9e-dD8ZstujK4xdGK4Ln4CIP-CBBbCpevKcJO/exec";
+  // ⚠️ Cambia esto por la URL del Web App del Apps Script
+  const API_URL = 'TU_WEB_APP_URL_AQUI';
 
-  // ======= UTILIDADES BÁSICAS =======
-  function setTodayLabel() {
-    const ahora = new Date();
-    const opciones = { day: "2-digit", month: "2-digit", year: "numeric" };
-    const etiquetaHoy = document.getElementById("etiqueta-hoy");
-    if (etiquetaHoy) {
-      etiquetaHoy.textContent = ahora.toLocaleDateString("es-PE", opciones);
-    }
-  }
+  let DATA = null;
+  let DASH = null;
+  let page = 'dashboard';
 
-  function setDashboardUpdatedLabel() {
-    const ahora = new Date();
-    const lbl = document.getElementById("dashboard-updated-label");
-    if (lbl) {
-      lbl.textContent = ahora.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
-    }
-  }
-
-  function setupNavigation() {
-    const buttons = document.querySelectorAll(".nav-button");
-    const views = document.querySelectorAll(".view");
-
-    buttons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const viewKey = btn.getAttribute("data-view");
-
-        buttons.forEach(b => b.classList.remove("nav-active"));
-        btn.classList.add("nav-active");
-
-        views.forEach(v => {
-          if (v.getAttribute("data-view-id") === viewKey) {
-            v.classList.add("view-active");
-          } else {
-            v.classList.remove("view-active");
-          }
-        });
-      });
-    });
-  }
-
-  // ======= SINCRONIZACIÓN CON GOOGLE SHEETS (ESQUELETO) =======
-  async function syncAll() {
-    if (!API_BASE) {
-      alert("Falta configurar la URL del Web App de Google Apps Script (API_BASE).");
-      return;
-    }
-
-    const btn = document.getElementById("sync-all-btn");
-    const originalText = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = "Sincronizando...";
-
+  async function init() {
     try {
-      const url = API_BASE + "?action=sync_all";
-      const res = await fetch(url);
-
-      if (!res.ok) {
-        throw new Error("HTTP " + res.status);
-      }
-
-      const data = await res.json();
-      console.log("Respuesta de sincronización:", data);
-
-      if (data && data.status === "ok") {
-        alert("Sincronización completada correctamente.");
-      } else {
-        alert("El servidor respondió con un estado inesperado. Revisa la consola para más detalle.");
-      }
-
-      setDashboardUpdatedLabel();
-    } catch (error) {
-      console.error("Error al sincronizar:", error);
-      alert("Ocurrió un error al sincronizar con Google Sheets.");
-    } finally {
-      btn.disabled = false;
-      btn.textContent = originalText;
+      showLoader('Cargando ERP...');
+      const [d, all] = await Promise.all([
+        fetch(API_URL + '?action=dashboard').then(r => r.json()),
+        fetch(API_URL + '?action=getAll').then(r => r.json())
+      ]);
+      DASH = d;
+      DATA = all;
+      render();
+    } catch (e) {
+      console.error(e);
+      showLoader('Error al conectar con el ERP. Revisa la URL del Web App.');
     }
   }
 
-  // ======= INICIALIZACIÓN =======
-  window.addEventListener("DOMContentLoaded", () => {
-    setTodayLabel();
-    setDashboardUpdatedLabel();
-    setupNavigation();
-  });
+  function showLoader(msg) {
+    document.getElementById('app').innerHTML = '<div class="loader">'+msg+'</div>';
+  }
+
+  function go(p, el) {
+    page = p;
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (el) el.classList.add('active');
+    render();
+  }
+
+  function render() {
+    if (!DATA || !DASH) { showLoader('Cargando datos...'); return; }
+    const app = document.getElementById('app');
+    if (page === 'dashboard') return app.innerHTML = renderDashboard();
+    if (page === 'ventas')    return app.innerHTML = renderVentas();
+    if (page === 'inventario')return app.innerHTML = renderInventario();
+    if (page === 'recetas')   return app.innerHTML = renderRecetas();
+    if (page === 'produccion')return app.innerHTML = renderProduccion();
+    if (page === 'compras')   return app.innerHTML = renderCompras();
+    if (page === 'gastos')    return app.innerHTML = renderGastos();
+    if (page === 'servicios') return app.innerHTML = renderServicios();
+    if (page === 'facturas')  return app.innerHTML = renderFacturas();
+    if (page === 'delivery')  return app.innerHTML = renderDelivery();
+    if (page === 'clientes')  return app.innerHTML = renderClientes();
+    if (page === 'personal')  return app.innerHTML = renderPersonal();
+    if (page === 'reclamos')  return app.innerHTML = renderReclamos();
+  }
+
+  function money(v){v=parseFloat(v||0);return 'S/ '+v.toFixed(2);}
+
+  // ---- Dashboard simple ----
+  function renderDashboard() {
+    return `
+      <div class="card">
+        <h3>Resumen general</h3>
+        <p style="font-size:.8rem;color:#64748b;">Ventas, pedidos y alertas de inventario/servicios</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-top:.75rem;">
+          <div>
+            <div style="font-size:.75rem;color:#64748b;">Ventas hoy</div>
+            <div style="font-size:1.3rem;font-weight:600;">${money(DASH.ventasHoy.total)}</div>
+            <div style="font-size:.75rem;color:#64748b;">${DASH.ventasHoy.cantidad||0} pedidos</div>
+          </div>
+          <div>
+            <div style="font-size:.75rem;color:#64748b;">Ventas mes</div>
+            <div style="font-size:1.3rem;font-weight:600;">${money(DASH.ventasMes.total)}</div>
+            <div style="font-size:.75rem;color:#64748b;">${DASH.ventasMes.cantidad||0} pedidos</div>
+          </div>
+          <div>
+            <div style="font-size:.75rem;color:#64748b;">Ticket promedio</div>
+            <div style="font-size:1.3rem;font-weight:600;">${money(DATA.estadisticas.ticketPromedio||0)}</div>
+            <div style="font-size:.75rem;color:#64748b;">${DATA.estadisticas.cantidadVentas||0} ventas históricas</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Alertas rápidas</h3>
+        <ul style="margin:.4rem 0 0;padding-left:1.1rem;font-size:.78rem;color:#e2e8f0;max-height:220px;overflow:auto;">
+          ${(DASH.alertas||[]).map(a => '<li>'+a.mensaje+'</li>').join('') || '<li style="color:#64748b;">Sin alertas por ahora.</li>'}
+        </ul>
+      </div>
+    `;
+  }
+
+  // ---- Módulos ejemplo (ventas / inventario / servicios…) ----
+  function renderVentas() {
+    const v = DATA.ventas || [];
+    const filas = v.slice(0,80).map(r => `
+      <tr>
+        <td>${r.idventa||''}</td>
+        <td>${r.fecharegistro||''}</td>
+        <td>${r.cliente||''}</td>
+        <td>${r.canal||''}</td>
+        <td>${money(r.total||0)}</td>
+        <td><span class="badge ${String(r.estadopago||'').toLowerCase()==='pagado'?'green':'red'}">${r.estadopago||''}</span></td>
+      </tr>
+    `).join('') || '<tr><td colspan="6" style="text-align:center;color:#64748b;padding:.6rem;">Sin ventas.</td></tr>';
+
+    return `
+      <div class="card">
+        <h3>Ventas</h3>
+        <div style="max-height:430px;overflow:auto;margin-top:.5rem;">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Fecha</th><th>Cliente</th><th>Canal</th><th>Total</th><th>Pago</th></tr>
+            </thead>
+            <tbody>${filas}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderInventario() {
+    const inv = DATA.inventario || [];
+    const filas = inv.slice(0,120).map(p => `
+      <tr>
+        <td>${p.codigo||''}</td>
+        <td>${p.nombreproducto||''}</td>
+        <td>${p.categoria||''}</td>
+        <td>${p.stockactual||''}</td>
+        <td>${p.stockminimo||''}</td>
+        <td>${money(p.precioventa||0)}</td>
+      </tr>
+    `).join('') || '<tr><td colspan="6" style="text-align:center;color:#64748b;padding:.6rem;">Sin productos.</td></tr>';
+    return `
+      <div class="card">
+        <h3>Inventario productos</h3>
+        <div style="max-height:430px;overflow:auto;margin-top:.5rem;">
+          <table>
+            <thead>
+              <tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Mínimo</th><th>Precio</th></tr>
+            </thead>
+            <tbody>${filas}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderRecetas() {
+    const maestro = DATA.recetasMaestro || [];
+    const filas = maestro.slice(0,80).map(r => `
+      <tr>
+        <td>${r.codigo||''}</td><td>${r.producto||''}</td><td>${r.rendimiento||''}</td><td>${r.tiempomin||''}</td>
+      </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;color:#64748b;padding:.6rem;">Sin recetas.</td></tr>';
+    return `
+      <div class="card">
+        <h3>Recetas maestras</h3>
+        <div style="max-height:430px;overflow:auto;margin-top:.5rem;">
+          <table>
+            <thead><tr><th>Código</th><th>Producto</th><th>Rendimiento</th><th>Tiempo (min)</th></tr></thead>
+            <tbody>${filas}</tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  // El resto de módulos: mismos patrones
+  function renderProduccion(){return '<div class="card"><h3>Producción</h3><p style="font-size:.8rem;color:#64748b;">Aquí listarás órdenes de producción.</p></div>';}
+  function renderCompras(){return '<div class="card"><h3>Compras</h3><p style="font-size:.8rem;color:#64748b;">Lista de compras a proveedores.</p></div>';}
+  function renderGastos(){return '<div class="card"><h3>Gastos</h3><p style="font-size:.8rem;color:#64748b;">Gastos por categoría / cuenta.</p></div>';}
+  function renderServicios(){return '<div class="card"><h3>Servicios</h3><p style="font-size:.8rem;color:#64748b;">Servicios por pagar y pagados.</p></div>'; }
+  function renderFacturas(){return '<div class="card"><h3>Facturas</h3><p style="font-size:.8rem;color:#64748b;">Facturas y boletas emitidas.</p></div>'; }
+  function renderDelivery(){return '<div class="card"><h3>Delivery</h3><p style="font-size:.8rem;color:#64748b;">Entregas por distrito y repartidor.</p></div>'; }
+  function renderClientes(){return '<div class="card"><h3>Clientes</h3><p style="font-size:.8rem;color:#64748b;">Ranking de clientes y datos.</p></div>'; }
+  function renderPersonal(){return '<div class="card"><h3>RRHH / Personal</h3><p style="font-size:.8rem;color:#64748b;">Colaboradores, sueldos y asistencia.</p></div>'; }
+  function renderReclamos(){return '<div class="card"><h3>Reclamos</h3><p style="font-size:.8rem;color:#64748b;">Historial de reclamos por pedido.</p></div>'; }
+
+  init();
 </script>
 </body>
 </html>
