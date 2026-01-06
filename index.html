@@ -1453,10 +1453,58 @@
 </div>
 
 <script>
-  // ====== CONFIGURACIÓN PARA SINCRONIZAR CON GOOGLE SHEETS ======
-  // Coloca aquí la URL de tu Web App de Apps Script (modo "Cualquiera con el enlace").
-  // Ejemplo (cuando lo tengas): const API_BASE = "https://script.google.com/macros/s/AKfycbx.../exec";
-  const API_BASE = "https://script.google.com/macros/s/AKfycbyHSpOvUwh5DE2qGLyQ4eLIzTLKXC2_YAOiF0DyAVIgqwCXPomhvOTfo4yCE9OR_lLk/exec"; // TODO: pegar URL cuando definamos el web app
+ <script>
+
+// ======= CONFIGURACIÓN PARA SINCRONIZAR CON GOOGLE SHEETS =======
+// URL del Web App de Google Apps Script
+// (debe tener acceso: "Cualquiera con el enlace")
+
+const API_BASE = "https://script.google.com/macros/s/AKfycbyHSpOvUwh5DE2qGLyQ4eLIzTLKXC2_YAOiF0DyAVIgqwCXPomhvOTfo4yCE9OR_lLk/exec";
+
+
+// ====== SINCRONIZACIÓN CON GOOGLE SHEETS ======
+async function syncAll() {
+
+  if (!API_BASE) {
+    alert("Falta configurar la URL del Web App de Google Apps Script (API_BASE).");
+    return;
+  }
+
+  const btn = document.getElementById("sync-all-btn");
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Sincronizando...";
+
+  try {
+
+    // Construimos la URL
+    const url = `${API_BASE}?action=sync_all`;
+
+    const res = await fetch(url, { method: "GET" });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    console.log("Respuesta del servidor:", data);
+
+    if (data.status === "ok") {
+      alert("Sincronización completada correctamente.");
+    } else {
+      alert("El servidor respondió con un error: " + (data.error || "Desconocido"));
+    }
+
+  } catch (error) {
+    console.error("Error al sincronizar:", error);
+    alert("Ocurrió un error al sincronizar con Google Sheets.");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+</script>
 
   // ====== UTILIDADES ======
   function setTodayLabel() {
