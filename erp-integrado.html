@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP Financiero Completo - Sistema Integrado</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a365d;
+            --primary-light: #2d4a7c;
+            --accent: #d97706;
+            --accent-light: #fbbf24;
+            --success: #059669;
+            --warning: #f59e0b;
+            --danger: #dc2626;
+            --info: #0ea5e9;
+            --bg-dark: #0f172a;
+            --bg-light: #f8fafc;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: rgba(15, 23, 42, 0.08);
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border);
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 4px 0 24px var(--shadow);
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--primary);
+            padding: 0 2rem 2rem;
+            border-bottom: 2px solid var(--accent);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 1.5rem 1rem;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            color: var(--text-dark);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            box-shadow: 0 4px 12px rgba(26, 54, 93, 0.3);
+        }
+
+        .nav-icon {
+            margin-right: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        .badge-notification {
+            position: absolute;
+            right: 1rem;
+            background: var(--danger);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .content-section {
+            display: none;
+            animation: slideIn 0.4s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Header */
+        .section-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 24px var(--shadow);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+        }
+
+        .section-subtitle {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 24px var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, white, #f8fafc);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 4px 16px var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.15);
+        }
+
+        .stat-card.warning {
+            border-left-color: var(--warning);
+        }
+
+        .stat-card.danger {
+            border-left-color: var(--danger);
+        }
+
+        .stat-card.success {
+            border-left-color: var(--success);
+        }
+
+        .stat-card.info {
+            border-left-color: var(--info);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-change {
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--danger);
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'IBM Plex Sans', sans-serif;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.875rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'IBM Plex Sans', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            box-shadow: 0 4px 12px rgba(26, 54, 93, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 54, 93, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            color: white;
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #10b981);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #ef4444);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, var(--info), #38bdf8);
+            color: white;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        thead {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.375rem 0.875rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Charts */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px var(--shadow);
+        }
+
+        .chart-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 0 0.25rem;
+        }
+
+        .action-btn.edit {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .action-btn.delete {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .action-btn.pay {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .action-btn.view {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        .modal-header {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .close-modal {
+            float: right;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: color 0.2s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--danger);
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            border-color: var(--success);
+            color: #065f46;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            border-color: var(--warning);
+            color: #92400e;
+        }
+
+        .alert-danger {
+            background: #fee2e2;
+            border-color: var(--danger);
+            color: #991b1b;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            border-color: var(--info);
+            color: #1e40af;
+        }
+
+        /* Filters */
+        .filters {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-light);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-text {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding: 1rem 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .timeline-marker {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab:hover {
+            color: var(--primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">ERP Integrado</div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a class="nav-link active" data-section="dashboard">
+                        <span class="nav-icon">📊</span>
+                        Dashboard General
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="ventas">
+                        <span class="nav-icon">🛒</span>
+                        Ventas
+                        <span class="badge-notification" id="ventasNotif" style="display:none;">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="yape">
+                        <span class="nav-icon">📱</span>
+                        Movimientos Yape
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="banco">
+                        <span class="nav-icon">🏦</span>
+                        Integración BCP
+                        <span class="badge-notification" id="bancoNotif" style="display:none;">0</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="conciliacion">
+                        <span class="nav-icon">✅</span>
+                        Conciliación
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="servicios">
+                        <span class="nav-icon">📋</span>
+                        Servicios / Cuentas por Pagar
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="facturas">
+                        <span class="nav-icon">🧾</span>
+                        Facturas / Compras
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="proveedores">
+                        <span class="nav-icon">🏢</span>
+                        Proveedores
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="gastos">
+                        <span class="nav-icon">💰</span>
+                        Gastos
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-section="reportes">
+                        <span class="nav-icon">📈</span>
+                        Reportes
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard General -->
+            <section id="dashboard" class="content-section active">
+                <div class="section-header">
+                    <h1 class="section-title">Dashboard General</h1>
+                    <p class="section-subtitle">Visión completa de tu negocio en tiempo real</p>
+                </div>
+
+                <div id="alertasContainer"></div>
+
+                <div class="stats-grid" id="dashboardStats"></div>
+
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3 class="chart-title">Ventas vs Gastos del Mes</h3>
+                        <canvas id="ventasVsGastosChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3 class="chart-title">Ventas por Medio de Pago</h3>
+                        <canvas id="ventasPorMedioPagoChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3 class="chart-title">Evolución de Ventas Diarias</h3>
+                        <canvas id="evolucionVentasChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3 class="chart-title">Top 5 Clientes</h3>
+                        <canvas id="topClientesChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ventas -->
+            <section id="ventas" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">Módulo de Ventas</h1>
+                    <p class="section-subtitle">Gestiona pedidos, entregas y pagos</p>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Nueva Venta / Pedido</h3>
+                    <form id="ventaForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>N° de Pedido *</label>
+                                <input type="text" id="venta_numero_pedido" placeholder="PED-1001" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Cliente / Contacto *</label>
+                                <input type="text" id="venta_cliente" required>
+                            </div>
+                            <div class="form-group">
+                                <label>RUC / DNI</label>
+                                <input type="text" id="venta_documento">
+                            </div>
+                            <div class="form-group">
+                                <label>Teléfono de Contacto *</label>
+                                <input type="tel" id="venta_telefono" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="venta_email">
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha de Entrega *</label>
+                                <input type="date" id="venta_fecha_entrega" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Hora de Entrega *</label>
+                                <input type="time" id="venta_hora_entrega" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Vendedora *</label>
+                                <select id="venta_vendedora" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Rosa">Rosa</option>
+                                    <option value="Sandy">Sandy</option>
+                                    <option value="Milagros">Milagros</option>
+                                    <option value="Otros">Otros</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Dirección de Entrega *</label>
+                            <input type="text" id="venta_direccion" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Producto / Servicio *</label>
+                            <textarea id="venta_producto" required></textarea>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Cantidad *</label>
+                                <input type="number" id="venta_cantidad" step="1" value="1" onchange="calcularTotalVenta()" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Precio Unitario *</label>
+                                <input type="number" id="venta_precio_unitario" step="0.01" onchange="calcularTotalVenta()" required>
+                            </div>
+                            <div class="form-group">
+                                <label>¿Incluye IGV?</label>
+                                <select id="venta_tiene_igv" onchange="calcularTotalVenta()">
+                                    <option value="Si">Sí</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Subtotal</label>
+                                <input type="number" id="venta_subtotal" step="0.01" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>IGV (18%)</label>
+                                <input type="number" id="venta_igv" step="0.01" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>TOTAL</label>
+                                <input type="number" id="venta_total" step="0.01" readonly style="font-weight: 700; font-size: 1.1rem;">
+                            </div>
+                            <div class="form-group">
+                                <label>Moneda *</label>
+                                <select id="venta_moneda" required>
+                                    <option value="S/">S/</option>
+                                    <option value="USD">USD</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Medio de Pago *</label>
+                                <select id="venta_medio_pago" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Yape">Yape</option>
+                                    <option value="Transferencia BCP">Transferencia BCP</option>
+                                    <option value="Efectivo">Efectivo</option>
+                                    <option value="Tarjeta">Tarjeta</option>
+                                    <option value="Depósito">Depósito</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Enlace al Comprobante (Google Drive)</label>
+                            <input type="url" id="venta_enlace_comprobante" placeholder="https://drive.google.com/...">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Enlace Yape (captura de pago)</label>
+                            <input type="url" id="venta_enlace_yape" placeholder="https://drive.google.com/...">
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">💾 Guardar Venta</button>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('ventaForm').reset(); calcularTotalVenta()">🔄 Limpiar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Lista de Ventas</h3>
+                    <div class="filters">
+                        <div class="filters-grid">
+                            <div class="form-group">
+                                <label>Fecha Desde</label>
+                                <input type="date" id="filterVentaFechaDesde" onchange="renderVentas()">
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha Hasta</label>
+                                <input type="date" id="filterVentaFechaHasta" onchange="renderVentas()">
+                            </div>
+                            <div class="form-group">
+                                <label>Estado de Pago</label>
+                                <select id="filterVentaEstadoPago" onchange="renderVentas()">
+                                    <option value="">Todos</option>
+                                    <option value="Pendiente">Pendiente</option>
+                                    <option value="Pagado">Pagado</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Vendedora</label>
+                                <select id="filterVentaVendedora" onchange="renderVentas()">
+                                    <option value="">Todas</option>
+                                    <option value="Rosa">Rosa</option>
+                                    <option value="Sandy">Sandy</option>
+                                    <option value="Milagros">Milagros</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Medio de Pago</label>
+                                <select id="filterVentaMedioPago" onchange="renderVentas()">
+                                    <option value="">Todos</option>
+                                    <option value="Yape">Yape</option>
+                                    <option value="Transferencia BCP">Transferencia BCP</option>
+                                    <option value="Efectivo">Efectivo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Pedido</th>
+                                    <th>Cliente</th>
+                                    <th>Fecha Entrega</th>
+                                    <th>Hora</th>
+                                    <th>Total</th>
+                                    <th>Medio Pago</th>
+                                    <th>Estado</th>
+                                    <th>Vendedora</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ventasTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Yape -->
+            <section id="yape" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">Movimientos Yape</h1>
+                    <p class="section-subtitle">Registra y concilia pagos por Yape</p>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Registrar Movimiento Yape</h3>
+                    <form id="yapeForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Fecha *</label>
+                                <input type="date" id="yape_fecha" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Hora *</label>
+                                <input type="time" id="yape_hora" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Nombre del Remitente *</label>
+                                <input type="text" id="yape_remitente" required>
+                            </div>
+                            <div class="form-group">
+                                <label>DNI</label>
+                                <input type="text" id="yape_dni">
+                            </div>
+                            <div class="form-group">
+                                <label>Monto *</label>
+                                <input type="number" id="yape_monto" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Moneda</label>
+                                <select id="yape_moneda">
+                                    <option value="S/">S/</option>
+                                    <option value="USD">USD</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Referencia / Mensaje</label>
+                            <input type="text" id="yape_referencia">
+                        </div>
+                        <div class="form-group">
+                            <label>Relacionado con Venta</label>
+                            <select id="yape_venta_id">
+                                <option value="">Ninguna (sin asignar)</option>
+                            </select>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">💾 Guardar Yape</button>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('yapeForm').reset()">🔄 Limpiar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Lista de Movimientos Yape</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>Hora</th>
+                                    <th>Remitente</th>
+                                    <th>Monto</th>
+                                    <th>Relacionado</th>
+                                    <th>Validado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="yapeTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Banco BCP -->
+            <section id="banco" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">Integración BCP</h1>
+                    <p class="section-subtitle">Movimientos bancarios y notificaciones</p>
+                </div>
+
+                <div class="alert alert-info">
+                    <span>ℹ️</span>
+                    <div>
+                        <strong>Instrucciones de integración:</strong> Para automatizar la lectura de correos del BCP, 
+                        puedes usar Google Apps Script o herramientas como Make/Zapier. Aquí puedes registrar manualmente 
+                        los movimientos o simular la integración.
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Registrar Movimiento BCP</h3>
+                    <form id="bancoForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Fecha *</label>
+                                <input type="date" id="banco_fecha" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Hora *</label>
+                                <input type="time" id="banco_hora" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo de Movimiento *</label>
+                                <select id="banco_tipo" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Ingreso">Ingreso (Depósito/Transferencia)</option>
+                                    <option value="Egreso">Egreso (Pago/Transferencia)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Monto *</label>
+                                <input type="number" id="banco_monto" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Moneda</label>
+                                <select id="banco_moneda">
+                                    <option value="S/">S/</option>
+                                    <option value="USD">USD</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>N° de Operación</label>
+                                <input type="text" id="banco_num_operacion">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción *</label>
+                            <textarea id="banco_descripcion" required></textarea>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">💾 Guardar Movimiento</button>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('bancoForm').reset()">🔄 Limpiar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Movimientos Bancarios BCP</h3>
+                    <div class="filters">
+                        <div class="filters-grid">
+                            <div class="form-group">
+                                <label>Tipo</label>
+                                <select id="filterBancoTipo" onchange="renderMovimientosBanco()">
+                                    <option value="">Todos</option>
+                                    <option value="Ingreso">Ingresos</option>
+                                    <option value="Egreso">Egresos</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Estado Conciliación</label>
+                                <select id="filterBancoConciliacion" onchange="renderMovimientosBanco()">
+                                    <option value="">Todos</option>
+                                    <option value="Pendiente">Pendiente</option>
+                                    <option value="Conciliado">Conciliado</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>Hora</th>
+                                    <th>Tipo</th>
+                                    <th>Descripción</th>
+                                    <th>Monto</th>
+                                    <th>N° Op.</th>
+                                    <th>Conciliación</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bancoTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Conciliación -->
+            <section id="conciliacion" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">Conciliación Bancaria</h1>
+                    <p class="section-subtitle">Valida y concilia movimientos bancarios con ventas y gastos</p>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Sugerencias de Conciliación Automática</h3>
+                    <div id="sugerenciasConciliacion"></div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Movimientos Pendientes de Conciliar</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Origen</th>
+                                    <th>Fecha</th>
+                                    <th>Descripción</th>
+                                    <th>Monto</th>
+                                    <th>Sugerencias</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="conciliacionTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Servicios (módulo original) -->
+            <section id="servicios" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">Servicios / Cuentas por Pagar</h1>
+                    <p class="section-subtitle">Gestiona tus servicios y controla vencimientos</p>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Nuevo Servicio</h3>
+                    <form id="servicioForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Proveedor *</label>
+                                <input type="text" id="srv_proveedor" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo de Servicio *</label>
+                                <select id="srv_tipo" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Agua">Agua</option>
+                                    <option value="Luz">Luz</option>
+                                    <option value="Internet">Internet</option>
+                                    <option value="Alquiler">Alquiler</option>
+                                    <option value="Mantenimiento">Mantenimiento</option>
+                                    <option value="Otros">Otros</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Área *</label>
+                                <select id="srv_area" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Dpto 1408">Dpto 1408</option>
+                                    <option value="Dpto 1808">Dpto 1808</option>
+                                    <option value="Taller">Taller</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Monto *</label>
+                                <input type="number" id="srv_monto" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Moneda *</label>
+                                <select id="srv_moneda" required>
+                                    <option value="S/">S/</option>
+                                    <option value="USD">USD</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha de Vencimiento *</label>
+                                <input type="date" id="srv_vencimiento" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción</label>
+                            <textarea id="srv_descripcion"></textarea>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">💾 Guardar Servicio</button>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('servicioForm').reset()">🔄 Limpiar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Lista de Servicios</h3>
+                    <div class="filters">
+                        <div class="filters-grid">
+                            <div class="form-group">
+                                <label>Filtrar por Estado</label>
+                                <select id="filterServicioEstado" onchange="renderServicios()">
+                                    <option value="">Todos</option>
+                                    <option value="Pendiente">Pendiente</option>
+                                    <option value="Por Vencer">Por Vencer</option>
+                                    <option value="Vencido">Vencido</option>
+                                    <option value="Pagado">Pagado</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Filtrar por Área</label>
+                                <select id="filterServicioArea" onchange="renderServicios()">
+                                    <option value="">Todas</option>
+                                    <option value="Dpto 1408">Dpto 1408</option>
+                                    <option value="Dpto 1808">Dpto 1808</option>
+                                    <option value="Taller">Taller</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Proveedor</th>
+                                    <th>Tipo</th>
+                                    <th>Área</th>
+                                    <th>Monto</th>
+                                    <th>Vencimiento</th>
+                                    <th>Días</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="serviciosTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Facturas (módulo original) -->
+            <section id="facturas" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">Facturas / Compras</h1>
+                    <p class="section-subtitle">Registra tus compras y comprobantes</p>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Nueva Factura / Compra</h3>
+                    <form id="facturaForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Proveedor *</label>
+                                <select id="fac_proveedor" onchange="autocompletarProveedor(this.value)" required>
+                                    <option value="">Seleccionar...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>RUC</label>
+                                <input type="text" id="fac_ruc" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo de Comprobante *</label>
+                                <select id="fac_tipo_comprobante" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Factura">Factura</option>
+                                    <option value="Boleta">Boleta</option>
+                                    <option value="Ticket">Ticket</option>
+                                    <option value="Recibo por Honorarios">Recibo por Honorarios</option>
+                                    <option value="Nota de Crédito">Nota de Crédito</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Serie</label>
+                                <input type="text" id="fac_serie">
+                            </div>
+                            <div class="form-group">
+                                <label>Número *</label>
+                                <input type="text" id="fac_numero" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha de Emisión *</label>
+                                <input type="date" id="fac_fecha_emision" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Cantidad *</label>
+                                <input type="number" id="fac_cantidad" step="1" value="1" onchange="calcularTotalFactura()" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Precio Unitario *</label>
+                                <input type="number" id="fac_precio_unitario" step="0.01" onchange="calcularTotalFactura()" required>
+                            </div>
+                            <div class="form-group">
+                                <label>¿Tiene IGV?</label>
+                                <select id="fac_tiene_igv" onchange="calcularTotalFactura()">
+                                    <option value="Si">Sí</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Subtotal</label>
+                                <input type="number" id="fac_subtotal" step="0.01" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>IGV (18%)</label>
+                                <input type="number" id="fac_igv" step="0.01" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>TOTAL</label>
+                                <input type="number" id="fac_total" step="0.01" readonly style="font-weight: 700; font-size: 1.1rem;">
+                            </div>
+                            <div class="form-group">
+                                <label>Moneda *</label>
+                                <select id="fac_moneda" required>
+                                    <option value="S/">S/</option>
+                                    <option value="USD">USD</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Área</label>
+                                <select id="fac_area">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Dpto 1408">Dpto 1408</option>
+                                    <option value="Dpto 1808">Dpto 1808</option>
+                                    <option value="Taller">Taller</option>
+                                    <option value="Otros">Otros</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Producto / Servicio *</label>
+                            <textarea id="fac_producto" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Enlace a Google Drive (opcional)</label>
+                            <input type="url" id="fac_enlace_drive" placeholder="https://drive.google.com/...">
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">💾 Guardar Factura</button>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('facturaForm').reset(); calcularTotalFactura()">🔄 Limpiar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Lista de Facturas / Compras</h3>
+                    <div class="filters">
+                        <div class="filters-grid">
+                            <div class="form-group">
+                                <label>Filtrar por Estado</label>
+                                <select id="filterFacturaEstado" onchange="renderFacturas()">
+                                    <option value="">Todos</option>
+                                    <option value="Pendiente">Pendiente</option>
+                                    <option value="Pagado">Pagado</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Filtrar por Proveedor</label>
+                                <select id="filterFacturaProveedor" onchange="renderFacturas()">
+                                    <option value="">Todos</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Proveedor</th>
+                                    <th>Tipo</th>
+                                    <th>Serie-Número</th>
+                                    <th>Fecha</th>
+                                    <th>Total</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="facturasTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Proveedores (módulo original) -->
+            <section id="proveedores" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">Proveedores</h1>
+                    <p class="section-subtitle">Gestiona tu base de datos de proveedores</p>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Nuevo Proveedor</h3>
+                    <form id="proveedorForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Razón Social / Nombre *</label>
+                                <input type="text" id="prov_nombre" required>
+                            </div>
+                            <div class="form-group">
+                                <label>RUC *</label>
+                                <input type="text" id="prov_ruc" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Celular / Teléfono</label>
+                                <input type="tel" id="prov_celular">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="prov_email">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Dirección</label>
+                            <input type="text" id="prov_direccion">
+                        </div>
+                        <div class="form-group">
+                            <label>Notas</label>
+                            <textarea id="prov_notas"></textarea>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">💾 Guardar Proveedor</button>
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('proveedorForm').reset()">🔄 Limpiar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Lista de Proveedores</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>RUC</th>
+                                    <th>Celular</th>
+                                    <th>Email</th>
+                                    <th>Dirección</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="proveedoresTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gastos (módulo original) -->
+            <section id="gastos" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">Gastos</h1>
+                    <p class="section-subtitle">Registro consolidado de todos los gastos pagados</p>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Resumen de Gastos</h3>
+                    <div class="stats-grid" id="gastosStats"></div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">Registro de Gastos</h3>
+                    <div class="filters">
+                        <div class="filters-grid">
+                            <div class="form-group">
+                                <label>Filtrar por Área</label>
+                                <select id="filterGastoArea" onchange="renderGastos()">
+                                    <option value="">Todas</option>
+                                    <option value="Dpto 1408">Dpto 1408</option>
+                                    <option value="Dpto 1808">Dpto 1808</option>
+                                    <option value="Taller">Taller</option>
+                                    <option value="Otros">Otros</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Filtrar por Medio de Pago</label>
+                                <select id="filterGastoMedioPago" onchange="renderGastos()">
+                                    <option value="">Todos</option>
+                                    <option value="Bravizimos">Bravizimos</option>
+                                    <option value="RUS Martin">RUS Martín</option>
+                                    <option value="RUS Rosa">RUS Rosa</option>
+                                    <option value="RUS Sandy">RUS Sandy</option>
+                                    <option value="RUS Milagros">RUS Milagros</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha Desde</label>
+                                <input type="date" id="filterGastoFechaDesde" onchange="renderGastos()">
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha Hasta</label>
+                                <input type="date" id="filterGastoFechaHasta" onchange="renderGastos()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>Proveedor</th>
+                                    <th>Tipo</th>
+                                    <th>Área</th>
+                                    <th>Monto</th>
+                                    <th>Medio de Pago</th>
+                                    <th>Origen</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gastosTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reportes -->
+            <section id="reportes" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">Reportes y Análisis</h1>
+                    <p class="section-subtitle">Análisis detallado de ventas, gastos y rentabilidad</p>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" data-tab="ranking">Ranking de Vendedoras</div>
+                    <div class="tab" data-tab="horarios">Ventas por Horario</div>
+                    <div class="tab" data-tab="utilidad">Utilidad del Mes</div>
+                </div>
+
+                <!-- Ranking de Vendedoras -->
+                <div id="ranking-tab" class="tab-content active">
+                    <div class="card">
+                        <h3 class="card-title">Ranking de Vendedoras del Mes</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Posición</th>
+                                        <th>Vendedora</th>
+                                        <th>Total Ventas</th>
+                                        <th>N° Pedidos</th>
+                                        <th>Ticket Promedio</th>
+                                        <th>% del Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rankingVendedorasBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h3 class="chart-title">Ventas por Vendedora</h3>
+                            <canvas id="ventasPorVendedoraChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3 class="chart-title">Pedidos por Vendedora</h3>
+                            <canvas id="pedidosPorVendedoraChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ventas por Horario -->
+                <div id="horarios-tab" class="tab-content">
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h3 class="chart-title">Entregas por Hora del Día</h3>
+                            <canvas id="entregasPorHoraChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3 class="chart-title">Ventas por Hora</h3>
+                            <canvas id="ventasPorHoraChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Utilidad -->
+                <div id="utilidad-tab" class="tab-content">
+                    <div class="stats-grid">
+                        <div class="stat-card success">
+                            <div class="stat-label">Total Ingresos (Ventas)</div>
+                            <div class="stat-value" id="totalIngresosReporte">S/ 0.00</div>
+                        </div>
+                        <div class="stat-card danger">
+                            <div class="stat-label">Total Gastos</div>
+                            <div class="stat-value" id="totalGastosReporte">S/ 0.00</div>
+                        </div>
+                        <div class="stat-card info">
+                            <div class="stat-label">Utilidad Estimada</div>
+                            <div class="stat-value" id="utilidadEstimada">S/ 0.00</div>
+                        </div>
+                        <div class="stat-card warning">
+                            <div class="stat-label">Margen %</div>
+                            <div class="stat-value" id="margenPorcentaje">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <h3 class="chart-title">Ingresos vs Gastos del Mes</h3>
+                            <canvas id="ingresosVsGastosChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3 class="chart-title">Evolución de Utilidad Diaria</h3>
+                            <canvas id="utilidadDiariaChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modales (continuación en el siguiente script) -->
+    
+    <!-- Modal para Pagar Servicio -->
+    <div id="pagarServicioModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="cerrarModal('pagarServicioModal')">&times;</span>
+            <h2 class="modal-header">Registrar Pago de Servicio</h2>
+            <form id="pagoServicioForm">
+                <input type="hidden" id="pago_servicio_id">
+                <div class="form-group">
+                    <label>Fecha de Pago *</label>
+                    <input type="date" id="pago_fecha" required>
+                </div>
+                <div class="form-group">
+                    <label>Medio de Pago *</label>
+                    <select id="pago_medio_pago" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="Bravizimos">Bravizimos</option>
+                        <option value="RUS Martin">RUS Martín</option>
+                        <option value="RUS Rosa">RUS Rosa</option>
+                        <option value="RUS Sandy">RUS Sandy</option>
+                        <option value="RUS Milagros">RUS Milagros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Observaciones</label>
+                    <textarea id="pago_observaciones"></textarea>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-success">✓ Confirmar Pago</button>
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModal('pagarServicioModal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Pagar Factura -->
+    <div id="pagarFacturaModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="cerrarModal('pagarFacturaModal')">&times;</span>
+            <h2 class="modal-header">Registrar Pago de Factura</h2>
+            <form id="pagoFacturaForm">
+                <input type="hidden" id="pago_factura_id">
+                <div class="form-group">
+                    <label>Fecha de Pago *</label>
+                    <input type="date" id="pago_fac_fecha" required>
+                </div>
+                <div class="form-group">
+                    <label>Medio de Pago *</label>
+                    <select id="pago_fac_medio_pago" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="Bravizimos">Bravizimos</option>
+                        <option value="RUS Martin">RUS Martín</option>
+                        <option value="RUS Rosa">RUS Rosa</option>
+                        <option value="RUS Sandy">RUS Sandy</option>
+                        <option value="RUS Milagros">RUS Milagros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Observaciones</label>
+                    <textarea id="pago_fac_observaciones"></textarea>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-success">✓ Confirmar Pago</button>
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModal('pagarFacturaModal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Marcar Venta como Pagada -->
+    <div id="pagarVentaModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="cerrarModal('pagarVentaModal')">&times;</span>
+            <h2 class="modal-header">Confirmar Pago de Venta</h2>
+            <form id="pagoVentaForm">
+                <input type="hidden" id="pago_venta_id">
+                <div class="form-group">
+                    <label>Fecha de Pago *</label>
+                    <input type="date" id="pago_venta_fecha" required>
+                </div>
+                <div class="form-group">
+                    <label>Observaciones</label>
+                    <textarea id="pago_venta_observaciones"></textarea>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-success">✓ Confirmar Pago</button>
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModal('pagarVentaModal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Conciliar Movimiento -->
+    <div id="conciliarModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="cerrarModal('conciliarModal')">&times;</span>
+            <h2 class="modal-header">Conciliar Movimiento Bancario</h2>
+            <form id="conciliarForm">
+                <input type="hidden" id="conciliar_banco_id">
+                <div class="form-group">
+                    <label>Relacionar con:</label>
+                    <select id="conciliar_tipo" onchange="actualizarOpcionesConciliacion()">
+                        <option value="">Seleccionar tipo...</option>
+                        <option value="venta">Venta</option>
+                        <option value="factura">Factura/Compra</option>
+                        <option value="servicio">Servicio</option>
+                        <option value="otro">Otro</option>
+                    </select>
+                </div>
+                <div class="form-group" id="conciliar_opciones_container" style="display:none;">
+                    <label>Seleccionar registro:</label>
+                    <select id="conciliar_registro_id"></select>
+                </div>
+                <div class="form-group">
+                    <label>Notas</label>
+                    <textarea id="conciliar_notas"></textarea>
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-success">✓ Conciliar</button>
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModal('conciliarModal')">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="erp-script.js"></script>
+</body>
+</html>
