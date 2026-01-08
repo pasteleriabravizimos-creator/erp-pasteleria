@@ -1,590 +1,115 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel de Servicios</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
-
-  <style>
-    body { background: #f8fafc; }
-    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-  </style>
-</head>
-
-<body class="min-h-screen">
-  <!-- NAV -->
-  <nav class="gradient-bg text-white shadow">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="font-bold text-lg">Gestión de Servicios</div>
-      <div class="flex items-center gap-2">
-        <button class="px-3 py-2 rounded hover:bg-white/10" onclick="showTab('servicios')">Servicios</button>
-        <button class="px-3 py-2 rounded hover:bg-white/10" onclick="showTab('dashboard')">Dashboard</button>
-        <button class="px-3 py-2 rounded hover:bg-white/10" onclick="showTab('historial')">Historial</button>
-        <button class="px-3 py-2 rounded hover:bg-white/10" onclick="openConfig()" title="Configuración">⚙️</button>
-      </div>
+<!doctype html>
+<html>
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body { font-family: Arial, sans-serif; margin: 18px; }
+      .grid { display: grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap: 12px; }
+      .card { border: 1px solid #e5e5e5; border-radius: 12px; padding: 12px; }
+      .k { font-size: 12px; color: #666; }
+      .v { font-size: 20px; font-weight: 700; margin-top: 6px; }
+      h2 { margin-top: 22px; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; font-size: 14px; }
+      .row { display:flex; gap:12px; flex-wrap:wrap; }
+      .pill { padding: 4px 10px; border-radius: 999px; background:#f3f3f3; display:inline-block; font-size:12px; }
+      @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+    </style>
+  </head>
+  <body>
+    <div class="row">
+      <div class="pill" id="range"></div>
+      <div class="pill" id="tipo"></div>
     </div>
-  </nav>
 
-  <main class="max-w-7xl mx-auto p-4">
-    <!-- SERVICIOS -->
-    <section id="tab-servicios" class="tab">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <!-- FORM -->
-        <div class="lg:col-span-2 bg-white rounded-xl shadow p-4">
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="text-xl font-semibold">Nuevo Servicio</h2>
-            <button class="text-sm px-3 py-2 rounded bg-slate-100 hover:bg-slate-200" onclick="limpiarForm()">Limpiar</button>
-          </div>
+    <div class="grid" style="margin-top:12px">
+      <div class="card"><div class="k">Ingresos</div><div class="v" id="ingresos">-</div></div>
+      <div class="card"><div class="k">Gastos</div><div class="v" id="gastos">-</div></div>
+      <div class="card"><div class="k">Utilidad</div><div class="v" id="utilidad">-</div></div>
+      <div class="card"><div class="k">Margen</div><div class="v" id="margen">-</div></div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <label class="text-sm font-medium">Código *</label>
-              <input id="codigo" class="w-full border rounded p-2" placeholder="SRV-001" />
-            </div>
-            <div>
-              <label class="text-sm font-medium">Proveedor *</label>
-              <input id="proveedor" class="w-full border rounded p-2" placeholder="Movistar" />
-            </div>
+      <div class="card"><div class="k">Ventas (N°)</div><div class="v" id="ventasCount">-</div></div>
+      <div class="card"><div class="k">Doc. Pendientes (N°)</div><div class="v" id="docPendCount">-</div></div>
+      <div class="card"><div class="k">Monto Doc. Pendiente</div><div class="v" id="docPendMonto">-</div></div>
+      <div class="card"><div class="k">Monto Pago Pendiente</div><div class="v" id="pagoPendMonto">-</div></div>
 
-            <div class="md:col-span-2">
-              <label class="text-sm font-medium">Servicio *</label>
-              <input id="servicio" class="w-full border rounded p-2" placeholder="Internet Fibra 100Mbps" />
-            </div>
-
-            <div>
-              <label class="text-sm font-medium">Categoría</label>
-              <input id="categoria" class="w-full border rounded p-2" placeholder="Internet" />
-            </div>
-            <div>
-              <label class="text-sm font-medium">Monto (S/)*</label>
-              <input id="monto" type="number" class="w-full border rounded p-2" placeholder="0" />
-              <label class="mt-2 flex items-center gap-2 text-sm">
-                <input id="montoVariable" type="checkbox" />
-                <span>El monto varía cada mes</span>
-              </label>
-            </div>
-
-            <div>
-              <label class="text-sm font-medium">Fecha Servicio</label>
-              <input id="fechaServicio" class="w-full border rounded p-2" placeholder="yyyy-mm-dd" />
-            </div>
-            <div>
-              <label class="text-sm font-medium">Fecha Vencimiento</label>
-              <input id="fechaVencimiento" class="w-full border rounded p-2" placeholder="yyyy-mm-dd" />
-            </div>
-
-            <div>
-              <label class="text-sm font-medium">Fecha Pago</label>
-              <input id="fechaPago" class="w-full border rounded p-2" placeholder="yyyy-mm-dd" />
-            </div>
-            <div>
-              <label class="text-sm font-medium">Estado *</label>
-              <select id="estado" class="w-full border rounded p-2">
-                <option value="PENDIENTE">PENDIENTE</option>
-                <option value="POR PAGAR">POR PAGAR</option>
-                <option value="PAGADO">PAGADO</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="text-sm font-medium">Medio de Pago</label>
-              <input id="medioPago" class="w-full border rounded p-2" placeholder="BCP / Yape / Efectivo" />
-            </div>
-            <div>
-              <label class="text-sm font-medium">Cuenta</label>
-              <input id="cuenta" class="w-full border rounded p-2" placeholder="Cuenta / Nº" />
-            </div>
-
-            <div class="md:col-span-2">
-              <label class="text-sm font-medium">Observaciones</label>
-              <textarea id="observaciones" class="w-full border rounded p-2" rows="3"></textarea>
-            </div>
-          </div>
-
-          <button class="mt-4 w-full gradient-bg text-white font-semibold py-3 rounded-lg hover:opacity-95"
-                  onclick="guardarServicio()">
-            Guardar Servicio (y Gastos si PAGADO)
-          </button>
-
-          <p class="mt-3 text-xs text-slate-500">
-            Tip: Primero abre ⚙️ y pega la URL <b>.../exec</b> de tu Web App (Apps Script).
-          </p>
-        </div>
-
-        <!-- RESUMEN + RECIENTES -->
-        <div class="space-y-4">
-          <div class="bg-white rounded-xl shadow p-4">
-            <div class="flex items-center gap-2 mb-2">
-              <span>📊</span><h3 class="font-semibold">Resumen</h3>
-            </div>
-            <div class="text-sm space-y-1">
-              <div class="flex justify-between"><span>Total</span><b id="resTotal">0</b></div>
-              <div class="flex justify-between"><span>Pagados</span><b id="resPagados">0</b></div>
-              <div class="flex justify-between"><span>Pendientes</span><b id="resPendientes">0</b></div>
-              <div class="flex justify-between"><span>Falta pagar</span><b id="resPorPagar">0</b></div>
-              <div class="pt-2">
-                <div class="h-2 bg-slate-100 rounded">
-                  <div id="barAvance" class="h-2 rounded gradient-bg" style="width:0%"></div>
-                </div>
-                <div class="text-right text-xs mt-1"><b id="resAvance">0%</b></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white rounded-xl shadow p-4">
-            <div class="flex items-center gap-2 mb-2">
-              <span>🕒</span><h3 class="font-semibold">Recientes</h3>
-            </div>
-            <div id="recientes" class="text-sm text-slate-600">Cargando...</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- LISTA -->
-      <div class="mt-6 bg-white rounded-xl shadow p-4">
-        <div class="flex items-center justify-between gap-2">
-          <h3 class="font-semibold">Todos los servicios</h3>
-          <div class="flex items-center gap-2">
-            <input id="buscar" class="border rounded p-2 text-sm" placeholder="Buscar..." oninput="renderServicios()" />
-            <select id="filtroEstado" class="border rounded p-2 text-sm" onchange="renderServicios()">
-              <option value="">Todos</option>
-              <option value="PENDIENTE">Pendiente</option>
-              <option value="POR PAGAR">Por pagar</option>
-              <option value="PAGADO">Pagado</option>
-            </select>
-            <button class="text-sm px-3 py-2 rounded bg-slate-100 hover:bg-slate-200" onclick="syncAll()">Actualizar</button>
-          </div>
-        </div>
-
-        <div class="overflow-x-auto mt-3">
-          <table class="min-w-full text-sm">
-            <thead class="bg-slate-50">
-              <tr>
-                <th class="text-left p-2">Código</th>
-                <th class="text-left p-2">Proveedor</th>
-                <th class="text-left p-2">Servicio</th>
-                <th class="text-right p-2">Monto</th>
-                <th class="text-left p-2">Estado</th>
-                <th class="text-left p-2">Acción</th>
-              </tr>
-            </thead>
-            <tbody id="tablaServicios">
-              <tr><td class="p-2 text-slate-500" colspan="6">Cargando...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- DASHBOARD -->
-    <section id="tab-dashboard" class="tab hidden">
-      <div class="bg-white rounded-xl shadow p-4">
-        <div class="flex items-center justify-between">
-          <h2 class="text-xl font-semibold">Dashboard</h2>
-          <button class="text-sm px-3 py-2 rounded bg-slate-100 hover:bg-slate-200" onclick="syncAll()">Actualizar</button>
-        </div>
-        <div class="mt-4">
-          <canvas id="chartEstados" height="110"></canvas>
-        </div>
-      </div>
-    </section>
-
-    <!-- HISTORIAL -->
-    <section id="tab-historial" class="tab hidden">
-      <div class="bg-white rounded-xl shadow p-4">
-        <div class="flex items-center justify-between">
-          <h2 class="text-xl font-semibold">Historial</h2>
-          <button class="text-sm px-3 py-2 rounded bg-slate-100 hover:bg-slate-200" onclick="cargarHistorial()">Actualizar</button>
-        </div>
-
-        <div class="overflow-x-auto mt-3">
-          <table class="min-w-full text-sm">
-            <thead class="bg-slate-50">
-              <tr>
-                <th class="text-left p-2">Fecha/Hora</th>
-                <th class="text-left p-2">Acción</th>
-                <th class="text-left p-2">Código</th>
-                <th class="text-left p-2">Proveedor</th>
-                <th class="text-left p-2">Servicio</th>
-                <th class="text-right p-2">Monto</th>
-                <th class="text-left p-2">Estado</th>
-              </tr>
-            </thead>
-            <tbody id="tablaHistorial">
-              <tr><td class="p-2 text-slate-500" colspan="7">Cargando...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- MODAL CONFIG -->
-  <div id="modalConfig" class="fixed inset-0 bg-black/40 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow max-w-lg w-full p-4">
-      <div class="flex items-center justify-between">
-        <h3 class="font-semibold text-lg">⚙️ Configuración</h3>
-        <button class="text-xl" onclick="closeConfig()">✕</button>
-      </div>
-
-      <label class="block text-sm font-medium mt-3">URL del Web App (Apps Script)</label>
-      <input id="webAppUrl" class="w-full border rounded p-2 mt-1"
-             placeholder="https://script.google.com/macros/s/XXXXXXXX/exec" />
-
-      <button class="mt-3 w-full gradient-bg text-white font-semibold py-2 rounded-lg hover:opacity-95"
-              onclick="guardarConfig()">
-        Guardar
-      </button>
-
-      <p class="mt-2 text-xs text-slate-500">
-        Debe terminar en <b>/exec</b>. Si pegas solo el ID, no funcionará.
-      </p>
+      <div class="card"><div class="k">Clientes Nuevos</div><div class="v" id="clientesNuevos">-</div></div>
+      <div class="card"><div class="k">Clientes Frecuentes</div><div class="v" id="clientesFrecuentes">-</div></div>
+      <div class="card"><div class="k">Días alerta servicios</div><div class="v" id="diasAlerta">-</div></div>
+      <div class="card"><div class="k">Tipo de fecha</div><div class="v" id="tipoFecha2">-</div></div>
     </div>
-  </div>
 
-<script>
-  /**********************
-   * CONFIG + HELPERS
-   **********************/
-  const LS_WEBAPP = 'bravizimos_webapp_url';
+    <h2>Top productos (por monto)</h2>
+    <table id="topProductos">
+      <thead><tr><th>Producto</th><th>Cantidad</th><th>Monto</th></tr></thead>
+      <tbody></tbody>
+    </table>
 
-  function getWebAppUrl() {
-    return (localStorage.getItem(LS_WEBAPP) || '').trim();
-  }
+    <h2>Servicios próximos a vencer</h2>
+    <table id="servicios">
+      <thead><tr><th>Servicio</th><th>Categoría</th><th>Vencimiento</th><th>Monto</th></tr></thead>
+      <tbody></tbody>
+    </table>
 
-  function setWebAppUrl(url) {
-    localStorage.setItem(LS_WEBAPP, (url || '').trim());
-  }
-
-  function openConfig() {
-    document.getElementById('webAppUrl').value = getWebAppUrl();
-    document.getElementById('modalConfig').classList.remove('hidden');
-    document.getElementById('modalConfig').classList.add('flex');
-  }
-
-  function closeConfig() {
-    document.getElementById('modalConfig').classList.add('hidden');
-    document.getElementById('modalConfig').classList.remove('flex');
-  }
-
-  function guardarConfig() {
-    const url = document.getElementById('webAppUrl').value.trim();
-    if (!url.startsWith('https://script.google.com/macros/s/') || !url.endsWith('/exec')) {
-      alert('Pega la URL completa que termina en /exec (no el ID suelto).');
-      return;
-    }
-    setWebAppUrl(url);
-    closeConfig();
-    syncAll();
-  }
-
-  async function callWebApp(action, data = null) {
-    const base = getWebAppUrl();
-    if (!base) throw new Error('Falta configurar la URL del Web App (⚙️).');
-
-    // GET
-    if (!data) {
-      const url = new URL(base);
-      url.searchParams.set('action', action);
-      const res = await fetch(url.toString(), { method: 'GET' });
-      const txt = await res.text();
-      return safeJsonParse_(txt);
-    }
-
-    // POST
-    const payload = Object.assign({ action }, data);
-    const res = await fetch(base, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita preflight
-      body: JSON.stringify(payload)
-    });
-    const txt = await res.text();
-    return safeJsonParse_(txt);
-  }
-
-  function safeJsonParse_(txt) {
-    const t = (txt || '').trim();
-    if (!t) throw new Error('Respuesta vacía del Web App.');
-    if (t[0] === '<') {
-      // Apps Script devolvió HTML (login/permiso o URL incorrecta)
-      throw new Error('El Web App devolvió HTML (no JSON). Revisa: URL /exec, permisos "Cualquier usuario", y vuelve a Implementar.');
-    }
-    try { return JSON.parse(t); }
-    catch (e) { throw new Error('JSON inválido: ' + t.slice(0, 120)); }
-  }
-
-  /**********************
-   * UI TABS
-   **********************/
-  function showTab(name) {
-    document.querySelectorAll('.tab').forEach(el => el.classList.add('hidden'));
-    document.getElementById('tab-' + name).classList.remove('hidden');
-    if (name === 'dashboard') renderDashboard();
-    if (name === 'historial') cargarHistorial();
-  }
-
-  /**********************
-   * STATE
-   **********************/
-  let SERVICIOS = [];
-  let CHART = null;
-
-  /**********************
-   * INIT
-   **********************/
-  document.addEventListener('DOMContentLoaded', () => {
-    // date pickers
-    flatpickr("#fechaServicio", { dateFormat: "Y-m-d", locale: "es" });
-    flatpickr("#fechaVencimiento", { dateFormat: "Y-m-d", locale: "es" });
-    flatpickr("#fechaPago", { dateFormat: "Y-m-d", locale: "es" });
-
-    // first load
-    syncAll().catch(err => console.warn(err));
-  });
-
-  /**********************
-   * SYNC
-   **********************/
-  async function syncAll() {
-    try {
-      await Promise.all([cargarServicios(), cargarResumen(), cargarRecientes()]);
-      if (!document.getElementById('tab-dashboard').classList.contains('hidden')) renderDashboard();
-      if (!document.getElementById('tab-historial').classList.contains('hidden')) cargarHistorial();
-    } catch (err) {
-      alert('Error: ' + err.message);
-    }
-  }
-
-  async function cargarServicios() {
-    const r = await callWebApp('listServicios');
-    if (!r.ok) throw new Error(r.error || 'Error listServicios');
-    SERVICIOS = r.data || [];
-    renderServicios();
-  }
-
-  async function cargarResumen() {
-    const r = await callWebApp('getDashboard');
-    if (!r.ok) throw new Error(r.error || 'Error getDashboard');
-    const d = r.data || {};
-    document.getElementById('resTotal').textContent = d.total ?? 0;
-    document.getElementById('resPagados').textContent = d.pagados ?? 0;
-    document.getElementById('resPendientes').textContent = d.pendientes ?? 0;
-    document.getElementById('resPorPagar').textContent = d.porPagar ?? 0;
-    const avance = d.total ? Math.round((d.pagados / d.total) * 100) : 0;
-    document.getElementById('resAvance').textContent = avance + '%';
-    document.getElementById('barAvance').style.width = avance + '%';
-  }
-
-  async function cargarRecientes() {
-    const r = await callWebApp('getRecientes');
-    if (!r.ok) throw new Error(r.error || 'Error getRecientes');
-    const items = r.data || [];
-    if (!items.length) {
-      document.getElementById('recientes').textContent = 'Sin registros.';
-      return;
-    }
-    document.getElementById('recientes').innerHTML = items.map(s =>
-      `<div class="py-1 border-b last:border-b-0">
-        <div class="font-medium">${escapeHtml(s.codigo)} - ${escapeHtml(s.servicio)}</div>
-        <div class="text-xs text-slate-500">${escapeHtml(s.proveedor)} • ${escapeHtml(s.estado)} • S/ ${escapeHtml(String(s.monto ?? ''))}</div>
-      </div>`
-    ).join('');
-  }
-
-  async function cargarHistorial() {
-    try {
-      const r = await callWebApp('getHistorial');
-      if (!r.ok) throw new Error(r.error || 'Error getHistorial');
-      const items = r.data || [];
-      const tbody = document.getElementById('tablaHistorial');
-      if (!items.length) {
-        tbody.innerHTML = `<tr><td class="p-2 text-slate-500" colspan="7">Sin historial.</td></tr>`;
-        return;
-      }
-      tbody.innerHTML = items.map(x => `
-        <tr class="border-t">
-          <td class="p-2">${fmtDateTime(x.fechaHora)}</td>
-          <td class="p-2">${escapeHtml(x.accion)}</td>
-          <td class="p-2">${escapeHtml(x.codigo)}</td>
-          <td class="p-2">${escapeHtml(x.proveedor)}</td>
-          <td class="p-2">${escapeHtml(x.servicio)}</td>
-          <td class="p-2 text-right">S/ ${escapeHtml(String(x.monto ?? ''))}</td>
-          <td class="p-2">${escapeHtml(x.estado)}</td>
-        </tr>
-      `).join('');
-    } catch (err) {
-      document.getElementById('tablaHistorial').innerHTML =
-        `<tr><td class="p-2 text-red-600" colspan="7">${escapeHtml(err.message)}</td></tr>`;
-    }
-  }
-
-  /**********************
-   * FORM
-   **********************/
-  function limpiarForm() {
-    ['codigo','proveedor','servicio','categoria','monto','fechaServicio','fechaVencimiento','fechaPago','medioPago','cuenta','observaciones'].forEach(id => {
-      document.getElementById(id).value = '';
-    });
-    document.getElementById('estado').value = 'PENDIENTE';
-    document.getElementById('montoVariable').checked = false;
-  }
-
-  async function guardarServicio() {
-    try {
-      const payload = {
-        codigo: document.getElementById('codigo').value.trim(),
-        proveedor: document.getElementById('proveedor').value.trim(),
-        servicio: document.getElementById('servicio').value.trim(),
-        categoria: document.getElementById('categoria').value.trim(),
-        monto: Number(document.getElementById('monto').value || 0),
-        montoVariable: document.getElementById('montoVariable').checked ? 'SI' : '',
-        fechaServicio: document.getElementById('fechaServicio').value,
-        fechaVencimiento: document.getElementById('fechaVencimiento').value,
-        fechaPago: document.getElementById('fechaPago').value,
-        estado: document.getElementById('estado').value,
-        medioPago: document.getElementById('medioPago').value.trim(),
-        cuenta: document.getElementById('cuenta').value.trim(),
-        observaciones: document.getElementById('observaciones').value.trim()
+    <script>
+      const money = (n) => {
+        const v = Number(n || 0);
+        return v.toLocaleString(undefined, { style: "currency", currency: "PEN" });
       };
+      const pct = (n) => (Number(n||0)*100).toFixed(1) + "%";
 
-      if (!payload.codigo || !payload.proveedor || !payload.servicio) {
-        alert('Completa Código, Proveedor y Servicio.');
-        return;
+      function set(id, text) { document.getElementById(id).textContent = text; }
+
+      function load() {
+        google.script.run.withSuccessHandler((res) => {
+          if (!res || !res.ok) {
+            document.body.insertAdjacentHTML("afterbegin",
+              `<div class="card" style="border-color:#f99;background:#fff0f0">
+                ${res?.error || "Error cargando datos"}
+              </div>`);
+            return;
+          }
+
+          const k = res.kpi || {};
+          set("range", `Rango: ${k.Desde} → ${k.Hasta}`);
+          set("tipo", `Filtro: ${k.TipoFecha}`);
+
+          set("ingresos", money(k.Ingresos));
+          set("gastos", money(k.Gastos));
+          set("utilidad", money(k.Utilidad));
+          set("margen", pct(k.Margen));
+
+          set("ventasCount", k.VentasCount ?? "-");
+          set("docPendCount", k.DocPendCount ?? "-");
+          set("docPendMonto", money(k.DocPendMonto));
+          set("pagoPendMonto", money(k.PagoPendMonto));
+
+          set("clientesNuevos", k.ClientesNuevos ?? "-");
+          set("clientesFrecuentes", k.ClientesFrecuentes ?? "-");
+          set("diasAlerta", k.DiasAlertaServicios ?? "-");
+          set("tipoFecha2", k.TipoFecha ?? "-");
+
+          // Top productos
+          const tb1 = document.querySelector("#topProductos tbody");
+          tb1.innerHTML = "";
+          (res.topProductos || []).forEach(x => {
+            tb1.insertAdjacentHTML("beforeend",
+              `<tr><td>${x.producto}</td><td>${x.cantidad}</td><td>${money(x.monto)}</td></tr>`);
+          });
+
+          // Servicios alerta
+          const tb2 = document.querySelector("#servicios tbody");
+          tb2.innerHTML = "";
+          (res.servicios || []).forEach(x => {
+            const d = new Date(x.vencimiento);
+            tb2.insertAdjacentHTML("beforeend",
+              `<tr><td>${x.servicio}</td><td>${x.categoria}</td><td>${d.toLocaleDateString()}</td><td>${money(x.monto)}</td></tr>`);
+          });
+
+        }).getResumenData();
       }
-
-      const r = await callWebApp('addServicio', payload);
-      if (!r.ok) throw new Error(r.error || 'No se pudo guardar');
-
-      limpiarForm();
-      await syncAll();
-      alert('Guardado ✅');
-    } catch (err) {
-      alert('Error: ' + err.message);
-    }
-  }
-
-  /**********************
-   * TABLE
-   **********************/
-  function renderServicios() {
-    const q = document.getElementById('buscar').value.trim().toLowerCase();
-    const estado = document.getElementById('filtroEstado').value;
-
-    const rows = SERVICIOS.filter(s => {
-      const hay = (s.codigo + ' ' + s.proveedor + ' ' + s.servicio).toLowerCase().includes(q);
-      const okEstado = estado ? String(s.estado || '').toUpperCase() === estado : true;
-      return hay && okEstado;
-    });
-
-    const tbody = document.getElementById('tablaServicios');
-    if (!rows.length) {
-      tbody.innerHTML = `<tr><td class="p-2 text-slate-500" colspan="6">Sin resultados.</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = rows.map(s => `
-      <tr class="border-t">
-        <td class="p-2 font-medium">${escapeHtml(s.codigo)}</td>
-        <td class="p-2">${escapeHtml(s.proveedor)}</td>
-        <td class="p-2">${escapeHtml(s.servicio)}</td>
-        <td class="p-2 text-right">S/ ${escapeHtml(String(s.monto ?? ''))}</td>
-        <td class="p-2">${badgeEstado(s.estado)}</td>
-        <td class="p-2">
-          <button class="text-xs px-2 py-1 rounded bg-slate-100 hover:bg-slate-200"
-                  onclick="cargarEnForm('${escapeJs(s.codigo)}')">Editar</button>
-          <button class="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100 ml-2"
-                  onclick="eliminarServicio('${escapeJs(s.codigo)}')">Eliminar</button>
-        </td>
-      </tr>
-    `).join('');
-  }
-
-  function cargarEnForm(codigo) {
-    const s = SERVICIOS.find(x => x.codigo === codigo);
-    if (!s) return;
-    document.getElementById('codigo').value = s.codigo || '';
-    document.getElementById('proveedor').value = s.proveedor || '';
-    document.getElementById('servicio').value = s.servicio || '';
-    document.getElementById('categoria').value = s.categoria || '';
-    document.getElementById('monto').value = s.monto ?? '';
-    document.getElementById('montoVariable').checked = String(s.montoVariable || '').toUpperCase() === 'SI';
-    document.getElementById('fechaServicio').value = fmtDate(s.fechaServicio);
-    document.getElementById('fechaVencimiento').value = fmtDate(s.fechaVencimiento);
-    document.getElementById('fechaPago').value = fmtDate(s.fechaPago);
-    document.getElementById('estado').value = (s.estado || 'PENDIENTE').toUpperCase();
-    document.getElementById('medioPago').value = s.medioPago || '';
-    document.getElementById('cuenta').value = s.cuenta || '';
-    document.getElementById('observaciones').value = s.observaciones || '';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  async function eliminarServicio(codigo) {
-    if (!confirm('¿Eliminar ' + codigo + '?')) return;
-    try {
-      const r = await callWebApp('deleteServicio', { codigo });
-      if (!r.ok) throw new Error(r.error || 'No se pudo eliminar');
-      await syncAll();
-    } catch (err) {
-      alert('Error: ' + err.message);
-    }
-  }
-
-  /**********************
-   * DASHBOARD CHART
-   **********************/
-  function renderDashboard() {
-    const total = SERVICIOS.length;
-    const pag = SERVICIOS.filter(s => (s.estado || '').toUpperCase() === 'PAGADO').length;
-    const pen = SERVICIOS.filter(s => (s.estado || '').toUpperCase() === 'PENDIENTE').length;
-    const por = SERVICIOS.filter(s => (s.estado || '').toUpperCase() === 'POR PAGAR').length;
-
-    const ctx = document.getElementById('chartEstados');
-    if (CHART) CHART.destroy();
-    CHART = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['Total','Pagados','Pendientes','Por pagar'],
-        datasets: [{ label: 'Servicios', data: [total, pag, pen, por] }]
-      },
-      options: { responsive: true, plugins: { legend: { display: false } } }
-    });
-  }
-
-  /**********************
-   * UTIL
-   **********************/
-  function badgeEstado(estado) {
-    const st = String(estado || '').toUpperCase();
-    if (st === 'PAGADO') return `<span class="px-2 py-1 rounded bg-green-50 text-green-700 text-xs">PAGADO</span>`;
-    if (st === 'POR PAGAR') return `<span class="px-2 py-1 rounded bg-amber-50 text-amber-800 text-xs">POR PAGAR</span>`;
-    return `<span class="px-2 py-1 rounded bg-slate-100 text-slate-700 text-xs">PENDIENTE</span>`;
-  }
-
-  function fmtDate(v) {
-    if (!v) return '';
-    const d = new Date(v);
-    if (isNaN(d.getTime())) return String(v).slice(0,10);
-    return d.toISOString().slice(0,10);
-  }
-
-  function fmtDateTime(v) {
-    if (!v) return '';
-    const d = new Date(v);
-    if (isNaN(d.getTime())) return String(v);
-    return d.toLocaleString('es-PE');
-  }
-
-  function escapeHtml(s) {
-    return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-  }
-  function escapeJs(s) {
-    return String(s ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-  }
-</script>
-</body>
+      load();
+    </script>
+  </body>
 </html>
