@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Panel de Servicios</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
@@ -11,473 +11,580 @@
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
 
   <style>
-    body { background:#f8fafc; }
+    body { background: #f8fafc; }
     .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
   </style>
 </head>
 
 <body class="min-h-screen">
+  <!-- NAV -->
   <nav class="gradient-bg text-white shadow">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="font-bold text-lg">Gestión de Servicios</div>
-      <div class="flex gap-3 items-center">
+      <div class="flex items-center gap-2">
         <button class="px-3 py-2 rounded hover:bg-white/10" onclick="showTab('servicios')">Servicios</button>
         <button class="px-3 py-2 rounded hover:bg-white/10" onclick="showTab('dashboard')">Dashboard</button>
         <button class="px-3 py-2 rounded hover:bg-white/10" onclick="showTab('historial')">Historial</button>
-        <button class="px-3 py-2 rounded hover:bg-white/10" onclick="openConfig()">⚙️</button>
+        <button class="px-3 py-2 rounded hover:bg-white/10" onclick="openConfig()" title="Configuración">⚙️</button>
       </div>
     </div>
   </nav>
 
-  <main class="max-w-7xl mx-auto p-4 md:p-8">
+  <main class="max-w-7xl mx-auto p-4">
+    <!-- SERVICIOS -->
+    <section id="tab-servicios" class="tab">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- FORM -->
+        <div class="lg:col-span-2 bg-white rounded-xl shadow p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-xl font-semibold">Nuevo Servicio</h2>
+            <button class="text-sm px-3 py-2 rounded bg-slate-100 hover:bg-slate-200" onclick="limpiarForm()">Limpiar</button>
+          </div>
 
-    <!-- TAB: SERVICIOS -->
-    <section id="tab-servicios" class="space-y-6">
-      <div class="bg-white rounded-2xl shadow p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-2xl font-bold">Nuevo / Editar Servicio</h2>
-          <button class="text-sm px-3 py-2 rounded border" onclick="resetForm()">Limpiar</button>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="text-sm font-medium">Código *</label>
+              <input id="codigo" class="w-full border rounded p-2" placeholder="SRV-001" />
+            </div>
+            <div>
+              <label class="text-sm font-medium">Proveedor *</label>
+              <input id="proveedor" class="w-full border rounded p-2" placeholder="Movistar" />
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="text-sm font-medium">Servicio *</label>
+              <input id="servicio" class="w-full border rounded p-2" placeholder="Internet Fibra 100Mbps" />
+            </div>
+
+            <div>
+              <label class="text-sm font-medium">Categoría</label>
+              <input id="categoria" class="w-full border rounded p-2" placeholder="Internet" />
+            </div>
+            <div>
+              <label class="text-sm font-medium">Monto (S/)*</label>
+              <input id="monto" type="number" class="w-full border rounded p-2" placeholder="0" />
+              <label class="mt-2 flex items-center gap-2 text-sm">
+                <input id="montoVariable" type="checkbox" />
+                <span>El monto varía cada mes</span>
+              </label>
+            </div>
+
+            <div>
+              <label class="text-sm font-medium">Fecha Servicio</label>
+              <input id="fechaServicio" class="w-full border rounded p-2" placeholder="yyyy-mm-dd" />
+            </div>
+            <div>
+              <label class="text-sm font-medium">Fecha Vencimiento</label>
+              <input id="fechaVencimiento" class="w-full border rounded p-2" placeholder="yyyy-mm-dd" />
+            </div>
+
+            <div>
+              <label class="text-sm font-medium">Fecha Pago</label>
+              <input id="fechaPago" class="w-full border rounded p-2" placeholder="yyyy-mm-dd" />
+            </div>
+            <div>
+              <label class="text-sm font-medium">Estado *</label>
+              <select id="estado" class="w-full border rounded p-2">
+                <option value="PENDIENTE">PENDIENTE</option>
+                <option value="POR PAGAR">POR PAGAR</option>
+                <option value="PAGADO">PAGADO</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-sm font-medium">Medio de Pago</label>
+              <input id="medioPago" class="w-full border rounded p-2" placeholder="BCP / Yape / Efectivo" />
+            </div>
+            <div>
+              <label class="text-sm font-medium">Cuenta</label>
+              <input id="cuenta" class="w-full border rounded p-2" placeholder="Cuenta / Nº" />
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="text-sm font-medium">Observaciones</label>
+              <textarea id="observaciones" class="w-full border rounded p-2" rows="3"></textarea>
+            </div>
+          </div>
+
+          <button class="mt-4 w-full gradient-bg text-white font-semibold py-3 rounded-lg hover:opacity-95"
+                  onclick="guardarServicio()">
+            Guardar Servicio (y Gastos si PAGADO)
+          </button>
+
+          <p class="mt-3 text-xs text-slate-500">
+            Tip: Primero abre ⚙️ y pega la URL <b>.../exec</b> de tu Web App (Apps Script).
+          </p>
         </div>
 
-        <form id="formServicio" class="grid grid-cols-1 md:grid-cols-3 gap-4" onsubmit="saveServicio(event)">
-          <div>
-            <label class="text-sm font-medium">Código *</label>
-            <input id="codigo" required class="w-full border rounded px-3 py-2" placeholder="SRV-001"/>
-          </div>
-          <div>
-            <label class="text-sm font-medium">Proveedor *</label>
-            <input id="proveedor" required class="w-full border rounded px-3 py-2" placeholder="Movistar"/>
-          </div>
-          <div>
-            <label class="text-sm font-medium">Servicio *</label>
-            <input id="servicio" required class="w-full border rounded px-3 py-2" placeholder="Internet Fibra 100Mbps"/>
-          </div>
-
-          <div>
-            <label class="text-sm font-medium">Categoría</label>
-            <select id="categoria" class="w-full border rounded px-3 py-2">
-              <option value="">Seleccionar…</option>
-              <option>Internet</option><option>Telefonía</option><option>Software</option><option>Energía</option><option>Otros</option>
-            </select>
+        <!-- RESUMEN + RECIENTES -->
+        <div class="space-y-4">
+          <div class="bg-white rounded-xl shadow p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span>📊</span><h3 class="font-semibold">Resumen</h3>
+            </div>
+            <div class="text-sm space-y-1">
+              <div class="flex justify-between"><span>Total</span><b id="resTotal">0</b></div>
+              <div class="flex justify-between"><span>Pagados</span><b id="resPagados">0</b></div>
+              <div class="flex justify-between"><span>Pendientes</span><b id="resPendientes">0</b></div>
+              <div class="flex justify-between"><span>Falta pagar</span><b id="resPorPagar">0</b></div>
+              <div class="pt-2">
+                <div class="h-2 bg-slate-100 rounded">
+                  <div id="barAvance" class="h-2 rounded gradient-bg" style="width:0%"></div>
+                </div>
+                <div class="text-right text-xs mt-1"><b id="resAvance">0%</b></div>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label class="text-sm font-medium">Monto (S/) *</label>
-            <input id="monto" type="number" step="0.01" required class="w-full border rounded px-3 py-2" placeholder="1200"/>
+          <div class="bg-white rounded-xl shadow p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span>🕒</span><h3 class="font-semibold">Recientes</h3>
+            </div>
+            <div id="recientes" class="text-sm text-slate-600">Cargando...</div>
           </div>
-
-          <div class="flex items-center gap-2 mt-6">
-            <input id="montoVariable" type="checkbox" class="w-4 h-4"/>
-            <label class="text-sm">Monto variable</label>
-          </div>
-
-          <div>
-            <label class="text-sm font-medium">Fecha Servicio</label>
-            <input id="fechaServicio" class="w-full border rounded px-3 py-2" placeholder="yyyy-mm-dd"/>
-          </div>
-          <div>
-            <label class="text-sm font-medium">Fecha Vencimiento</label>
-            <input id="fechaVencimiento" class="w-full border rounded px-3 py-2" placeholder="yyyy-mm-dd"/>
-          </div>
-          <div>
-            <label class="text-sm font-medium">Fecha Pago</label>
-            <input id="fechaPago" class="w-full border rounded px-3 py-2" placeholder="yyyy-mm-dd"/>
-          </div>
-
-          <div>
-            <label class="text-sm font-medium">Estado *</label>
-            <select id="estado" required class="w-full border rounded px-3 py-2">
-              <option>PENDIENTE</option>
-              <option>FALTA PAGAR</option>
-              <option>PAGADO</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="text-sm font-medium">Medio de Pago</label>
-            <select id="medioPago" class="w-full border rounded px-3 py-2">
-              <option value="">Seleccionar…</option>
-              <option>BCP</option><option>YAPE</option><option>PLIN</option><option>Efectivo</option><option>Transferencia</option><option>Tarjeta</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-sm font-medium">Cuenta</label>
-            <input id="cuenta" class="w-full border rounded px-3 py-2" placeholder="N° cuenta / cel"/>
-          </div>
-
-          <div class="md:col-span-3">
-            <label class="text-sm font-medium">Observaciones</label>
-            <textarea id="observaciones" class="w-full border rounded px-3 py-2" rows="2"></textarea>
-          </div>
-
-          <div>
-            <label class="text-sm font-medium">Voucher (1 archivo)</label>
-            <input id="voucher" type="file" accept="image/*,application/pdf" class="w-full"/>
-          </div>
-
-          <div class="md:col-span-2">
-            <label class="text-sm font-medium">Recibo/Contrato/Otros (múltiples)</label>
-            <input id="docs" type="file" multiple accept="image/*,application/pdf" class="w-full"/>
-          </div>
-
-          <div class="md:col-span-3 flex gap-3 pt-2">
-            <button class="gradient-bg text-white px-4 py-3 rounded-lg font-semibold" type="submit">
-              Guardar Servicio
-            </button>
-            <button class="px-4 py-3 rounded-lg border" type="button" onclick="resetForm()">Cancelar</button>
-          </div>
-        </form>
+        </div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-2xl font-bold">Todos los Servicios</h2>
-          <div class="flex gap-2">
-            <input id="search" class="border rounded px-3 py-2" placeholder="Buscar…" onkeyup="renderServicios()"/>
-            <select id="filterEstado" class="border rounded px-3 py-2" onchange="renderServicios()">
+      <!-- LISTA -->
+      <div class="mt-6 bg-white rounded-xl shadow p-4">
+        <div class="flex items-center justify-between gap-2">
+          <h3 class="font-semibold">Todos los servicios</h3>
+          <div class="flex items-center gap-2">
+            <input id="buscar" class="border rounded p-2 text-sm" placeholder="Buscar..." oninput="renderServicios()" />
+            <select id="filtroEstado" class="border rounded p-2 text-sm" onchange="renderServicios()">
               <option value="">Todos</option>
-              <option>PAGADO</option>
-              <option>PENDIENTE</option>
-              <option>FALTA PAGAR</option>
+              <option value="PENDIENTE">Pendiente</option>
+              <option value="POR PAGAR">Por pagar</option>
+              <option value="PAGADO">Pagado</option>
             </select>
+            <button class="text-sm px-3 py-2 rounded bg-slate-100 hover:bg-slate-200" onclick="syncAll()">Actualizar</button>
           </div>
         </div>
 
-        <div class="overflow-auto">
-          <table class="w-full text-sm">
+        <div class="overflow-x-auto mt-3">
+          <table class="min-w-full text-sm">
             <thead class="bg-slate-50">
               <tr>
-                <th class="p-2 text-left">Código</th>
-                <th class="p-2 text-left">Proveedor</th>
-                <th class="p-2 text-left">Servicio</th>
-                <th class="p-2 text-left">Monto</th>
-                <th class="p-2 text-left">Estado</th>
-                <th class="p-2 text-left">Docs</th>
-                <th class="p-2 text-left">Acciones</th>
+                <th class="text-left p-2">Código</th>
+                <th class="text-left p-2">Proveedor</th>
+                <th class="text-left p-2">Servicio</th>
+                <th class="text-right p-2">Monto</th>
+                <th class="text-left p-2">Estado</th>
+                <th class="text-left p-2">Acción</th>
               </tr>
             </thead>
-            <tbody id="tbodyServicios"></tbody>
+            <tbody id="tablaServicios">
+              <tr><td class="p-2 text-slate-500" colspan="6">Cargando...</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- TAB: DASHBOARD -->
-    <section id="tab-dashboard" class="hidden space-y-6">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="bg-white rounded-2xl shadow p-4"><div class="text-xs text-slate-500">Total</div><div id="kpiTotal" class="text-2xl font-bold">0</div></div>
-        <div class="bg-white rounded-2xl shadow p-4"><div class="text-xs text-slate-500">Pagados</div><div id="kpiPagados" class="text-2xl font-bold text-green-600">0</div></div>
-        <div class="bg-white rounded-2xl shadow p-4"><div class="text-xs text-slate-500">Pendientes</div><div id="kpiPendientes" class="text-2xl font-bold text-yellow-600">0</div></div>
-        <div class="bg-white rounded-2xl shadow p-4"><div class="text-xs text-slate-500">Avance</div><div id="kpiAvance" class="text-2xl font-bold">0%</div></div>
-      </div>
-
-      <div class="bg-white rounded-2xl shadow p-6">
-        <h2 class="text-2xl font-bold mb-4">Estado de Servicios</h2>
-        <canvas id="chartEstado"></canvas>
+    <!-- DASHBOARD -->
+    <section id="tab-dashboard" class="tab hidden">
+      <div class="bg-white rounded-xl shadow p-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-semibold">Dashboard</h2>
+          <button class="text-sm px-3 py-2 rounded bg-slate-100 hover:bg-slate-200" onclick="syncAll()">Actualizar</button>
+        </div>
+        <div class="mt-4">
+          <canvas id="chartEstados" height="110"></canvas>
+        </div>
       </div>
     </section>
 
-    <!-- TAB: HISTORIAL -->
-    <section id="tab-historial" class="hidden space-y-6">
-      <div class="bg-white rounded-2xl shadow p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-2xl font-bold">Historial</h2>
-          <button class="px-3 py-2 rounded border" onclick="loadHistorial()">Recargar</button>
+    <!-- HISTORIAL -->
+    <section id="tab-historial" class="tab hidden">
+      <div class="bg-white rounded-xl shadow p-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-semibold">Historial</h2>
+          <button class="text-sm px-3 py-2 rounded bg-slate-100 hover:bg-slate-200" onclick="cargarHistorial()">Actualizar</button>
         </div>
 
-        <div class="overflow-auto">
-          <table class="w-full text-sm">
+        <div class="overflow-x-auto mt-3">
+          <table class="min-w-full text-sm">
             <thead class="bg-slate-50">
               <tr>
-                <th class="p-2 text-left">Fecha/Hora</th>
-                <th class="p-2 text-left">Código</th>
-                <th class="p-2 text-left">Proveedor</th>
-                <th class="p-2 text-left">Servicio</th>
-                <th class="p-2 text-left">Monto</th>
-                <th class="p-2 text-left">Estado</th>
-                <th class="p-2 text-left">Voucher</th>
-                <th class="p-2 text-left">Docs</th>
+                <th class="text-left p-2">Fecha/Hora</th>
+                <th class="text-left p-2">Acción</th>
+                <th class="text-left p-2">Código</th>
+                <th class="text-left p-2">Proveedor</th>
+                <th class="text-left p-2">Servicio</th>
+                <th class="text-right p-2">Monto</th>
+                <th class="text-left p-2">Estado</th>
               </tr>
             </thead>
-            <tbody id="tbodyHistorial"></tbody>
+            <tbody id="tablaHistorial">
+              <tr><td class="p-2 text-slate-500" colspan="7">Cargando...</td></tr>
+            </tbody>
           </table>
         </div>
       </div>
     </section>
-
   </main>
 
   <!-- MODAL CONFIG -->
-  <div id="modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow max-w-lg w-full p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold">Configuración</h3>
-        <button onclick="closeConfig()" class="text-slate-500">✖</button>
+  <div id="modalConfig" class="fixed inset-0 bg-black/40 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow max-w-lg w-full p-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold text-lg">⚙️ Configuración</h3>
+        <button class="text-xl" onclick="closeConfig()">✕</button>
       </div>
 
-      <label class="text-sm font-medium">URL Web App (Apps Script) *</label>
-      <input id="webAppUrl" class="w-full border rounded px-3 py-2 mt-1"
-        placeholder="https://script.google.com/macros/s/.../exec" />
+      <label class="block text-sm font-medium mt-3">URL del Web App (Apps Script)</label>
+      <input id="webAppUrl" class="w-full border rounded p-2 mt-1"
+             placeholder="https://script.google.com/macros/s/XXXXXXXX/exec" />
 
-      <p class="text-xs text-slate-500 mt-2">
-        *Debe terminar en <b>/exec</b>. No pegues solo el ID "AKfycb...".
+      <button class="mt-3 w-full gradient-bg text-white font-semibold py-2 rounded-lg hover:opacity-95"
+              onclick="guardarConfig()">
+        Guardar
+      </button>
+
+      <p class="mt-2 text-xs text-slate-500">
+        Debe terminar en <b>/exec</b>. Si pegas solo el ID, no funcionará.
       </p>
-
-      <button class="gradient-bg text-white px-4 py-3 rounded-lg font-semibold w-full mt-4"
-        onclick="saveConfig()">Guardar</button>
     </div>
   </div>
 
 <script>
-  // ===== CONFIG =====
-  let WEB_APP_URL = localStorage.getItem('webAppUrl') || '';
-  let servicios = [];
-  let historial = [];
-  let chart = null;
+  /**********************
+   * CONFIG + HELPERS
+   **********************/
+  const LS_WEBAPP = 'bravizimos_webapp_url';
 
-  // flatpickr
-  flatpickr("#fechaServicio", { locale:"es", dateFormat:"Y-m-d" });
-  flatpickr("#fechaPago", { locale:"es", dateFormat:"Y-m-d" });
-  flatpickr("#fechaVencimiento", { locale:"es", dateFormat:"Y-m-d" });
+  function getWebAppUrl() {
+    return (localStorage.getItem(LS_WEBAPP) || '').trim();
+  }
 
-  function openConfig(){ document.getElementById('modal').classList.remove('hidden'); document.getElementById('modal').classList.add('flex'); document.getElementById('webAppUrl').value = WEB_APP_URL; }
-  function closeConfig(){ document.getElementById('modal').classList.add('hidden'); }
-  function saveConfig(){
-    WEB_APP_URL = document.getElementById('webAppUrl').value.trim();
-    localStorage.setItem('webAppUrl', WEB_APP_URL);
+  function setWebAppUrl(url) {
+    localStorage.setItem(LS_WEBAPP, (url || '').trim());
+  }
+
+  function openConfig() {
+    document.getElementById('webAppUrl').value = getWebAppUrl();
+    document.getElementById('modalConfig').classList.remove('hidden');
+    document.getElementById('modalConfig').classList.add('flex');
+  }
+
+  function closeConfig() {
+    document.getElementById('modalConfig').classList.add('hidden');
+    document.getElementById('modalConfig').classList.remove('flex');
+  }
+
+  function guardarConfig() {
+    const url = document.getElementById('webAppUrl').value.trim();
+    if (!url.startsWith('https://script.google.com/macros/s/') || !url.endsWith('/exec')) {
+      alert('Pega la URL completa que termina en /exec (no el ID suelto).');
+      return;
+    }
+    setWebAppUrl(url);
     closeConfig();
-    boot();
-    alert('✅ Configuración guardada');
+    syncAll();
   }
 
-  // ===== TABS =====
-  function showTab(name){
-    document.getElementById('tab-servicios').classList.add('hidden');
-    document.getElementById('tab-dashboard').classList.add('hidden');
-    document.getElementById('tab-historial').classList.add('hidden');
-    document.getElementById(`tab-${name}`).classList.remove('hidden');
+  async function callWebApp(action, data = null) {
+    const base = getWebAppUrl();
+    if (!base) throw new Error('Falta configurar la URL del Web App (⚙️).');
 
-    if (name === 'dashboard') loadStats();
-    if (name === 'historial') loadHistorial();
-  }
+    // GET
+    if (!data) {
+      const url = new URL(base);
+      url.searchParams.set('action', action);
+      const res = await fetch(url.toString(), { method: 'GET' });
+      const txt = await res.text();
+      return safeJsonParse_(txt);
+    }
 
-  // ===== JSONP (evita CORS) =====
-  function jsonp(url){
-    return new Promise((resolve, reject) => {
-      const cb = 'cb_' + Math.random().toString(36).slice(2);
-      window[cb] = (data) => { resolve(data); cleanup(); };
-      const s = document.createElement('script');
-      s.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cb;
-      s.onerror = () => { reject(new Error('JSONP error')); cleanup(); };
-      document.body.appendChild(s);
-      function cleanup(){
-        delete window[cb];
-        if (s && s.parentNode) s.parentNode.removeChild(s);
-      }
+    // POST
+    const payload = Object.assign({ action }, data);
+    const res = await fetch(base, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita preflight
+      body: JSON.stringify(payload)
     });
+    const txt = await res.text();
+    return safeJsonParse_(txt);
   }
 
-  async function loadServicios(){
-    if (!WEB_APP_URL) return openConfig();
-    const data = await jsonp(`${WEB_APP_URL}?action=servicios`);
-    if (!data.ok) throw new Error(data.error || 'No se pudo cargar servicios');
-    servicios = data.items || [];
+  function safeJsonParse_(txt) {
+    const t = (txt || '').trim();
+    if (!t) throw new Error('Respuesta vacía del Web App.');
+    if (t[0] === '<') {
+      // Apps Script devolvió HTML (login/permiso o URL incorrecta)
+      throw new Error('El Web App devolvió HTML (no JSON). Revisa: URL /exec, permisos "Cualquier usuario", y vuelve a Implementar.');
+    }
+    try { return JSON.parse(t); }
+    catch (e) { throw new Error('JSON inválido: ' + t.slice(0, 120)); }
+  }
+
+  /**********************
+   * UI TABS
+   **********************/
+  function showTab(name) {
+    document.querySelectorAll('.tab').forEach(el => el.classList.add('hidden'));
+    document.getElementById('tab-' + name).classList.remove('hidden');
+    if (name === 'dashboard') renderDashboard();
+    if (name === 'historial') cargarHistorial();
+  }
+
+  /**********************
+   * STATE
+   **********************/
+  let SERVICIOS = [];
+  let CHART = null;
+
+  /**********************
+   * INIT
+   **********************/
+  document.addEventListener('DOMContentLoaded', () => {
+    // date pickers
+    flatpickr("#fechaServicio", { dateFormat: "Y-m-d", locale: "es" });
+    flatpickr("#fechaVencimiento", { dateFormat: "Y-m-d", locale: "es" });
+    flatpickr("#fechaPago", { dateFormat: "Y-m-d", locale: "es" });
+
+    // first load
+    syncAll().catch(err => console.warn(err));
+  });
+
+  /**********************
+   * SYNC
+   **********************/
+  async function syncAll() {
+    try {
+      await Promise.all([cargarServicios(), cargarResumen(), cargarRecientes()]);
+      if (!document.getElementById('tab-dashboard').classList.contains('hidden')) renderDashboard();
+      if (!document.getElementById('tab-historial').classList.contains('hidden')) cargarHistorial();
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  }
+
+  async function cargarServicios() {
+    const r = await callWebApp('listServicios');
+    if (!r.ok) throw new Error(r.error || 'Error listServicios');
+    SERVICIOS = r.data || [];
     renderServicios();
   }
 
-  async function loadStats(){
-    if (!WEB_APP_URL) return openConfig();
-    const data = await jsonp(`${WEB_APP_URL}?action=stats`);
-    if (!data.ok) throw new Error(data.error || 'No se pudo cargar stats');
-
-    document.getElementById('kpiTotal').textContent = data.total || 0;
-    document.getElementById('kpiPagados').textContent = data.pagados || 0;
-    document.getElementById('kpiPendientes').textContent = data.pendientes || 0;
-    document.getElementById('kpiAvance').textContent = (data.avance || 0) + '%';
-
-    const ctx = document.getElementById('chartEstado');
-    const vals = [data.pagados||0, data.pendientes||0, data.faltaPagar||0];
-
-    if (chart) chart.destroy();
-    chart = new Chart(ctx, {
-      type: 'bar',
-      data: { labels: ['PAGADO','PENDIENTE','FALTA PAGAR'], datasets: [{ label:'Servicios', data: vals }] },
-      options: { responsive:true }
-    });
+  async function cargarResumen() {
+    const r = await callWebApp('getDashboard');
+    if (!r.ok) throw new Error(r.error || 'Error getDashboard');
+    const d = r.data || {};
+    document.getElementById('resTotal').textContent = d.total ?? 0;
+    document.getElementById('resPagados').textContent = d.pagados ?? 0;
+    document.getElementById('resPendientes').textContent = d.pendientes ?? 0;
+    document.getElementById('resPorPagar').textContent = d.porPagar ?? 0;
+    const avance = d.total ? Math.round((d.pagados / d.total) * 100) : 0;
+    document.getElementById('resAvance').textContent = avance + '%';
+    document.getElementById('barAvance').style.width = avance + '%';
   }
 
-  async function loadHistorial(){
-    if (!WEB_APP_URL) return openConfig();
-    const data = await jsonp(`${WEB_APP_URL}?action=historial`);
-    if (!data.ok) throw new Error(data.error || 'No se pudo cargar historial');
-    historial = data.items || [];
-    renderHistorial();
+  async function cargarRecientes() {
+    const r = await callWebApp('getRecientes');
+    if (!r.ok) throw new Error(r.error || 'Error getRecientes');
+    const items = r.data || [];
+    if (!items.length) {
+      document.getElementById('recientes').textContent = 'Sin registros.';
+      return;
+    }
+    document.getElementById('recientes').innerHTML = items.map(s =>
+      `<div class="py-1 border-b last:border-b-0">
+        <div class="font-medium">${escapeHtml(s.codigo)} - ${escapeHtml(s.servicio)}</div>
+        <div class="text-xs text-slate-500">${escapeHtml(s.proveedor)} • ${escapeHtml(s.estado)} • S/ ${escapeHtml(String(s.monto ?? ''))}</div>
+      </div>`
+    ).join('');
   }
 
-  // ===== RENDER =====
-  function badge(estado){
-    const e = (estado||'').toUpperCase();
-    const base = 'px-2 py-1 rounded text-xs font-semibold';
-    if (e === 'PAGADO') return `<span class="${base} bg-green-100 text-green-700">PAGADO</span>`;
-    if (e === 'PENDIENTE') return `<span class="${base} bg-yellow-100 text-yellow-700">PENDIENTE</span>`;
-    return `<span class="${base} bg-red-100 text-red-700">FALTA PAGAR</span>`;
-  }
-
-  function renderServicios(){
-    const q = (document.getElementById('search').value||'').toLowerCase();
-    const fe = (document.getElementById('filterEstado').value||'').toUpperCase();
-
-    const rows = servicios
-      .filter(s => {
-        const txt = `${s.codigo} ${s.proveedor} ${s.servicio}`.toLowerCase();
-        const okQ = !q || txt.includes(q);
-        const okE = !fe || (String(s.estado||'').toUpperCase() === fe);
-        return okQ && okE;
-      })
-      .map(s => `
-        <tr class="border-b">
-          <td class="p-2 font-mono text-indigo-600">${s.codigo||''}</td>
-          <td class="p-2">${s.proveedor||''}</td>
-          <td class="p-2">${s.servicio||''}</td>
-          <td class="p-2 font-semibold">S/ ${(Number(s.monto||0)).toFixed(2)}</td>
-          <td class="p-2">${badge(s.estado)}</td>
-          <td class="p-2">
-            ${s.voucherUrl ? `<a class="text-indigo-600 underline" href="${s.voucherUrl}" target="_blank">Voucher</a>` : ''}
-            ${s.docsUrl ? ` · <span class="text-slate-500">Docs</span>` : ''}
-          </td>
-          <td class="p-2">
-            <button class="text-indigo-600 underline" onclick="editServicio('${(s.codigo||'').replace(/'/g,"\\'")}')">Editar</button>
-          </td>
+  async function cargarHistorial() {
+    try {
+      const r = await callWebApp('getHistorial');
+      if (!r.ok) throw new Error(r.error || 'Error getHistorial');
+      const items = r.data || [];
+      const tbody = document.getElementById('tablaHistorial');
+      if (!items.length) {
+        tbody.innerHTML = `<tr><td class="p-2 text-slate-500" colspan="7">Sin historial.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = items.map(x => `
+        <tr class="border-t">
+          <td class="p-2">${fmtDateTime(x.fechaHora)}</td>
+          <td class="p-2">${escapeHtml(x.accion)}</td>
+          <td class="p-2">${escapeHtml(x.codigo)}</td>
+          <td class="p-2">${escapeHtml(x.proveedor)}</td>
+          <td class="p-2">${escapeHtml(x.servicio)}</td>
+          <td class="p-2 text-right">S/ ${escapeHtml(String(x.monto ?? ''))}</td>
+          <td class="p-2">${escapeHtml(x.estado)}</td>
         </tr>
       `).join('');
-
-    document.getElementById('tbodyServicios').innerHTML = rows || `<tr><td class="p-3 text-slate-500" colspan="7">Sin datos</td></tr>`;
+    } catch (err) {
+      document.getElementById('tablaHistorial').innerHTML =
+        `<tr><td class="p-2 text-red-600" colspan="7">${escapeHtml(err.message)}</td></tr>`;
+    }
   }
 
-  function renderHistorial(){
-    const rows = historial.slice().reverse().map(h => `
-      <tr class="border-b">
-        <td class="p-2">${h.fechaHora ? new Date(h.fechaHora).toLocaleString() : ''}</td>
-        <td class="p-2 font-mono text-indigo-600">${h.codigo||''}</td>
-        <td class="p-2">${h.proveedor||''}</td>
-        <td class="p-2">${h.servicio||''}</td>
-        <td class="p-2 font-semibold">S/ ${(Number(h.monto||0)).toFixed(2)}</td>
-        <td class="p-2">${badge(h.estado)}</td>
-        <td class="p-2">${h.voucherUrl ? `<a class="text-indigo-600 underline" href="${h.voucherUrl}" target="_blank">Ver</a>` : ''}</td>
-        <td class="p-2">${h.docsUrl ? `<span class="text-slate-500">Ver en hoja</span>` : ''}</td>
+  /**********************
+   * FORM
+   **********************/
+  function limpiarForm() {
+    ['codigo','proveedor','servicio','categoria','monto','fechaServicio','fechaVencimiento','fechaPago','medioPago','cuenta','observaciones'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('estado').value = 'PENDIENTE';
+    document.getElementById('montoVariable').checked = false;
+  }
+
+  async function guardarServicio() {
+    try {
+      const payload = {
+        codigo: document.getElementById('codigo').value.trim(),
+        proveedor: document.getElementById('proveedor').value.trim(),
+        servicio: document.getElementById('servicio').value.trim(),
+        categoria: document.getElementById('categoria').value.trim(),
+        monto: Number(document.getElementById('monto').value || 0),
+        montoVariable: document.getElementById('montoVariable').checked ? 'SI' : '',
+        fechaServicio: document.getElementById('fechaServicio').value,
+        fechaVencimiento: document.getElementById('fechaVencimiento').value,
+        fechaPago: document.getElementById('fechaPago').value,
+        estado: document.getElementById('estado').value,
+        medioPago: document.getElementById('medioPago').value.trim(),
+        cuenta: document.getElementById('cuenta').value.trim(),
+        observaciones: document.getElementById('observaciones').value.trim()
+      };
+
+      if (!payload.codigo || !payload.proveedor || !payload.servicio) {
+        alert('Completa Código, Proveedor y Servicio.');
+        return;
+      }
+
+      const r = await callWebApp('addServicio', payload);
+      if (!r.ok) throw new Error(r.error || 'No se pudo guardar');
+
+      limpiarForm();
+      await syncAll();
+      alert('Guardado ✅');
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  }
+
+  /**********************
+   * TABLE
+   **********************/
+  function renderServicios() {
+    const q = document.getElementById('buscar').value.trim().toLowerCase();
+    const estado = document.getElementById('filtroEstado').value;
+
+    const rows = SERVICIOS.filter(s => {
+      const hay = (s.codigo + ' ' + s.proveedor + ' ' + s.servicio).toLowerCase().includes(q);
+      const okEstado = estado ? String(s.estado || '').toUpperCase() === estado : true;
+      return hay && okEstado;
+    });
+
+    const tbody = document.getElementById('tablaServicios');
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td class="p-2 text-slate-500" colspan="6">Sin resultados.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = rows.map(s => `
+      <tr class="border-t">
+        <td class="p-2 font-medium">${escapeHtml(s.codigo)}</td>
+        <td class="p-2">${escapeHtml(s.proveedor)}</td>
+        <td class="p-2">${escapeHtml(s.servicio)}</td>
+        <td class="p-2 text-right">S/ ${escapeHtml(String(s.monto ?? ''))}</td>
+        <td class="p-2">${badgeEstado(s.estado)}</td>
+        <td class="p-2">
+          <button class="text-xs px-2 py-1 rounded bg-slate-100 hover:bg-slate-200"
+                  onclick="cargarEnForm('${escapeJs(s.codigo)}')">Editar</button>
+          <button class="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100 ml-2"
+                  onclick="eliminarServicio('${escapeJs(s.codigo)}')">Eliminar</button>
+        </td>
       </tr>
     `).join('');
-    document.getElementById('tbodyHistorial').innerHTML = rows || `<tr><td class="p-3 text-slate-500" colspan="8">Sin historial</td></tr>`;
   }
 
-  // ===== FORM =====
-  function resetForm(){
-    document.getElementById('formServicio').reset();
-  }
-
-  function editServicio(codigo){
-    const s = servicios.find(x => String(x.codigo||'') === String(codigo||''));
+  function cargarEnForm(codigo) {
+    const s = SERVICIOS.find(x => x.codigo === codigo);
     if (!s) return;
-
     document.getElementById('codigo').value = s.codigo || '';
     document.getElementById('proveedor').value = s.proveedor || '';
     document.getElementById('servicio').value = s.servicio || '';
     document.getElementById('categoria').value = s.categoria || '';
-    document.getElementById('monto').value = s.monto || 0;
-    document.getElementById('fechaServicio').value = s.fechaServicio || '';
-    document.getElementById('fechaVencimiento').value = s.fechaVencimiento || '';
-    document.getElementById('fechaPago').value = s.fechaPago || '';
-    document.getElementById('estado').value = s.estado || 'PENDIENTE';
+    document.getElementById('monto').value = s.monto ?? '';
+    document.getElementById('montoVariable').checked = String(s.montoVariable || '').toUpperCase() === 'SI';
+    document.getElementById('fechaServicio').value = fmtDate(s.fechaServicio);
+    document.getElementById('fechaVencimiento').value = fmtDate(s.fechaVencimiento);
+    document.getElementById('fechaPago').value = fmtDate(s.fechaPago);
+    document.getElementById('estado').value = (s.estado || 'PENDIENTE').toUpperCase();
     document.getElementById('medioPago').value = s.medioPago || '';
     document.getElementById('cuenta').value = s.cuenta || '';
     document.getElementById('observaciones').value = s.observaciones || '';
-    document.getElementById('montoVariable').checked = !!s.montoVariable;
-
-    window.scrollTo({ top:0, behavior:'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function fileToDataUrl(file){
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+  async function eliminarServicio(codigo) {
+    if (!confirm('¿Eliminar ' + codigo + '?')) return;
+    try {
+      const r = await callWebApp('deleteServicio', { codigo });
+      if (!r.ok) throw new Error(r.error || 'No se pudo eliminar');
+      await syncAll();
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  }
+
+  /**********************
+   * DASHBOARD CHART
+   **********************/
+  function renderDashboard() {
+    const total = SERVICIOS.length;
+    const pag = SERVICIOS.filter(s => (s.estado || '').toUpperCase() === 'PAGADO').length;
+    const pen = SERVICIOS.filter(s => (s.estado || '').toUpperCase() === 'PENDIENTE').length;
+    const por = SERVICIOS.filter(s => (s.estado || '').toUpperCase() === 'POR PAGAR').length;
+
+    const ctx = document.getElementById('chartEstados');
+    if (CHART) CHART.destroy();
+    CHART = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Total','Pagados','Pendientes','Por pagar'],
+        datasets: [{ label: 'Servicios', data: [total, pag, pen, por] }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
     });
   }
 
-  async function saveServicio(ev){
-    ev.preventDefault();
-    if (!WEB_APP_URL) return openConfig();
-
-    const voucherInput = document.getElementById('voucher');
-    const docsInput = document.getElementById('docs');
-
-    const voucherFile = voucherInput.files && voucherInput.files[0] ? voucherInput.files[0] : null;
-    const docsFiles = docsInput.files ? Array.from(docsInput.files) : [];
-
-    // convierte a base64 (dataURL)
-    const voucherPayload = voucherFile ? {
-      name: voucherFile.name,
-      type: voucherFile.type,
-      dataUrl: await fileToDataUrl(voucherFile)
-    } : null;
-
-    const docsPayload = [];
-    for (const f of docsFiles) {
-      docsPayload.push({
-        name: f.name,
-        type: f.type,
-        dataUrl: await fileToDataUrl(f)
-      });
-    }
-
-    const payload = {
-      codigo: document.getElementById('codigo').value.trim(),
-      proveedor: document.getElementById('proveedor').value.trim(),
-      servicio: document.getElementById('servicio').value.trim(),
-      categoria: document.getElementById('categoria').value,
-      monto: Number(document.getElementById('monto').value || 0),
-      fechaServicio: document.getElementById('fechaServicio').value,
-      fechaVencimiento: document.getElementById('fechaVencimiento').value,
-      fechaPago: document.getElementById('fechaPago').value,
-      estado: document.getElementById('estado').value,
-      medioPago: document.getElementById('medioPago').value,
-      cuenta: document.getElementById('cuenta').value,
-      observaciones: document.getElementById('observaciones').value,
-      montoVariable: document.getElementById('montoVariable').checked,
-      voucherFile: voucherPayload,
-      docsFiles: docsPayload
-    };
-
-    try{
-      // POST sin CORS (igual escribe en Sheet / Drive)
-      await fetch(WEB_APP_URL, {
-        method:'POST',
-        mode:'no-cors',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      alert('✅ Guardado. Actualizando…');
-      resetForm();
-      setTimeout(async () => {
-        await loadServicios();
-        if (!document.getElementById('tab-dashboard').classList.contains('hidden')) await loadStats();
-        if (!document.getElementById('tab-historial').classList.contains('hidden')) await loadHistorial();
-      }, 1500);
-
-    }catch(err){
-      console.error(err);
-      alert('❌ Error al guardar. Revisa URL / permisos del Web App.');
-    }
+  /**********************
+   * UTIL
+   **********************/
+  function badgeEstado(estado) {
+    const st = String(estado || '').toUpperCase();
+    if (st === 'PAGADO') return `<span class="px-2 py-1 rounded bg-green-50 text-green-700 text-xs">PAGADO</span>`;
+    if (st === 'POR PAGAR') return `<span class="px-2 py-1 rounded bg-amber-50 text-amber-800 text-xs">POR PAGAR</span>`;
+    return `<span class="px-2 py-1 rounded bg-slate-100 text-slate-700 text-xs">PENDIENTE</span>`;
   }
 
-  async function boot(){
-    if (!WEB_APP_URL) return openConfig();
-    await loadServicios();
+  function fmtDate(v) {
+    if (!v) return '';
+    const d = new Date(v);
+    if (isNaN(d.getTime())) return String(v).slice(0,10);
+    return d.toISOString().slice(0,10);
   }
 
-  window.onload = boot;
+  function fmtDateTime(v) {
+    if (!v) return '';
+    const d = new Date(v);
+    if (isNaN(d.getTime())) return String(v);
+    return d.toLocaleString('es-PE');
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  }
+  function escapeJs(s) {
+    return String(s ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  }
 </script>
 </body>
 </html>
