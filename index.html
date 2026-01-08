@@ -86,13 +86,17 @@
                     <span class="text-white text-xl font-bold">Gestión de Servicios</span>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button onclick="location.href='dashboard.html'" class="text-white hover:text-gray-200 flex items-center">
+                    <button onclick="location.href='dashboard-servicios.html'" class="text-white hover:text-gray-200 flex items-center">
                         <i data-lucide="bar-chart-3" class="mr-2" size="20"></i>
                         Dashboard
                     </button>
-                    <button onclick="location.href='historial.html'" class="text-white hover:text-gray-200 flex items-center">
+                    <button onclick="verHistorial()" class="text-white hover:text-gray-200 flex items-center">
                         <i data-lucide="clock" class="mr-2" size="20"></i>
                         Historial
+                    </button>
+                    <button onclick="location.href='index-servicios-web.html'" class="text-white hover:text-gray-200 flex items-center">
+                        <i data-lucide="home" class="mr-2" size="20"></i>
+                        Servicios
                     </button>
                     <button onclick="abrirConfiguracion()" class="text-white hover:text-gray-200">
                         <i data-lucide="settings" size="20"></i>
@@ -683,6 +687,13 @@
                 abrirConfiguracion();
             }
         };
+        
+        // Ver historial
+        function verHistorial() {
+            // Mostrar modal con historial
+            alert('📜 Función de historial - Mostrará la tabla de gastos/historial de tu Google Sheet');
+            // En producción, esto abriría un modal o navegaría a otra vista
+        }
     </script>
 </body>
 </html>
