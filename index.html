@@ -3,659 +3,433 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Servicios - Dashboard Financiero</title>
+    <title>Gestión de Servicios - INDEX</title>
     
-    <!-- Chart.js para gráficos -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Date picker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     
     <style>
-        :root {
-            /* Paleta de colores moderna */
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary: #ec4899;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --info: #3b82f6;
-            
-            /* Grises */
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-300: #d1d5db;
-            --gray-600: #4b5563;
-            --gray-700: #374151;
-            --gray-800: #1f2937;
-            --gray-900: #111827;
-            
-            /* Fondos */
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-card: #334155;
-            
-            /* Tipografía */
-            --font-main: 'Outfit', sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
         }
         
-        body {
-            font-family: var(--font-main);
-            background: linear-gradient(135deg, var(--bg-primary) 0%, #1a2332 100%);
-            color: var(--gray-100);
-            min-height: 100vh;
-            padding: 2rem;
-            overflow-x: hidden;
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
-        /* Animación de fondo */
-        body::before {
-            content: '';
-            position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: gridMove 20s linear infinite;
-            z-index: 0;
-            pointer-events: none;
-        }
-        
-        @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-        
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-        
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            padding: 2rem;
-            border-radius: 20px;
-            margin-bottom: 2rem;
-            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            animation: pulse 8s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-        }
-        
-        .header-content {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: white;
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            letter-spacing: -0.02em;
-        }
-        
-        .header-actions {
-            display: flex;
-            gap: 1rem;
-        }
-        
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            border: none;
-            font-family: var(--font-main);
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
+        .card-hover {
             transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
         
-        .btn-primary {
-            background: white;
-            color: var(--primary);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            backdrop-filter: blur(10px);
-        }
-        
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .stat-card {
-            background: var(--bg-secondary);
-            padding: 1.5rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-        
-        .stat-card:hover::before {
-            transform: scaleX(1);
-        }
-        
-        .stat-card:hover {
+        .card-hover:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
         
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--gray-300);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
+        .input-focus:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
         
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 800;
-            color: white;
-            margin-bottom: 0.5rem;
-            font-family: var(--font-mono);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        .stat-change {
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
         }
         
-        .stat-change.positive {
-            color: var(--success);
-        }
-        
-        .stat-change.negative {
-            color: var(--danger);
-        }
-        
-        /* Charts Grid */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .chart-card {
-            background: var(--bg-secondary);
-            padding: 1.5rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        .chart-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: white;
-        }
-        
-        .chart-filter {
-            padding: 0.5rem 1rem;
-            background: var(--bg-card);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: white;
-            font-family: var(--font-main);
-            font-size: 0.85rem;
-            cursor: pointer;
-        }
-        
-        /* Table */
-        .table-card {
-            background: var(--bg-secondary);
-            padding: 1.5rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 2rem;
-        }
-        
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        
-        .table-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: white;
-        }
-        
-        .table-search {
-            padding: 0.75rem 1rem;
-            background: var(--bg-card);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: white;
-            font-family: var(--font-main);
-            width: 300px;
-        }
-        
-        .table-search::placeholder {
-            color: var(--gray-400);
-        }
-        
-        .table-container {
-            overflow-x: auto;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        thead {
-            background: var(--bg-card);
-        }
-        
-        th {
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: var(--gray-300);
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
-        }
-        
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            color: var(--gray-200);
-        }
-        
-        tr:hover {
-            background: rgba(255, 255, 255, 0.02);
-        }
-        
-        /* Badges */
         .badge {
-            display: inline-block;
-            padding: 0.35rem 0.75rem;
-            border-radius: 6px;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
             font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.03em;
         }
         
         .badge-pagado {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--success);
-            border: 1px solid var(--success);
+            background-color: #d1fae5;
+            color: #065f46;
         }
         
         .badge-pendiente {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--warning);
-            border: 1px solid var(--warning);
+            background-color: #fef3c7;
+            color: #92400e;
         }
         
         .badge-falta {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--danger);
-            border: 1px solid var(--danger);
-        }
-        
-        /* Loading */
-        .loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 4rem;
-            color: var(--gray-300);
-        }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(99, 102, 241, 0.2);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: var(--bg-secondary);
-            padding: 2rem;
-            border-radius: 20px;
-            max-width: 600px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: white;
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--gray-400);
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        
-        .modal-close:hover {
-            color: white;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-            
-            .header h1 {
-                font-size: 1.8rem;
-            }
-            
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .table-search {
-                width: 100%;
-            }
-        }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: var(--bg-primary);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 5px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary-dark);
+            background-color: #fee2e2;
+            color: #991b1b;
         }
     </style>
 </head>
-<body>
-    <div class="container">
+<body class="bg-gray-50">
+    
+    <!-- Navbar -->
+    <nav class="gradient-bg shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <i data-lucide="layers" class="text-white mr-2"></i>
+                    <span class="text-white text-xl font-bold">Gestión de Servicios</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="location.href='dashboard.html'" class="text-white hover:text-gray-200 flex items-center">
+                        <i data-lucide="bar-chart-3" class="mr-2" size="20"></i>
+                        Dashboard
+                    </button>
+                    <button onclick="location.href='historial.html'" class="text-white hover:text-gray-200 flex items-center">
+                        <i data-lucide="clock" class="mr-2" size="20"></i>
+                        Historial
+                    </button>
+                    <button onclick="abrirConfiguracion()" class="text-white hover:text-gray-200">
+                        <i data-lucide="settings" size="20"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
         <!-- Header -->
-        <div class="header">
-            <div class="header-content">
-                <div>
-                    <h1>💼 Panel de Servicios</h1>
-                    <p style="color: rgba(255,255,255,0.8); margin-top: 0.5rem;">Dashboard Financiero en Tiempo Real</p>
+        <div class="mb-8 fade-in">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">📋 Gestión de Servicios</h1>
+            <p class="text-gray-600">Registra y administra tus servicios de manera eficiente</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Formulario -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-lg p-8 card-hover fade-in">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">
+                            <span id="form-title">Nuevo Servicio</span>
+                        </h2>
+                        <button onclick="limpiarFormulario()" class="text-gray-400 hover:text-gray-600">
+                            <i data-lucide="refresh-ccw" size="20"></i>
+                        </button>
+                    </div>
+
+                    <form id="servicioForm" class="space-y-6">
+                        
+                        <!-- Información Básica -->
+                        <div class="border-b pb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i data-lucide="info" class="mr-2" size="20"></i>
+                                Información Básica
+                            </h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Código -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Código <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" id="codigo" name="codigo" required
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus"
+                                        placeholder="SRV-001">
+                                </div>
+
+                                <!-- Proveedor -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Proveedor <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" id="proveedor" name="proveedor" required
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus"
+                                        placeholder="Movistar">
+                                </div>
+
+                                <!-- Servicio -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Servicio <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" id="servicio" name="servicio" required
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus"
+                                        placeholder="Internet Fibra 100Mbps">
+                                </div>
+
+                                <!-- Categoría -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Categoría
+                                    </label>
+                                    <select id="categoria" name="categoria"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus">
+                                        <option value="">Seleccionar...</option>
+                                        <option value="Internet">Internet</option>
+                                        <option value="Telefonía">Telefonía</option>
+                                        <option value="Hosting">Hosting</option>
+                                        <option value="Software">Software</option>
+                                        <option value="Energía">Energía</option>
+                                        <option value="Otros">Otros</option>
+                                    </select>
+                                </div>
+
+                                <!-- Monto -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Monto (S/) <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="number" id="monto" name="monto" step="0.01" required
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus"
+                                        placeholder="1200.00">
+                                </div>
+
+                                <!-- Monto Variable -->
+                                <div class="flex items-center md:col-span-2">
+                                    <input type="checkbox" id="montoVariable" name="montoVariable"
+                                        class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500">
+                                    <label for="montoVariable" class="ml-2 text-sm text-gray-700">
+                                        El monto varía cada mes
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fechas -->
+                        <div class="border-b pb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i data-lucide="calendar" class="mr-2" size="20"></i>
+                                Fechas
+                            </h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <!-- Fecha Servicio -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Fecha del Servicio
+                                    </label>
+                                    <input type="text" id="fechaServicio" name="fechaServicio"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus"
+                                        placeholder="Seleccionar fecha">
+                                </div>
+
+                                <!-- Fecha Pago -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Fecha de Pago
+                                    </label>
+                                    <input type="text" id="fechaPago" name="fechaPago"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus"
+                                        placeholder="Seleccionar fecha">
+                                </div>
+
+                                <!-- Fecha Vencimiento -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Fecha Vencimiento
+                                    </label>
+                                    <input type="text" id="fechaVencimiento" name="fechaVencimiento"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus"
+                                        placeholder="Seleccionar fecha">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estado y Pago -->
+                        <div class="border-b pb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i data-lucide="credit-card" class="mr-2" size="20"></i>
+                                Estado y Pago
+                            </h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <!-- Estado -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Estado <span class="text-red-500">*</span>
+                                    </label>
+                                    <select id="estado" name="estado" required onchange="togglePagoFields()"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus">
+                                        <option value="PENDIENTE">PENDIENTE</option>
+                                        <option value="FALTA PAGAR">FALTA PAGAR</option>
+                                        <option value="PAGADO">PAGADO</option>
+                                    </select>
+                                </div>
+
+                                <!-- Medio de Pago -->
+                                <div id="medioPagoContainer">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Medio de Pago
+                                    </label>
+                                    <select id="medioPago" name="medioPago"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus">
+                                        <option value="">Seleccionar...</option>
+                                        <option value="BCP">BCP</option>
+                                        <option value="YAPE">YAPE</option>
+                                        <option value="PLIN">PLIN</option>
+                                        <option value="Efectivo">Efectivo</option>
+                                        <option value="Transferencia">Transferencia</option>
+                                        <option value="Tarjeta">Tarjeta de Crédito</option>
+                                    </select>
+                                </div>
+
+                                <!-- Cuenta -->
+                                <div id="cuentaContainer">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Cuenta
+                                    </label>
+                                    <input type="text" id="cuenta" name="cuenta"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus"
+                                        placeholder="999-888-777">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Adjuntos -->
+                        <div class="border-b pb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <i data-lucide="paperclip" class="mr-2" size="20"></i>
+                                Adjuntos
+                            </h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <!-- Voucher -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Voucher
+                                    </label>
+                                    <input type="file" id="voucher" name="voucher" accept="image/*,application/pdf"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm">
+                                </div>
+
+                                <!-- Recibo -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Recibo
+                                    </label>
+                                    <input type="file" id="recibo" name="recibo" accept="image/*,application/pdf"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm">
+                                </div>
+
+                                <!-- Contrato -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Contrato
+                                    </label>
+                                    <input type="file" id="contrato" name="contrato" accept="image/*,application/pdf"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notas -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Observaciones / Notas
+                            </label>
+                            <textarea id="observaciones" name="observaciones" rows="3"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg input-focus"
+                                placeholder="Notas adicionales sobre el servicio..."></textarea>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="flex gap-4 pt-6">
+                            <button type="submit" class="flex-1 gradient-bg text-white font-semibold py-4 rounded-lg hover:opacity-90 transition flex items-center justify-center">
+                                <i data-lucide="save" class="mr-2" size="20"></i>
+                                Guardar Servicio
+                            </button>
+                            <button type="button" onclick="limpiarFormulario()" class="px-6 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition">
+                                Cancelar
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <div class="header-actions">
-                    <button class="btn btn-primary" onclick="cargarDatos()">
-                        🔄 Actualizar
-                    </button>
-                    <button class="btn btn-secondary" onclick="abrirConfiguracion()">
-                        ⚙️ Configurar
-                    </button>
+            </div>
+
+            <!-- Sidebar - Servicios Recientes -->
+            <div class="space-y-6">
+                
+                <!-- Quick Stats -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 fade-in">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">📊 Resumen Rápido</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Total Servicios</span>
+                            <span class="font-bold text-gray-900" id="stat-total">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Pagados</span>
+                            <span class="font-bold text-green-600" id="stat-pagados">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Pendientes</span>
+                            <span class="font-bold text-yellow-600" id="stat-pendientes">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Por Pagar</span>
+                            <span class="font-bold text-red-600" id="stat-porpagar">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Servicios Recientes -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 fade-in">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">🕒 Recientes</h3>
+                    <div id="serviciosRecientes" class="space-y-3">
+                        <!-- Se llenarán dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Próximos Vencimientos -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 fade-in">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">⚠️ Próximos Vencimientos</h3>
+                    <div id="proximosVencimientos" class="space-y-3">
+                        <!-- Se llenarán dinámicamente -->
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Total Pagado</div>
-                <div class="stat-value" id="stat-pagado">S/ 0</div>
-                <div class="stat-change positive" id="stat-pagado-change">
-                    ↗ +0% vs mes anterior
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-label">Por Pagar</div>
-                <div class="stat-value" id="stat-pendiente">S/ 0</div>
-                <div class="stat-change negative" id="stat-pendiente-change">
-                    ⚠️ Requiere atención
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-label">Total Servicios</div>
-                <div class="stat-value" id="stat-total">0</div>
-                <div class="stat-change" id="stat-total-change">
-                    📊 Servicios registrados
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-label">Gasto Promedio</div>
-                <div class="stat-value" id="stat-promedio">S/ 0</div>
-                <div class="stat-change" id="stat-promedio-change">
-                    💰 Por servicio
-                </div>
-            </div>
-        </div>
-
-        <!-- Charts Grid -->
-        <div class="charts-grid">
-            <!-- Gráfico de Estado -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title">📊 Estado de Servicios</h3>
-                </div>
-                <canvas id="chartEstado"></canvas>
-            </div>
-            
-            <!-- Gráfico de Gastos Mensuales -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title">📈 Gastos Mensuales</h3>
-                    <select class="chart-filter" id="filterPeriodo" onchange="actualizarGraficoGastos()">
-                        <option value="6">Últimos 6 meses</option>
-                        <option value="12">Último año</option>
-                        <option value="24">Últimos 2 años</option>
+        <!-- Lista de Servicios -->
+        <div class="mt-8 bg-white rounded-2xl shadow-lg p-8 fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">📋 Todos los Servicios</h2>
+                <div class="flex gap-4">
+                    <input type="text" id="searchInput" placeholder="🔍 Buscar..." 
+                        class="px-4 py-2 border border-gray-300 rounded-lg input-focus"
+                        onkeyup="filtrarServicios()">
+                    <select id="filterEstado" onchange="filtrarServicios()"
+                        class="px-4 py-2 border border-gray-300 rounded-lg input-focus">
+                        <option value="">Todos los estados</option>
+                        <option value="PAGADO">PAGADO</option>
+                        <option value="PENDIENTE">PENDIENTE</option>
+                        <option value="FALTA PAGAR">FALTA PAGAR</option>
                     </select>
                 </div>
-                <canvas id="chartGastos"></canvas>
             </div>
-            
-            <!-- Gráfico de Proveedores -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title">🏢 Top Proveedores</h3>
-                </div>
-                <canvas id="chartProveedores"></canvas>
-            </div>
-            
-            <!-- Gráfico de Categorías -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title">🎯 Distribución por Categoría</h3>
-                </div>
-                <canvas id="chartCategorias"></canvas>
-            </div>
-        </div>
 
-        <!-- Tabla de Servicios -->
-        <div class="table-card">
-            <div class="table-header">
-                <h3 class="table-title">📋 Servicios Recientes</h3>
-                <input type="text" class="table-search" placeholder="🔍 Buscar servicios..." id="searchInput" onkeyup="filtrarTabla()">
-            </div>
-            <div class="table-container">
-                <table id="tablaServicios">
-                    <thead>
+            <div class="overflow-x-auto">
+                <table class="w-full" id="tablaServicios">
+                    <thead class="bg-gray-50 border-b">
                         <tr>
-                            <th>Código</th>
-                            <th>Proveedor</th>
-                            <th>Servicio</th>
-                            <th>Monto</th>
-                            <th>Estado</th>
-                            <th>Fecha</th>
-                            <th>Medio de Pago</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Proveedor</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Servicio</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Monto</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="tablaServiciosBody">
-                        <tr>
-                            <td colspan="7">
-                                <div class="loading">
-                                    <div class="spinner"></div>
-                                    <p>Cargando servicios...</p>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Historial de Pagos -->
-        <div class="table-card">
-            <div class="table-header">
-                <h3 class="table-title">📜 Historial de Pagos</h3>
-            </div>
-            <div class="table-container">
-                <table id="tablaHistorial">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Concepto</th>
-                            <th>Proveedor</th>
-                            <th>Monto</th>
-                            <th>Medio de Pago</th>
-                            <th>Cuenta</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaHistorialBody">
-                        <tr>
-                            <td colspan="6">
-                                <div class="loading">
-                                    <div class="spinner"></div>
-                                    <p>Cargando historial...</p>
-                                </div>
-                            </td>
-                        </tr>
+                    <tbody id="tablaServiciosBody" class="divide-y divide-gray-200">
+                        <!-- Se llenará dinámicamente -->
                     </tbody>
                 </table>
             </div>
@@ -663,102 +437,99 @@
     </div>
 
     <!-- Modal de Configuración -->
-    <div class="modal" id="modalConfig">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">⚙️ Configuración de Google Sheets</h3>
-                <button class="modal-close" onclick="cerrarConfiguracion()">×</button>
+    <div id="modalConfig" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">⚙️ Configuración</h3>
+                <button onclick="cerrarConfiguracion()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" size="24"></i>
+                </button>
             </div>
-            <div style="margin-bottom: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem; color: var(--gray-300);">ID de Google Sheet:</label>
-                <input type="text" id="sheetId" placeholder="Pega el ID de tu Google Sheet" style="width: 100%; padding: 0.75rem; background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; font-family: var(--font-mono); font-size: 0.9rem;">
-                <p style="font-size: 0.8rem; color: var(--gray-400); margin-top: 0.5rem;">
-                    💡 Encuentra el ID en la URL de tu Google Sheet
-                </p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">ID de Google Sheet</label>
+                    <input type="text" id="configSheetId" class="w-full px-4 py-3 border rounded-lg input-focus">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
+                    <input type="text" id="configApiKey" class="w-full px-4 py-3 border rounded-lg input-focus">
+                </div>
+                <button onclick="guardarConfiguracion()" class="w-full gradient-bg text-white font-semibold py-3 rounded-lg">
+                    💾 Guardar Configuración
+                </button>
             </div>
-            <div style="margin-bottom: 1.5rem;">
-                <label style="display: block; margin-bottom: 0.5rem; color: var(--gray-300);">API Key de Google:</label>
-                <input type="text" id="apiKey" placeholder="Pega tu API Key de Google Cloud" style="width: 100%; padding: 0.75rem; background: var(--bg-card); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; font-family: var(--font-mono); font-size: 0.9rem;">
-                <p style="font-size: 0.8rem; color: var(--gray-400); margin-top: 0.5rem;">
-                    💡 Crea una API Key en Google Cloud Console
-                </p>
-            </div>
-            <button class="btn btn-primary" onclick="guardarConfiguracion()" style="width: 100%;">
-                💾 Guardar y Cargar Datos
-            </button>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // CONFIGURACIÓN
-        // ==========================================
-        
+        // Inicializar iconos Lucide
+        lucide.createIcons();
+
+        // Configuración
         let SHEET_ID = localStorage.getItem('sheetId') || '';
         let API_KEY = localStorage.getItem('apiKey') || '';
-        
-        // Datos globales
-        let serviciosData = [];
-        let gastosData = [];
-        
-        // Gráficos
-        let chartEstado, chartGastos, chartProveedores, chartCategorias;
+        let servicios = [];
 
-        // ==========================================
-        // INICIALIZACIÓN
-        // ==========================================
-        
-        window.onload = function() {
-            if (!SHEET_ID || !API_KEY) {
-                abrirConfiguracion();
-            } else {
-                cargarDatos();
-            }
-        };
+        // Inicializar datepickers
+        flatpickr("#fechaServicio", { locale: "es", dateFormat: "Y-m-d" });
+        flatpickr("#fechaPago", { locale: "es", dateFormat: "Y-m-d" });
+        flatpickr("#fechaVencimiento", { locale: "es", dateFormat: "Y-m-d" });
 
-        // ==========================================
-        // CONFIGURACIÓN
-        // ==========================================
-        
-        function abrirConfiguracion() {
-            document.getElementById('sheetId').value = SHEET_ID;
-            document.getElementById('apiKey').value = API_KEY;
-            document.getElementById('modalConfig').classList.add('active');
-        }
-        
-        function cerrarConfiguracion() {
-            document.getElementById('modalConfig').classList.remove('active');
-        }
-        
-        function guardarConfiguracion() {
-            SHEET_ID = document.getElementById('sheetId').value.trim();
-            API_KEY = document.getElementById('apiKey').value.trim();
+        // Toggle campos de pago
+        function togglePagoFields() {
+            const estado = document.getElementById('estado').value;
+            const medioPagoContainer = document.getElementById('medioPagoContainer');
+            const cuentaContainer = document.getElementById('cuentaContainer');
             
-            if (!SHEET_ID || !API_KEY) {
-                alert('Por favor completa ambos campos');
-                return;
+            if (estado === 'PAGADO') {
+                medioPagoContainer.querySelector('label').innerHTML = 'Medio de Pago <span class="text-red-500">*</span>';
+                document.getElementById('medioPago').required = true;
+            } else {
+                medioPagoContainer.querySelector('label').innerHTML = 'Medio de Pago';
+                document.getElementById('medioPago').required = false;
             }
+        }
+
+        // Configuración
+        function abrirConfiguracion() {
+            document.getElementById('modalConfig').classList.remove('hidden');
+            document.getElementById('modalConfig').classList.add('flex');
+            document.getElementById('configSheetId').value = SHEET_ID;
+            document.getElementById('configApiKey').value = API_KEY;
+        }
+
+        function cerrarConfiguracion() {
+            document.getElementById('modalConfig').classList.add('hidden');
+            document.getElementById('modalConfig').classList.remove('flex');
+        }
+
+        function guardarConfiguracion() {
+            SHEET_ID = document.getElementById('configSheetId').value;
+            API_KEY = document.getElementById('configApiKey').value;
             
             localStorage.setItem('sheetId', SHEET_ID);
             localStorage.setItem('apiKey', API_KEY);
             
             cerrarConfiguracion();
-            cargarDatos();
+            cargarServicios();
+            alert('✅ Configuración guardada');
         }
 
-        // ==========================================
-        // CARGAR DATOS DESDE GOOGLE SHEETS
-        // ==========================================
-        
-        async function cargarDatos() {
+        // Cargar servicios
+        async function cargarServicios() {
+            if (!SHEET_ID || !API_KEY) {
+                abrirConfiguracion();
+                return;
+            }
+
             try {
-                // Cargar servicios
-                const urlServicios = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/servicios!A2:M?key=${API_KEY}`;
-                const resServicios = await fetch(urlServicios);
-                const dataServicios = await resServicios.json();
-                
-                if (dataServicios.values) {
-                    serviciosData = dataServicios.values.map(row => ({
+                const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/servicios!A2:M?key=${API_KEY}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.values) {
+                    servicios = data.values.map(row => ({
                         proveedor: row[0] || '',
                         servicio: row[1] || '',
                         codigo: row[2] || '',
@@ -768,349 +539,150 @@
                         estado: row[6] || '',
                         medioPago: row[7] || '',
                         cuenta: row[8] || '',
-                        observaciones: row[9] || '',
-                        linkVoucher: row[10] || '',
-                        linkRecibo: row[11] || '',
-                        linkContrato: row[12] || ''
+                        observaciones: row[9] || ''
                     }));
+
+                    actualizarUI();
                 }
-                
-                // Cargar gastos (historial)
-                const urlGastos = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/gastos!A2:H?key=${API_KEY}`;
-                const resGastos = await fetch(urlGastos);
-                const dataGastos = await resGastos.json();
-                
-                if (dataGastos.values) {
-                    gastosData = dataGastos.values.map(row => ({
-                        fecha: row[0] || '',
-                        concepto: row[1] || '',
-                        codigo: row[2] || '',
-                        monto: parseFloat(row[3]) || 0,
-                        medioPago: row[4] || '',
-                        cuenta: row[5] || '',
-                        proveedor: row[6] || '',
-                        observaciones: row[7] || ''
-                    }));
-                }
-                
-                // Actualizar UI
-                actualizarStats();
-                actualizarGraficos();
-                actualizarTablaServicios();
-                actualizarTablaHistorial();
-                
             } catch (error) {
-                console.error('Error cargando datos:', error);
-                alert('Error al cargar datos. Verifica tu configuración.');
+                console.error('Error:', error);
+                alert('❌ Error al cargar servicios. Verifica tu configuración.');
             }
         }
 
-        // ==========================================
-        // ACTUALIZAR ESTADÍSTICAS
-        // ==========================================
-        
+        // Actualizar UI
+        function actualizarUI() {
+            actualizarStats();
+            actualizarTabla();
+            actualizarRecientes();
+            actualizarVencimientos();
+        }
+
         function actualizarStats() {
-            const totalPagado = serviciosData
-                .filter(s => s.estado === 'PAGADO')
-                .reduce((sum, s) => sum + s.monto, 0);
-            
-            const totalPendiente = serviciosData
-                .filter(s => s.estado !== 'PAGADO')
-                .reduce((sum, s) => sum + s.monto, 0);
-            
-            const totalServicios = serviciosData.length;
-            
-            const promedio = totalServicios > 0 ? totalPagado / serviciosData.filter(s => s.estado === 'PAGADO').length : 0;
-            
-            document.getElementById('stat-pagado').textContent = `S/ ${totalPagado.toFixed(2)}`;
-            document.getElementById('stat-pendiente').textContent = `S/ ${totalPendiente.toFixed(2)}`;
-            document.getElementById('stat-total').textContent = totalServicios;
-            document.getElementById('stat-promedio').textContent = `S/ ${promedio.toFixed(2)}`;
+            const total = servicios.length;
+            const pagados = servicios.filter(s => s.estado === 'PAGADO').length;
+            const pendientes = servicios.filter(s => s.estado === 'PENDIENTE').length;
+            const porPagar = servicios.filter(s => s.estado === 'FALTA PAGAR').length;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-pagados').textContent = pagados;
+            document.getElementById('stat-pendientes').textContent = pendientes;
+            document.getElementById('stat-porpagar').textContent = porPagar;
         }
 
-        // ==========================================
-        // ACTUALIZAR GRÁFICOS
-        // ==========================================
-        
-        function actualizarGraficos() {
-            actualizarGraficoEstado();
-            actualizarGraficoGastos();
-            actualizarGraficoProveedores();
-            actualizarGraficoCategorias();
-        }
-        
-        function actualizarGraficoEstado() {
-            const estados = {
-                'PAGADO': 0,
-                'PENDIENTE': 0,
-                'FALTA PAGAR': 0
-            };
-            
-            serviciosData.forEach(s => {
-                if (estados.hasOwnProperty(s.estado)) {
-                    estados[s.estado]++;
-                }
-            });
-            
-            const ctx = document.getElementById('chartEstado').getContext('2d');
-            
-            if (chartEstado) {
-                chartEstado.destroy();
-            }
-            
-            chartEstado = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(estados),
-                    datasets: [{
-                        data: Object.values(estados),
-                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: '#f3f4f6',
-                                padding: 15,
-                                font: { size: 12, family: 'Outfit' }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        function actualizarGraficoGastos() {
-            // Agrupar por mes
-            const gastosPorMes = {};
-            
-            gastosData.forEach(g => {
-                if (!g.fecha) return;
-                const mes = g.fecha.substring(0, 7); // YYYY-MM
-                gastosPorMes[mes] = (gastosPorMes[mes] || 0) + g.monto;
-            });
-            
-            const meses = Object.keys(gastosPorMes).sort();
-            const montos = meses.map(m => gastosPorMes[m]);
-            
-            const ctx = document.getElementById('chartGastos').getContext('2d');
-            
-            if (chartGastos) {
-                chartGastos.destroy();
-            }
-            
-            chartGastos = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: meses,
-                    datasets: [{
-                        label: 'Gastos (S/)',
-                        data: montos,
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { color: '#d1d5db' },
-                            grid: { color: 'rgba(255,255,255,0.05)' }
-                        },
-                        x: {
-                            ticks: { color: '#d1d5db' },
-                            grid: { color: 'rgba(255,255,255,0.05)' }
-                        }
-                    }
-                }
-            });
-        }
-        
-        function actualizarGraficoProveedores() {
-            const proveedores = {};
-            
-            serviciosData
-                .filter(s => s.estado === 'PAGADO')
-                .forEach(s => {
-                    proveedores[s.proveedor] = (proveedores[s.proveedor] || 0) + s.monto;
-                });
-            
-            const top5 = Object.entries(proveedores)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 5);
-            
-            const ctx = document.getElementById('chartProveedores').getContext('2d');
-            
-            if (chartProveedores) {
-                chartProveedores.destroy();
-            }
-            
-            chartProveedores = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: top5.map(p => p[0]),
-                    datasets: [{
-                        label: 'Gasto Total (S/)',
-                        data: top5.map(p => p[1]),
-                        backgroundColor: '#ec4899'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { color: '#d1d5db' },
-                            grid: { color: 'rgba(255,255,255,0.05)' }
-                        },
-                        x: {
-                            ticks: { color: '#d1d5db' },
-                            grid: { display: false }
-                        }
-                    }
-                }
-            });
-        }
-        
-        function actualizarGraficoCategorias() {
-            // Extraer categorías del código (ej: SRV, LIC, HOST)
-            const categorias = {};
-            
-            serviciosData.forEach(s => {
-                const categoria = s.codigo.split('-')[0] || 'OTROS';
-                categorias[categoria] = (categorias[categoria] || 0) + 1;
-            });
-            
-            const ctx = document.getElementById('chartCategorias').getContext('2d');
-            
-            if (chartCategorias) {
-                chartCategorias.destroy();
-            }
-            
-            chartCategorias = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(categorias),
-                    datasets: [{
-                        data: Object.values(categorias),
-                        backgroundColor: ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#3b82f6']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: '#f3f4f6',
-                                padding: 15,
-                                font: { size: 12, family: 'Outfit' }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // ==========================================
-        // ACTUALIZAR TABLAS
-        // ==========================================
-        
-        function actualizarTablaServicios() {
+        function actualizarTabla() {
             const tbody = document.getElementById('tablaServiciosBody');
             tbody.innerHTML = '';
-            
-            if (serviciosData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--gray-400);">No hay servicios registrados</td></tr>';
-                return;
-            }
-            
-            serviciosData
-                .slice()
-                .reverse()
-                .slice(0, 20)
-                .forEach(s => {
-                    const tr = document.createElement('tr');
-                    
-                    let badgeClass = 'badge-falta';
-                    if (s.estado === 'PAGADO') badgeClass = 'badge-pagado';
-                    if (s.estado === 'PENDIENTE') badgeClass = 'badge-pendiente';
-                    
-                    tr.innerHTML = `
-                        <td><code style="color: #6366f1;">${s.codigo}</code></td>
-                        <td>${s.proveedor}</td>
-                        <td>${s.servicio}</td>
-                        <td style="font-family: var(--font-mono); font-weight: 600;">S/ ${s.monto.toFixed(2)}</td>
-                        <td><span class="badge ${badgeClass}">${s.estado}</span></td>
-                        <td>${s.fechaPago || s.fechaServicio || '-'}</td>
-                        <td>${s.medioPago || '-'}</td>
-                    `;
-                    
-                    tbody.appendChild(tr);
-                });
-        }
-        
-        function actualizarTablaHistorial() {
-            const tbody = document.getElementById('tablaHistorialBody');
-            tbody.innerHTML = '';
-            
-            if (gastosData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--gray-400);">No hay pagos registrados</td></tr>';
-                return;
-            }
-            
-            gastosData
-                .slice()
-                .reverse()
-                .slice(0, 20)
-                .forEach(g => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${g.fecha}</td>
-                        <td>${g.concepto}</td>
-                        <td>${g.proveedor}</td>
-                        <td style="font-family: var(--font-mono); font-weight: 600; color: var(--success);">S/ ${g.monto.toFixed(2)}</td>
-                        <td>${g.medioPago}</td>
-                        <td>${g.cuenta || '-'}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+
+            servicios.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50';
+                
+                let badgeClass = 'badge-falta';
+                if (s.estado === 'PAGADO') badgeClass = 'badge-pagado';
+                if (s.estado === 'PENDIENTE') badgeClass = 'badge-pendiente';
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 text-sm font-mono text-purple-600">${s.codigo}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${s.proveedor}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${s.servicio}</td>
+                    <td class="px-6 py-4 text-sm font-semibold">S/ ${s.monto.toFixed(2)}</td>
+                    <td class="px-6 py-4"><span class="badge ${badgeClass}">${s.estado}</span></td>
+                    <td class="px-6 py-4 text-sm">
+                        <button onclick="editarServicio('${s.codigo}')" class="text-purple-600 hover:text-purple-800 mr-3">
+                            <i data-lucide="edit-2" size="16"></i>
+                        </button>
+                        <button onclick="eliminarServicio('${s.codigo}')" class="text-red-600 hover:text-red-800">
+                            <i data-lucide="trash-2" size="16"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            lucide.createIcons();
         }
 
-        // ==========================================
-        // BÚSQUEDA Y FILTROS
-        // ==========================================
-        
-        function filtrarTabla() {
-            const input = document.getElementById('searchInput').value.toLowerCase();
-            const tbody = document.getElementById('tablaServiciosBody');
-            const rows = tbody.getElementsByTagName('tr');
-            
-            for (let i = 0; i < rows.length; i++) {
-                const row = rows[i];
+        function actualizarRecientes() {
+            const container = document.getElementById('serviciosRecientes');
+            const recientes = servicios.slice(-5).reverse();
+
+            container.innerHTML = recientes.map(s => `
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <div>
+                        <p class="font-semibold text-sm">${s.proveedor}</p>
+                        <p class="text-xs text-gray-500">${s.servicio}</p>
+                    </div>
+                    <span class="badge badge-${s.estado === 'PAGADO' ? 'pagado' : s.estado === 'PENDIENTE' ? 'pendiente' : 'falta'}">${s.estado}</span>
+                </div>
+            `).join('');
+        }
+
+        function actualizarVencimientos() {
+            const container = document.getElementById('proximosVencimientos');
+            container.innerHTML = '<p class="text-sm text-gray-500">No hay vencimientos próximos</p>';
+        }
+
+        // Filtrar servicios
+        function filtrarServicios() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const estado = document.getElementById('filterEstado').value;
+            const rows = document.querySelectorAll('#tablaServiciosBody tr');
+
+            rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(input) ? '' : 'none';
-            }
+                const estadoCell = row.querySelector('td:nth-child(5)').textContent;
+                
+                const matchSearch = text.includes(search);
+                const matchEstado = !estado || estadoCell.includes(estado);
+
+                row.style.display = matchSearch && matchEstado ? '' : 'none';
+            });
         }
+
+        // Limpiar formulario
+        function limpiarFormulario() {
+            document.getElementById('servicioForm').reset();
+            document.getElementById('form-title').textContent = 'Nuevo Servicio';
+        }
+
+        // Editar servicio
+        function editarServicio(codigo) {
+            const servicio = servicios.find(s => s.codigo === codigo);
+            if (!servicio) return;
+
+            document.getElementById('form-title').textContent = 'Editar Servicio';
+            document.getElementById('codigo').value = servicio.codigo;
+            document.getElementById('proveedor').value = servicio.proveedor;
+            document.getElementById('servicio').value = servicio.servicio;
+            document.getElementById('monto').value = servicio.monto;
+            document.getElementById('estado').value = servicio.estado;
+            document.getElementById('medioPago').value = servicio.medioPago;
+            document.getElementById('cuenta').value = servicio.cuenta;
+            document.getElementById('observaciones').value = servicio.observaciones;
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Submit form
+        document.getElementById('servicioForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            alert('✅ Servicio guardado (implementar guardado real)');
+            limpiarFormulario();
+        });
+
+        // Inicializar
+        window.onload = () => {
+            if (SHEET_ID && API_KEY) {
+                cargarServicios();
+            } else {
+                abrirConfiguracion();
+            }
+        };
     </script>
 </body>
 </html>
