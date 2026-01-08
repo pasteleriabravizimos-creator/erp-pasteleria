@@ -1,484 +1,494 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>BRAVIZIMO'S ERP V2</title>
+  <base target="_top">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Tailwind CDN para estilos rápidos -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body{font-family:Arial, sans-serif; margin:16px; background:#fafafa;}
+    .grid{display:grid; grid-template-columns: 1fr 1fr; gap:16px;}
+    .card{background:#fff; border:1px solid #ddd; border-radius:12px; padding:14px;}
+    .row{display:flex; gap:10px; flex-wrap:wrap;}
+    label{font-size:12px; color:#333; display:block; margin-bottom:4px;}
+    input, select, textarea{padding:10px; border:1px solid #ccc; border-radius:10px; width:100%;}
+    textarea{min-height:70px;}
+    button{padding:10px 14px; border:0; border-radius:10px; cursor:pointer;}
+    .btn{background:#111; color:#fff;}
+    .btn2{background:#e9e9e9;}
+    .btnDanger{background:#c62828; color:#fff;}
+    table{width:100%; border-collapse:collapse;}
+    th,td{border-bottom:1px solid #eee; padding:8px; font-size:13px; text-align:left;}
+    th{background:#f6f6f6;}
+    .kpi{font-size:22px; font-weight:700;}
+    .muted{color:#666; font-size:12px;}
+    .pill{padding:4px 8px; border-radius:999px; font-size:12px; display:inline-block;}
+    .pPaid{background:#d7ffd9;}
+    .pPend{background:#fff3cd;}
+    .pDue{background:#ffd7d7;}
+  </style>
 </head>
-<body class="bg-slate-950 text-slate-100">
-  <div class="min-h-screen flex">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-slate-950/95 border-r border-slate-800 flex flex-col">
-      <div class="px-4 py-4 border-b border-slate-800 flex items-center gap-2">
-        <div class="h-8 w-8 rounded-full bg-amber-400 flex items-center justify-center font-bold text-slate-900">
-          B
+<body>
+  <h2>Panel Servicios</h2>
+  <div class="muted">Registra, edita, paga, adjunta voucher/recibo/contrato y se guarda historial + gastos + backup en Sheets.</div>
+
+  <div class="grid" style="margin-top:12px;">
+    <div class="card">
+      <h3>INDEX - Servicio</h3>
+      <input type="hidden" id="id">
+
+      <div class="row">
+        <div style="flex:1; min-width:220px;">
+          <label>Proveedor</label>
+          <input id="proveedor" placeholder="Ej: CALIDDA">
         </div>
-        <div>
-          <div class="text-xs text-slate-400 leading-tight">BRAVIZIMO'S</div>
-          <div class="text-sm font-semibold">ERP · Bocaditos</div>
+        <div style="flex:1; min-width:220px;">
+          <label>Servicio</label>
+          <input id="servicio" placeholder="Ej: Gas">
         </div>
       </div>
 
-      <nav class="flex-1 overflow-y-auto text-sm">
-        <p class="px-4 pt-4 pb-1 text-[11px] uppercase tracking-wide text-slate-500">General</p>
-        <ul>
-          <li><button data-view="dashboard" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800 flex items-center gap-2 text-emerald-300 font-semibold">Dashboard</button></li>
-        </ul>
-
-        <p class="px-4 pt-4 pb-1 text-[11px] uppercase tracking-wide text-slate-500">Ventas & Entregas</p>
-        <ul>
-          <li><button data-view="ventas" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Ventas</button></li>
-          <li><button data-view="delivery" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Delivery</button></li>
-        </ul>
-
-        <p class="px-4 pt-4 pb-1 text-[11px] uppercase tracking-wide text-slate-500">Operación</p>
-        <ul>
-          <li><button data-view="inventario" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Inventario</button></li>
-          <li><button data-view="insumos" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Insumos</button></li>
-          <li><button data-view="produccion" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Producción</button></li>
-          <li><button data-view="compras" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Compras</button></li>
-          <li><button data-view="proveedores" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Proveedores</button></li>
-        </ul>
-
-        <p class="px-4 pt-4 pb-1 text-[11px] uppercase tracking-wide text-slate-500">Finanzas</p>
-        <ul>
-          <li><button data-view="gastos" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Gastos generales</button></li>
-          <li><button data-view="servicios" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Servicios</button></li>
-          <li><button data-view="facturas" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Facturas</button></li>
-        </ul>
-
-        <p class="px-4 pt-4 pb-1 text-[11px] uppercase tracking-wide text-slate-500">Personas & Clientes</p>
-        <ul>
-          <li><button data-view="clientes" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Clientes</button></li>
-          <li><button data-view="personal" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">RRHH / Personal</button></li>
-          <li><button data-view="reclamos" class="nav-btn w-full text-left px-4 py-2 hover:bg-slate-800">Reclamos</button></li>
-        </ul>
-      </nav>
-
-      <div class="px-4 py-3 border-t border-slate-800 text-[11px] text-slate-500">
-        BRAVIZIMO'S ERP v2<br />
-        <span id="footer-connection">Conectado a Google Sheets</span>
+      <div class="row" style="margin-top:10px;">
+        <div style="flex:1; min-width:180px;">
+          <label>Código</label>
+          <input id="codigo" placeholder="Opcional">
+        </div>
+        <div style="flex:1; min-width:180px;">
+          <label>Categoría</label>
+          <select id="categoria">
+            <option value="SERVICIOS">SERVICIOS</option>
+            <option value="ALQUILER">ALQUILER</option>
+            <option value="PLANILLA">PLANILLA</option>
+            <option value="INSUMOS">INSUMOS</option>
+            <option value="MARKETING">MARKETING</option>
+            <option value="TRANSPORTE">TRANSPORTE</option>
+            <option value="OTROS">OTROS</option>
+          </select>
+        </div>
       </div>
-    </aside>
 
-    <!-- Main -->
-    <main class="flex-1 bg-slate-900/90">
-      <!-- Top bar -->
-      <header class="h-14 border-b border-slate-800 flex items-center justify-between px-6">
-        <div>
-          <h1 id="view-title" class="text-lg font-semibold">Dashboard</h1>
-          <p class="text-xs text-slate-400" id="view-subtitle">Resumen de ventas, operación y finanzas</p>
+      <div class="row" style="margin-top:10px;">
+        <div style="flex:1; min-width:180px;">
+          <label>Fecha servicio (vencimiento)</label>
+          <input type="date" id="fecha_servicio">
         </div>
-        <div class="flex items-center gap-3">
-          <button id="btn-sync" class="px-3 py-1.5 rounded-full text-xs border border-slate-700 hover:border-emerald-400 hover:text-emerald-300">
-            Sincronizar ahora
-          </button>
+        <div style="flex:1; min-width:180px;">
+          <label>Monto</label>
+          <input type="number" step="0.01" id="monto" placeholder="0.00">
         </div>
-      </header>
+      </div>
 
-      <!-- Contenido -->
-      <section id="view-container" class="p-6 space-y-6 text-sm overflow-y-auto h-[calc(100vh-3.5rem)]">
-        <!-- Aquí se renderizan las vistas con JS -->
-      </section>
-    </main>
+      <div class="row" style="margin-top:10px;">
+        <div style="flex:1; min-width:180px;">
+          <label>Estado</label>
+          <select id="estado">
+            <option>FALTA PAGAR</option>
+            <option>PENDIENTE</option>
+            <option>PAGADO</option>
+          </select>
+        </div>
+        <div style="flex:1; min-width:180px;">
+          <label>Medio de pago</label>
+          <select id="medio_pago">
+            <option value="">--</option>
+            <option>BCP</option>
+            <option>YAPE</option>
+            <option>PLIN</option>
+            <option>EFECTIVO</option>
+            <option>TRANSFERENCIA</option>
+            <option>OTRO</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div style="flex:1; min-width:180px;">
+          <label>Cuenta / Banco</label>
+          <input id="cuenta" placeholder="Ej: BCP Bravizimos / Yape ...">
+        </div>
+        <div style="flex:1; min-width:180px;">
+          <label>Notas</label>
+          <input id="notas" placeholder="Opcional">
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <button class="btn" onclick="saveService()">Guardar / Actualizar</button>
+        <button class="btn2" onclick="clearForm()">Nuevo</button>
+        <button class="btnDanger" onclick="removeService()">Eliminar</button>
+      </div>
+
+      <hr style="margin:14px 0; border:none; border-top:1px solid #eee;">
+
+      <h4>Pagar (crea historial + gasto)</h4>
+      <div class="row">
+        <div style="flex:1; min-width:180px;">
+          <label>Fecha pago</label>
+          <input type="date" id="p_fecha_pago">
+        </div>
+        <div style="flex:1; min-width:180px;">
+          <label>Monto pagado</label>
+          <input type="number" step="0.01" id="p_monto_pagado" placeholder="0.00">
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div style="flex:1; min-width:180px;">
+          <label>Medio pago</label>
+          <select id="p_medio_pago">
+            <option>BCP</option>
+            <option>YAPE</option>
+            <option>PLIN</option>
+            <option>EFECTIVO</option>
+            <option>TRANSFERENCIA</option>
+            <option>OTRO</option>
+          </select>
+        </div>
+        <div style="flex:1; min-width:180px;">
+          <label>Cuenta</label>
+          <input id="p_cuenta" placeholder="Ej: BCP Bravizimos">
+        </div>
+      </div>
+
+      <div style="margin-top:10px;">
+        <label>Observación</label>
+        <input id="p_observacion" placeholder="Ej: pago completo / parcial">
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <button class="btn" onclick="payService()">Marcar como Pagado</button>
+        <button class="btn2" onclick="loadHistory()">Ver historial</button>
+      </div>
+
+      <div style="margin-top:12px;">
+        <h4>Adjuntos a Drive</h4>
+        <div class="muted">Sube voucher/recibo/contrato/otros. Se guarda en Drive y se registra el link.</div>
+        <div class="row" style="margin-top:8px;">
+          <select id="a_tipo">
+            <option value="VOUCHER">VOUCHER</option>
+            <option value="RECIBO">RECIBO</option>
+            <option value="CONTRATO">CONTRATO</option>
+            <option value="OTRO">OTRO</option>
+          </select>
+          <input type="file" id="a_file">
+          <button class="btn2" onclick="uploadFile()">Subir</button>
+        </div>
+        <div id="a_result" class="muted" style="margin-top:6px;"></div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <h4>Historial</h4>
+        <div id="history" class="muted">Selecciona un servicio y presiona “Ver historial”.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Dashboard</h3>
+      <div class="row">
+        <div style="flex:1;">
+          <div class="muted">Monto total</div>
+          <div class="kpi" id="k_total">0.00</div>
+        </div>
+        <div style="flex:1;">
+          <div class="muted">Monto pagado</div>
+          <div class="kpi" id="k_pagado">0.00</div>
+        </div>
+        <div style="flex:1;">
+          <div class="muted">% avance</div>
+          <div class="kpi" id="k_pct">0%</div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;">
+        <canvas id="chartDonut"></canvas>
+      </div>
+
+      <div style="margin-top:14px;">
+        <canvas id="chartCat"></canvas>
+      </div>
+
+      <div style="margin-top:14px;">
+        <canvas id="chartPay"></canvas>
+      </div>
+
+      <hr style="margin:14px 0; border:none; border-top:1px solid #eee;">
+
+      <h3>Servicios</h3>
+      <div class="row" style="margin-bottom:8px;">
+        <input id="q" placeholder="Buscar: proveedor/servicio/código" style="flex:1; min-width:240px;">
+        <select id="f_estado">
+          <option value="">Estado (todos)</option>
+          <option>FALTA PAGAR</option>
+          <option>PENDIENTE</option>
+          <option>PAGADO</option>
+        </select>
+        <button class="btn2" onclick="loadServices()">Filtrar</button>
+      </div>
+
+      <div style="overflow:auto; max-height:520px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Estado</th>
+              <th>Proveedor</th>
+              <th>Servicio</th>
+              <th>Vence</th>
+              <th>Monto</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tbl"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbx-Y51fuMKIirWSwadTPWj4m_bdKjIriOIB8DBG2rTQQhk3X-r1iqdW5EDhX6bgiVX_5w/exec";
+  let donut, catChart, payChart;
+  let lastUploadedUrl = null;
 
-let ERP_DATA = null;
-
-// Util: formato moneda
-const fmtMoney = (n) => "S/ " + (Number(n || 0)).toFixed(2);
-
-// ================== CARGA INICIAL ==================
-async function loadAll() {
-  setViewSubtitle("Cargando datos desde Google Sheets...");
-  try {
-    const res = await fetch(API_URL + "?action=getAll");
-    const data = await res.json();
-    ERP_DATA = data;
-    setViewSubtitle("Datos actualizados " + new Date().toLocaleString());
-    renderDashboard();
-  } catch (e) {
-    console.error(e);
-    setViewSubtitle("Error al conectar con la API");
-  }
-}
-
-function setViewTitle(t, s) {
-  document.getElementById("view-title").textContent = t;
-  if (s) document.getElementById("view-subtitle").textContent = s;
-}
-function setViewSubtitle(s) {
-  document.getElementById("view-subtitle").textContent = s;
-}
-
-// ================== VISTAS ==================
-function renderDashboard() {
-  if (!ERP_DATA) return;
-
-  setViewTitle("Dashboard", "Resumen de ventas, finanzas y operación");
-
-  const stats = ERP_DATA.estadisticas || {};
-  const dash = ERP_DATA.dashboard || {};
-
-  const totalVentas = stats.totalVentas || 0;
-  const ticketProm = stats.ticketPromedio || 0;
-  const totalClientes = stats.totalClientes || 0;
-  const totalProductos = stats.totalProductos || 0;
-
-  const container = document.getElementById("view-container");
-  container.innerHTML = `
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-        <div class="text-[11px] text-slate-400 mb-1">Total Ventas (histórico)</div>
-        <div class="text-2xl font-semibold">${fmtMoney(totalVentas)}</div>
-        <div class="text-[11px] text-emerald-400 mt-1">Ticket promedio: ${fmtMoney(ticketProm)}</div>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-        <div class="text-[11px] text-slate-400 mb-1">Clientes registrados</div>
-        <div class="text-2xl font-semibold">${totalClientes}</div>
-        <div class="text-[11px] text-sky-400 mt-1">Base de datos de clientes</div>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-        <div class="text-[11px] text-slate-400 mb-1">Productos en inventario</div>
-        <div class="text-2xl font-semibold">${totalProductos}</div>
-        <div class="text-[11px] text-amber-400 mt-1">Insumos + productos finales</div>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-        <div class="text-[11px] text-slate-400 mb-1">Fecha/Hora</div>
-        <div class="text-lg font-semibold">${new Date().toLocaleDateString()}</div>
-        <div class="text-[11px] text-slate-400 mt-1">${new Date().toLocaleTimeString()}</div>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 col-span-2">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-sm font-semibold">Top productos por stock</h2>
-        </div>
-        <div class="overflow-x-auto text-xs">
-          ${renderTablaSimple(ERP_DATA.inventario || [], ["codigo","nombreproducto","categoria","stockactual","precioventa"], {
-            codigo: "Código",
-            nombreproducto: "Producto",
-            categoria: "Categoría",
-            stockactual: "Stock",
-            precioventa: "P. Venta"
-          })}
-        </div>
-      </div>
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-        <h2 class="text-sm font-semibold mb-2">Alertas de inventario</h2>
-        <div id="alertas-box" class="space-y-2 text-xs">
-          ${(ERP_DATA.alertas || []).map(a => `
-            <div class="rounded-xl px-3 py-2 bg-${a.tipo === "error" ? "rose" : "amber"}-900/40 border border-${a.tipo === "error" ? "rose" : "amber"}-500/40">
-              ${a.mensaje}
-            </div>
-          `).join("") || "<div class='text-slate-500 text-xs'>Sin alertas por ahora 🎉</div>"}
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderTablaSimple(rows, cols, labels) {
-  if (!rows || rows.length === 0) {
-    return `<div class="text-slate-500 py-4">Sin registros</div>`;
-  }
-  return `
-    <table class="min-w-full text-left border-collapse">
-      <thead>
-        <tr>
-          ${cols.map(c => `<th class="border-b border-slate-800 px-2 py-1 font-semibold text-[11px] text-slate-400">${labels[c] || c}</th>`).join("")}
-        </tr>
-      </thead>
-      <tbody>
-        ${rows.slice(0, 20).map(r => `
-          <tr class="hover:bg-slate-800/60">
-            ${cols.map(c => `<td class="border-b border-slate-900 px-2 py-1">${formatCell(c, r[c])}</td>`).join("")}
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>
-  `;
-}
-function formatCell(key, val) {
-  if (key === "total" || key === "monto" || key === "precioventa" || key === "costo") {
-    return fmtMoney(val);
-  }
-  return val ?? "";
-}
-
-// --------- Vistas simples de tablas ----------
-function renderTableView(nombre, titulo, columnas, labels) {
-  if (!ERP_DATA) return;
-  const rows = ERP_DATA[nombre] || [];
-  setViewTitle(titulo, `Mostrando ${rows.length} registros`);
-  const container = document.getElementById("view-container");
-  container.innerHTML = `
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-      <div class="flex justify-between items-center mb-3">
-        <h2 class="text-sm font-semibold">${titulo}</h2>
-        <span class="text-[11px] text-slate-500">Fuente: hoja ${nombre.toUpperCase()}</span>
-      </div>
-      <div class="overflow-x-auto text-xs">
-        ${renderTablaSimple(rows, columnas, labels)}
-      </div>
-    </div>
-  `;
-}
-
-// --------- Vista Servicios (con formulario) ----------
-function renderServicios() {
-  if (!ERP_DATA) return;
-  const servicios = ERP_DATA.servicios || [];
-  setViewTitle("Servicios", "Registrar luz, agua, internet, alquiler, etc. Se guardan también en GASTOS");
-
-  const container = document.getElementById("view-container");
-  container.innerHTML = `
-    <div class="space-y-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-        <h2 class="text-sm font-semibold mb-3">Registrar servicio rápido</h2>
-        <div class="grid md:grid-cols-5 gap-3 text-xs">
-          <input id="srv-nombre" type="text" placeholder="Servicio (ej: Luz Enel Enero)" class="bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400 md:col-span-2" />
-          <input id="srv-monto" type="number" step="0.01" placeholder="Monto (S/)" class="bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400" />
-          <select id="srv-medio" class="bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400">
-            <option value="">Medio de pago</option>
-            <option>Transferencia</option>
-            <option>Yape</option>
-            <option>Plin</option>
-            <option>Efectivo</option>
-            <option>Débito automático</option>
-          </select>
-          <select id="srv-cuenta" class="bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400">
-            <option value="">Cuenta</option>
-            <option>Bcp BRAVIZIMO’S</option>
-            <option>RUS Rosa</option>
-            <option>RUS Martín</option>
-            <option>RUS Milagros</option>
-            <option>RUS Sandy</option>
-          </select>
-          <select id="srv-estado" class="bg-slate-950/70 border border-slate-700 rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-400">
-            <option>Pagado</option>
-            <option>Pendiente</option>
-          </select>
-        </div>
-        <div class="mt-3 flex justify-end">
-          <button id="btn-guardar-servicio" class="px-4 py-2 rounded-full bg-emerald-500 text-slate-900 text-xs font-semibold hover:bg-emerald-400">
-            Guardar servicio
-          </button>
-        </div>
-        <div id="srv-msg" class="mt-2 text-[11px] text-slate-400"></div>
-      </div>
-
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-        <h2 class="text-sm font-semibold mb-3">Historial de servicios (gastos)</h2>
-        <div class="overflow-x-auto text-xs">
-          ${renderTablaSimple(servicios, ["id","fecha","servicio","monto","mediopago","cuenta","estado"], {
-            id: "ID",
-            fecha: "Fecha",
-            servicio: "Servicio",
-            monto: "Monto",
-            mediopago: "Medio",
-            cuenta: "Cuenta",
-            estado: "Estado"
-          })}
-        </div>
-      </div>
-    </div>
-  `;
-
-  document.getElementById("btn-guardar-servicio").addEventListener("click", guardarServicio);
-}
-
-async function guardarServicio() {
-  const nombre = document.getElementById("srv-nombre").value.trim();
-  const monto = document.getElementById("srv-monto").value;
-  const medio = document.getElementById("srv-medio").value;
-  const cuenta = document.getElementById("srv-cuenta").value;
-  const estado = document.getElementById("srv-estado").value;
-  const msgEl = document.getElementById("srv-msg");
-
-  if (!nombre || !monto) {
-    msgEl.textContent = "Completa al menos servicio y monto.";
-    msgEl.className = "mt-2 text-[11px] text-amber-400";
-    return;
+  function money(x){
+    const n = Number(x||0);
+    return n.toLocaleString('es-PE', {minimumFractionDigits:2, maximumFractionDigits:2});
   }
 
-  msgEl.textContent = "Guardando servicio...";
-  msgEl.className = "mt-2 text-[11px] text-slate-400";
+  function pill(estado){
+    if(estado==='PAGADO') return `<span class="pill pPaid">PAGADO</span>`;
+    if(estado==='PENDIENTE') return `<span class="pill pPend">PENDIENTE</span>`;
+    return `<span class="pill pDue">FALTA PAGAR</span>`;
+  }
 
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "crear_servicio",
-        servicio: nombre,
-        monto: Number(monto),
-        mediopago: medio,
-        cuenta,
-        estado
-      })
+  function clearForm(){
+    ['id','proveedor','servicio','codigo','categoria','fecha_servicio','monto','estado','medio_pago','cuenta','notas'].forEach(x=>{
+      document.getElementById(x).value = (x==='estado') ? 'FALTA PAGAR' : (x==='categoria' ? 'SERVICIOS' : '');
     });
-    const out = await res.json();
-    if (out.success) {
-      msgEl.textContent = "Servicio registrado correctamente ✅";
-      msgEl.className = "mt-2 text-[11px] text-emerald-400";
-      await loadAll();   // recarga ERP_DATA
-      renderServicios(); // vuelve a pintar
-    } else {
-      msgEl.textContent = "Error: " + (out.mensaje || "No se pudo guardar");
-      msgEl.className = "mt-2 text-[11px] text-rose-400";
+    document.getElementById('history').innerHTML = 'Selecciona un servicio y presiona “Ver historial”.';
+    lastUploadedUrl = null;
+  }
+
+  function getForm(){
+    return {
+      id: document.getElementById('id').value || null,
+      proveedor: document.getElementById('proveedor').value,
+      servicio: document.getElementById('servicio').value,
+      codigo: document.getElementById('codigo').value,
+      categoria: document.getElementById('categoria').value,
+      fecha_servicio: document.getElementById('fecha_servicio').value,
+      monto: document.getElementById('monto').value,
+      estado: document.getElementById('estado').value,
+      medio_pago: document.getElementById('medio_pago').value,
+      cuenta: document.getElementById('cuenta').value,
+      notas: document.getElementById('notas').value,
+    };
+  }
+
+  function saveService(){
+    const p = getForm();
+    if(!p.servicio || !p.fecha_servicio || !p.monto){
+      alert('Falta Servicio, Fecha servicio o Monto.');
+      return;
     }
-  } catch (e) {
-    console.error(e);
-    msgEl.textContent = "Error de conexión con la API";
-    msgEl.className = "mt-2 text-[11px] text-rose-400";
+    google.script.run.withSuccessHandler(res=>{
+      alert('Guardado OK');
+      document.getElementById('id').value = res.id;
+      loadServices(); loadDashboard();
+    }).upsertService(p);
   }
-}
 
-// ================== NAV ==================
-document.querySelectorAll(".nav-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("bg-slate-800","text-emerald-300","font-semibold"));
-    btn.classList.add("bg-slate-800","text-emerald-300","font-semibold");
-
-    const view = btn.getAttribute("data-view");
-    if (view === "dashboard") return renderDashboard();
-    if (view === "servicios") return renderServicios();
-
-    // tablas simples
-    if (view === "ventas")      return renderTableView("ventas", "Ventas", ["idventa","fecharegistro","cliente","canal","total","estadopago","estadopedido"], {
-      idventa: "ID",
-      fecharegistro: "F. Registro",
-      cliente: "Cliente",
-      canal: "Canal",
-      total: "Total",
-      estadopago: "Pago",
-      estadopedido: "Estado"
-    });
-    if (view === "inventario")  return renderTableView("inventario", "Inventario", ["codigo","nombreproducto","categoria","stockactual","stockminimo","precioventa"], {
-      codigo: "Código",
-      nombreproducto: "Producto",
-      categoria: "Categoría",
-      stockactual: "Stock",
-      stockminimo: "Mínimo",
-      precioventa: "P. Venta"
-    });
-    if (view === "insumos")     return renderTableView("insumos", "Insumos", ["codigo","nombre","categoria","stock","minimo","costounit","proveedor"], {
-      codigo: "Código",
-      nombre: "Nombre",
-      categoria: "Categoría",
-      stock: "Stock",
-      minimo: "Mínimo",
-      costounit: "Costo",
-      proveedor: "Proveedor"
-    });
-    if (view === "produccion")  return renderTableView("produccion", "Producción", ["id","fecha","producto","cantidad","estado","costo"], {
-      id: "ID",
-      fecha: "Fecha",
-      producto: "Producto",
-      cantidad: "Cantidad",
-      estado: "Estado",
-      costo: "Costo"
-    });
-    if (view === "compras")     return renderTableView("compras", "Compras", ["id","fecha","proveedor","total","estadopago","estadocompra"], {
-      id: "ID",
-      fecha: "Fecha",
-      proveedor: "Proveedor",
-      total: "Total",
-      estadopago: "Pago",
-      estadocompra: "Estado"
-    });
-    if (view === "proveedores") return renderTableView("proveedores", "Proveedores", ["id","nombre","ruc","telefono","email","categoria","calificacion","estado"], {
-      id: "ID",
-      nombre: "Nombre",
-      ruc: "RUC",
-      telefono: "Teléfono",
-      email: "Email",
-      categoria: "Categoría",
-      calificacion: "Rating",
-      estado: "Estado"
-    });
-    if (view === "gastos")      return renderTableView("gastos", "Gastos generales", ["id","fecha","categoria","descripcion","monto","metodopago","cuenta","estado"], {
-      id: "ID",
-      fecha: "Fecha",
-      categoria: "Categoría",
-      descripcion: "Descripción",
-      monto: "Monto",
-      metodopago: "Medio",
-      cuenta: "Cuenta",
-      estado: "Estado"
-    });
-    if (view === "facturas")    return renderTableView("facturas", "Facturas", ["id","tipo","numero","fecha","cliente","total","estado"], {
-      id: "ID",
-      tipo: "Tipo",
-      numero: "Número",
-      fecha: "Fecha",
-      cliente: "Cliente",
-      total: "Total",
-      estado: "Estado"
-    });
-    if (view === "clientes")    return renderTableView("clientes", "Clientes", ["id","nombre","documento","telefono","segmento","totalcompras","estado"], {
-      id: "ID",
-      nombre: "Nombre",
-      documento: "Doc",
-      telefono: "Teléfono",
-      segmento: "Segmento",
-      totalcompras: "Total compras",
-      estado: "Estado"
-    });
-    if (view === "delivery")    return renderTableView("delivery", "Delivery", ["id","fecha","cliente","direccion","distrito","repartidor","costo","estado"], {
-      id: "ID",
-      fecha: "Fecha",
-      cliente: "Cliente",
-      direccion: "Dirección",
-      distrito: "Distrito",
-      repartidor: "Repartidor",
-      costo: "Costo",
-      estado: "Estado"
-    });
-    if (view === "personal")    return renderTableView("personal", "Personal / RRHH", ["id","nombre","dni","cargo","telefono","sueldo","comision","estado"], {
-      id: "ID",
-      nombre: "Nombre",
-      dni: "DNI",
-      cargo: "Cargo",
-      telefono: "Teléfono",
-      sueldo: "Sueldo",
-      comision: "Comisión %",
-      estado: "Estado"
-    });
-    if (view === "reclamos")    return renderTableView("reclamos", "Reclamos", ["id","fecha","cliente","tipo","descripcion","prioridad","estado"], {
-      id: "ID",
-      fecha: "Fecha",
-      cliente: "Cliente",
-      tipo: "Tipo",
-      descripcion: "Descripción",
-      prioridad: "Prioridad",
-      estado: "Estado"
-    });
-  });
-});
-
-// Botón sincronizar
-document.getElementById("btn-sync").addEventListener("click", async () => {
-  setViewSubtitle("Sincronizando datos...");
-  try {
-    await fetch(API_URL + "?action=sync");
-    await loadAll();
-    setViewSubtitle("Datos sincronizados " + new Date().toLocaleString());
-  } catch (e) {
-    console.error(e);
-    setViewSubtitle("Error al sincronizar");
+  function removeService(){
+    const id = document.getElementById('id').value;
+    if(!id){ alert('Selecciona un servicio primero.'); return; }
+    if(!confirm('¿Eliminar servicio?')) return;
+    google.script.run.withSuccessHandler(res=>{
+      if(res.ok){ alert('Eliminado'); clearForm(); loadServices(); loadDashboard(); }
+      else alert(res.error || 'Error');
+    }).deleteService(id);
   }
-});
 
-// Carga inicial
-loadAll();
+  function selectService(s){
+    document.getElementById('id').value = s.id;
+    document.getElementById('proveedor').value = s.proveedor || '';
+    document.getElementById('servicio').value = s.servicio || '';
+    document.getElementById('codigo').value = s.codigo || '';
+    document.getElementById('categoria').value = s.categoria || 'SERVICIOS';
+    document.getElementById('fecha_servicio').value = toISODate(s.fecha_servicio);
+    document.getElementById('monto').value = s.monto || 0;
+    document.getElementById('estado').value = s.estado || 'FALTA PAGAR';
+    document.getElementById('medio_pago').value = s.medio_pago || '';
+    document.getElementById('cuenta').value = s.cuenta || '';
+    document.getElementById('notas').value = s.notas || '';
+
+    // precargar pagar
+    document.getElementById('p_monto_pagado').value = s.monto || 0;
+    document.getElementById('p_medio_pago').value = (s.medio_pago || 'BCP');
+    document.getElementById('p_cuenta').value = (s.cuenta || '');
+    document.getElementById('p_fecha_pago').value = new Date().toISOString().slice(0,10);
+  }
+
+  function toISODate(v){
+    if(!v) return '';
+    // Apps Script puede devolver Date o string
+    const d = (v instanceof Date) ? v : new Date(v);
+    if(String(d)==='Invalid Date') return '';
+    return d.toISOString().slice(0,10);
+  }
+
+  function loadServices(){
+    const q = document.getElementById('q').value || '';
+    const estado = document.getElementById('f_estado').value || '';
+    google.script.run.withSuccessHandler(rows=>{
+      const tb = document.getElementById('tbl');
+      tb.innerHTML = '';
+      rows.forEach(r=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${pill(r.estado)}</td>
+          <td>${r.proveedor||''}</td>
+          <td>${r.servicio||''}</td>
+          <td>${toISODate(r.fecha_servicio)}</td>
+          <td>${money(r.monto)}</td>
+          <td><button class="btn2" onclick='selectService(${JSON.stringify(r)})'>Editar</button></td>
+        `;
+        tb.appendChild(tr);
+      });
+    }).listServices({q, estado});
+  }
+
+  function payService(){
+    const service_id = document.getElementById('id').value;
+    if(!service_id){ alert('Selecciona un servicio primero.'); return; }
+
+    const payload = {
+      service_id,
+      fecha_pago: document.getElementById('p_fecha_pago').value,
+      monto_pagado: document.getElementById('p_monto_pagado').value,
+      medio_pago: document.getElementById('p_medio_pago').value,
+      cuenta: document.getElementById('p_cuenta').value,
+      estado_mov: 'PAGADO',
+      observacion: document.getElementById('p_observacion').value || '',
+    };
+
+    // Si subiste un archivo, úsalo como voucher/recibo/contrato según tipo seleccionado
+    // (Puedes subir varios: repite la subida)
+    if(lastUploadedUrl){
+      const tipo = document.getElementById('a_tipo').value;
+      if(tipo==='VOUCHER') payload.voucher_url = lastUploadedUrl;
+      if(tipo==='RECIBO') payload.recibo_url = lastUploadedUrl;
+      if(tipo==='CONTRATO') payload.contrato_url = lastUploadedUrl;
+      if(tipo==='OTRO') payload.otros_urls = lastUploadedUrl;
+    }
+
+    if(!payload.fecha_pago || !payload.monto_pagado){
+      alert('Falta fecha pago o monto pagado.');
+      return;
+    }
+
+    google.script.run.withSuccessHandler(res=>{
+      alert('Pago registrado. Historial + Gasto creado.');
+      loadServices(); loadDashboard(); loadHistory();
+    }).recordPayment(payload);
+  }
+
+  function loadHistory(){
+    const serviceId = document.getElementById('id').value;
+    if(!serviceId){ alert('Selecciona un servicio primero.'); return; }
+    google.script.run.withSuccessHandler(rows=>{
+      if(!rows.length){
+        document.getElementById('history').innerHTML = 'Sin historial aún.';
+        return;
+      }
+      const html = rows.map(r=>{
+        const links = [r.voucher_url, r.recibo_url, r.contrato_url, r.otros_urls].filter(Boolean)
+          .map(u=>`<a href="${u}" target="_blank">doc</a>`).join(' | ');
+        return `<div style="padding:8px 0;border-bottom:1px solid #eee;">
+          <b>${toISODate(r.fecha_pago)}</b> — S/ ${money(r.monto_pagado)} — ${r.medio_pago} — ${r.cuenta}<br>
+          <span class="muted">${r.observacion||''}</span><br>
+          ${links ? links : '<span class="muted">sin adjuntos</span>'}
+        </div>`;
+      }).join('');
+      document.getElementById('history').innerHTML = html;
+    }).listPayments(serviceId);
+  }
+
+  function loadDashboard(){
+    google.script.run.withSuccessHandler(d=>{
+      document.getElementById('k_total').innerText = 'S/ ' + money(d.montoTotal);
+      document.getElementById('k_pagado').innerText = 'S/ ' + money(d.montoPagado);
+      document.getElementById('k_pct').innerText = Math.round((d.pctPagado||0)*100) + '%';
+
+      // donut
+      const donutData = {
+        labels: ['Pagado', 'Pendiente'],
+        datasets: [{ data: [d.montoPagado, d.montoPendiente] }]
+      };
+      if(donut) donut.destroy();
+      donut = new Chart(document.getElementById('chartDonut'), { type:'doughnut', data: donutData });
+
+      // por categoria
+      const cLabels = Object.keys(d.byCategoria||{});
+      const cVals = cLabels.map(k=>d.byCategoria[k]);
+      if(catChart) catChart.destroy();
+      catChart = new Chart(document.getElementById('chartCat'), {
+        type:'bar',
+        data:{ labels:cLabels, datasets:[{ label:'Monto por categoría', data:cVals }] }
+      });
+
+      // por medio pago (gastos)
+      const pLabels = Object.keys(d.byMedioPago||{});
+      const pVals = pLabels.map(k=>d.byMedioPago[k]);
+      if(payChart) payChart.destroy();
+      payChart = new Chart(document.getElementById('chartPay'), {
+        type:'bar',
+        data:{ labels:pLabels, datasets:[{ label:'Pagado por medio', data:pVals }] }
+      });
+
+    }).getDashboardSummary();
+  }
+
+  async function uploadFile(){
+    const service_id = document.getElementById('id').value;
+    if(!service_id){ alert('Selecciona un servicio primero.'); return; }
+
+    const tipo = document.getElementById('a_tipo').value;
+    const fileInput = document.getElementById('a_file');
+    if(!fileInput.files.length){ alert('Selecciona un archivo.'); return; }
+
+    const file = fileInput.files[0];
+    const base64Data = await readAsBase64(file);
+    document.getElementById('a_result').innerText = 'Subiendo...';
+
+    google.script.run.withSuccessHandler(res=>{
+      if(res.ok){
+        lastUploadedUrl = res.url;
+        document.getElementById('a_result').innerHTML = `Subido OK: <a href="${res.url}" target="_blank">${tipo}</a>`;
+      } else {
+        document.getElementById('a_result').innerText = 'Error subiendo.';
+      }
+    }).uploadAttachment({
+      service_id,
+      tipo,
+      filename: file.name,
+      mimeType: file.type,
+      base64Data
+    });
+  }
+
+  function readAsBase64(file){
+    return new Promise((resolve,reject)=>{
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result;
+        // result: data:mime/type;base64,XXXX
+        resolve(result.split(',')[1]);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // init
+  clearForm();
+  loadServices();
+  loadDashboard();
 </script>
 </body>
 </html>
