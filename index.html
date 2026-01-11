@@ -1,393 +1,462 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>BRAVIZIMO'S | Dashboard Financiero</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-:root{
-  --bg:#f5f7fb; --card:#fff; --ink:#0b1220; --muted:#6b7280;
-  --brand:#0f172a; --line:#e5e7eb; --radius:16px;
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:var(--ink)}
-header{
-  background:linear-gradient(120deg,#0b1220,#111827,#0b1220);
-  color:#fff;padding:22px 18px; position:sticky; top:0; z-index:10;
-  box-shadow:0 12px 30px rgba(0,0,0,.22);
-}
-.wrap{max-width:1200px;margin:0 auto}
-.hrow{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-.title h1{margin:0;font-size:18px;letter-spacing:.4px}
-.title p{margin:4px 0 0;color:rgba(255,255,255,.75);font-size:12px}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BRAVIZIMO'S | Dashboard Financiero</title>
 
-.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-select,input,button{
-  border:1px solid rgba(255,255,255,.15);
-  background:rgba(255,255,255,.06);
-  color:#fff;border-radius:12px;padding:10px 12px;outline:none;
-}
-input{min-width:140px}
-button{background:#fff;color:#111827;border:0;font-weight:700;cursor:pointer}
-button:hover{opacity:.95}
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <style>
+    :root{
+      --bg:#f4f6fb; --card:#fff; --text:#0f172a; --muted:#64748b;
+      --shadow:0 10px 25px rgba(15,23,42,.08);
+      --radius:18px;
+    }
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;}
+    body{margin:0;background:var(--bg);color:var(--text);}
+    header{
+      background: radial-gradient(1200px 500px at 70% 10%, #2b3a55 0%, #0b1220 55%, #05070e 100%);
+      color:#fff;padding:22px 22px 18px;
+      position:sticky;top:0;z-index:10;
+      box-shadow: var(--shadow);
+    }
+    header .top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+    h1{font-size:18px;margin:0;}
+    .sub{font-size:12px;opacity:.85;margin-top:4px;}
+    .filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    select,input,button{
+      border-radius:999px;border:1px solid rgba(255,255,255,.22);
+      padding:10px 12px;background:rgba(255,255,255,.08);color:#fff;outline:none;
+    }
+    input{width:150px}
+    button{background:#fff;color:#0b1220;border:none;font-weight:700;cursor:pointer}
+    button:hover{opacity:.9}
 
-.main{padding:18px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
-.card{
-  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-  padding:14px 14px 12px; box-shadow:0 10px 25px rgba(15,23,42,.06);
-}
-.card .k{font-size:12px;color:var(--muted)}
-.card .v{font-size:22px;margin-top:6px;font-weight:800}
-.row{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;margin-top:12px}
-@media (max-width: 980px){ .row{grid-template-columns:1fr} }
-
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 10px}
-.tab{
-  border:1px solid var(--line); background:#fff; color:#111827;
-  border-radius:999px; padding:8px 12px; font-weight:700; cursor:pointer;
-}
-.tab.active{background:#111827;color:#fff;border-color:#111827}
-
-.panel{display:none}
-.panel.active{display:block}
-
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media (max-width: 980px){ .grid2{grid-template-columns:1fr} }
-
-h2{margin:0 0 8px;font-size:14px}
-small{color:var(--muted)}
-
-.table{
-  width:100%; border-collapse:separate; border-spacing:0; overflow:hidden;
-  border:1px solid var(--line); border-radius:14px; background:#fff;
-}
-.table th,.table td{padding:10px 10px;border-bottom:1px solid var(--line);font-size:12px}
-.table th{background:#f9fafb;text-align:left;color:#111827}
-.table tr:last-child td{border-bottom:0}
-.badge{
-  display:inline-block;padding:6px 10px;border-radius:999px;background:#fee2e2;color:#991b1b;
-  font-weight:800;font-size:12px
-}
-</style>
+    main{max-width:1200px;margin:18px auto;padding:0 16px 60px;}
+    .error{display:none;background:#ffe4e6;color:#9f1239;border:1px solid #fecdd3;padding:10px 12px;border-radius:999px;margin:10px 0;}
+    .grid-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px;}
+    .card{
+      background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+      padding:14px 14px;
+    }
+    .kpi-title{font-size:12px;color:var(--muted);margin:0 0 6px}
+    .kpi-value{font-size:20px;font-weight:800;margin:0}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 10px;}
+    .tab{background:#fff;border:1px solid #e2e8f0;border-radius:999px;padding:8px 12px;cursor:pointer;font-weight:700;font-size:12px;}
+    .tab.active{background:#0b1220;color:#fff;border-color:#0b1220;}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .grid-1{display:grid;grid-template-columns:1fr;gap:12px;}
+    .table{width:100%;border-collapse:collapse;font-size:12px;}
+    .table th,.table td{padding:10px;border-bottom:1px solid #eef2f7;text-align:left;}
+    .table th{color:var(--muted);font-weight:800;font-size:11px;text-transform:uppercase;}
+    .muted{color:var(--muted);font-size:12px;}
+    .foot{margin-top:10px;color:var(--muted);font-size:12px;}
+    @media(max-width:980px){.grid-kpi{grid-template-columns:repeat(2,1fr)} .grid-2{grid-template-columns:1fr}}
+  </style>
 </head>
+
 <body>
-
 <header>
-  <div class="wrap hrow">
-    <div class="title">
+  <div class="top">
+    <div>
       <h1>BRAVIZIMO'S | Dashboard Financiero</h1>
-      <p>Sincronizado con Google Sheets (Apps Script)</p>
+      <div class="sub">Sincronizado con Google Sheets (Apps Script)</div>
     </div>
-
-    <div class="controls">
+    <div class="filters">
       <select id="mode">
         <option value="month">Mes</option>
         <option value="range">Rango</option>
       </select>
-
-      <input id="month" type="month"/>
-      <input id="from" type="date" placeholder="dd/mm/aaaa" style="display:none"/>
-      <input id="to" type="date" placeholder="dd/mm/aaaa" style="display:none"/>
-
+      <input id="month" type="month" />
+      <input id="from" type="date" style="display:none;" />
+      <input id="to" type="date" style="display:none;" />
       <button id="btn">Actualizar</button>
     </div>
   </div>
 </header>
 
-<div class="main wrap">
-  <div id="err" style="margin:10px 0;display:none"><span class="badge" id="errTxt"></span></div>
+<main>
+  <div id="err" class="error"></div>
 
-  <div class="kpis" id="kpis"></div>
-
-  <div class="tabs" id="tabs"></div>
-
-  <div id="panels">
-    <div class="panel active" data-panel="Finanzas">
-      <div class="grid2">
-        <div class="card"><h2>Ventas vs Gastos (por día) + Saldo</h2><canvas id="chart1" height="140"></canvas></div>
-        <div class="card"><h2>Acumulado de ventas</h2><canvas id="chart2" height="140"></canvas></div>
-      </div>
-    </div>
-
-    <div class="panel" data-panel="Alertas">
-      <div class="card">
-        <h2>Alertas</h2>
-        <div id="alertasBox"></div>
-      </div>
-    </div>
-
-    <div class="panel" data-panel="Distritos">
-      <div class="card">
-        <h2>Ranking por distritos</h2>
-        <table class="table" id="tblDistritos"></table>
-      </div>
-    </div>
-
-    <div class="panel" data-panel="Vendedoras">
-      <div class="card">
-        <h2>Vendedoras por día (ventas, saldo, pedidos)</h2>
-        <div id="vendTot"></div>
-        <table class="table" id="tblVend"></table>
-      </div>
-    </div>
-
-    <div class="panel" data-panel="Delivery">
-      <div class="grid2">
-        <div class="card"><h2>Delivery por día (cobrado/costo) + Recojo tienda</h2><table class="table" id="tblDelDia"></table></div>
-        <div class="card"><h2>Delivery por repartidor (para pago)</h2><table class="table" id="tblDelRep"></table></div>
-      </div>
-    </div>
-
-    <div class="panel" data-panel="Productos">
-      <div class="grid2">
-        <div class="card"><h2>Top 20 productos por monto</h2><table class="table" id="tblProdMonto"></table></div>
-        <div class="card"><h2>Top 20 productos por cantidad</h2><table class="table" id="tblProdCant"></table></div>
-      </div>
-    </div>
-
-    <div class="panel" data-panel="Clientes">
-      <div class="card">
-        <h2>Clientes (hoja clientes)</h2>
-        <small>Tip: aquí puedes filtrar con CTRL+F por nombre/celular.</small>
-        <table class="table" id="tblCli"></table>
-      </div>
-    </div>
-
-    <div class="panel" data-panel="Gastos">
-      <div class="card">
-        <h2>Gastos por categoría</h2>
-        <table class="table" id="tblGastos"></table>
-      </div>
-    </div>
-
-    <div class="panel" data-panel="Medios de pago">
-      <div class="card">
-        <h2>Medios de pago (1er y 2do pago por cuentas)</h2>
-        <table class="table" id="tblMP"></table>
-      </div>
-    </div>
-
-    <div class="panel" data-panel="Servicios">
-      <div class="card">
-        <h2>Servicios (pendientes y pagados)</h2>
-        <table class="table" id="tblServ"></table>
-      </div>
-    </div>
+  <div class="grid-kpi" id="kpis">
+    <!-- KPI cards -->
   </div>
-</div>
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-view="finanzas">Finanzas</div>
+    <div class="tab" data-view="alertas">Alertas</div>
+    <div class="tab" data-view="distritos">Distritos</div>
+    <div class="tab" data-view="vendedoras">Vendedoras</div>
+    <div class="tab" data-view="delivery">Delivery</div>
+    <div class="tab" data-view="productos">Productos</div>
+    <div class="tab" data-view="clientes">Clientes</div>
+    <div class="tab" data-view="gastos">Gastos</div>
+    <div class="tab" data-view="medios">Medios de pago</div>
+    <div class="tab" data-view="servicios">Servicios</div>
+  </div>
+
+  <section id="view-finanzas" class="grid-2">
+    <div class="card">
+      <h3>Ventas vs Gastos (por día) + Saldo</h3>
+      <div id="chart-finanzas" style="height:320px;"></div>
+    </div>
+    <div class="card">
+      <h3>Acumulado de ventas</h3>
+      <div id="chart-acumulado" style="height:320px;"></div>
+    </div>
+  </section>
+
+  <section id="view-alertas" class="grid-1" style="display:none;">
+    <div class="card">
+      <h3>Alertas</h3>
+      <div id="alertasBox" class="muted"></div>
+    </div>
+  </section>
+
+  <section id="view-distritos" class="grid-1" style="display:none;">
+    <div class="card">
+      <h3>Ranking por distrito (monto y veces)</h3>
+      <table class="table" id="tbl-distritos"></table>
+    </div>
+  </section>
+
+  <section id="view-vendedoras" class="grid-1" style="display:none;">
+    <div class="card">
+      <h3>Vendedoras por día (ventas, saldo, pedidos)</h3>
+      <table class="table" id="tbl-vendedoras"></table>
+    </div>
+  </section>
+
+  <section id="view-delivery" class="grid-2" style="display:none;">
+    <div class="card">
+      <h3>Delivery vs Costo (por día)</h3>
+      <div id="chart-delivery-dia" style="height:320px;"></div>
+    </div>
+    <div class="card">
+      <h3>Delivery por motorizado</h3>
+      <table class="table" id="tbl-delivery-mot"></table>
+    </div>
+  </section>
+
+  <section id="view-productos" class="grid-1" style="display:none;">
+    <div class="card">
+      <h3>Top 20 productos (según fecha de entrega)</h3>
+      <div id="chart-top-prod" style="height:360px;"></div>
+      <table class="table" id="tbl-top-prod"></table>
+    </div>
+  </section>
+
+  <section id="view-clientes" class="grid-1" style="display:none;">
+    <div class="card">
+      <h3>Clientes (se toma el total de clientes únicos del periodo desde Nota de Ventas)</h3>
+      <div class="muted" id="clientesInfo"></div>
+    </div>
+  </section>
+
+  <section id="view-gastos" class="grid-1" style="display:none;">
+    <div class="card">
+      <h3>Gastos por categoría</h3>
+      <div id="chart-gastos-cat" style="height:320px;"></div>
+      <table class="table" id="tbl-gastos-cat"></table>
+    </div>
+  </section>
+
+  <section id="view-medios" class="grid-1" style="display:none;">
+    <div class="card">
+      <h3>Medios de pago (suma 1er pago + 2do pago)</h3>
+      <table class="table" id="tbl-medios"></table>
+    </div>
+  </section>
+
+  <section id="view-servicios" class="grid-1" style="display:none;">
+    <div class="card">
+      <h3>Servicios (pendiente / pagado)</h3>
+      <div class="muted" id="serviciosKpi"></div>
+      <table class="table" id="tbl-servicios"></table>
+    </div>
+  </section>
+
+  <div class="foot" id="updated"></div>
+</main>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbykGV3yTg5v1cKf9w50WAcr64ogSAyXkYGErBwAMvLsXlwXvPyqvcY3qFZZg59uuxsa/exec";
+  // 🔥 PEGA TU URL /exec AQUÍ:
+  const API_URL = "PEGAR_AQUI_TU_URL_DE_APPS_SCRIPT_EXEC";
 
-const TABS = ["Finanzas","Alertas","Distritos","Vendedoras","Delivery","Productos","Clientes","Gastos","Medios de pago","Servicios"];
+  google.charts.load('current', {'packages':['corechart','bar']});
 
-const money = n => "S/ " + (Number(n||0)).toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2});
-const intFmt = n => (Number(n||0)).toLocaleString("es-PE");
+  const $ = (id)=>document.getElementById(id);
+  const errBox = $("err");
 
-const el = id => document.getElementById(id);
-
-let chart1, chart2;
-
-function setModeUI(){
-  const mode = el("mode").value;
-  el("month").style.display = mode==="month" ? "" : "none";
-  el("from").style.display  = mode==="range" ? "" : "none";
-  el("to").style.display    = mode==="range" ? "" : "none";
-}
-el("mode").addEventListener("change", setModeUI);
-
-function buildQuery(){
-  const mode = el("mode").value;
-  const params = new URLSearchParams();
-  if(mode==="month"){
-    const m = el("month").value;
-    if(m) params.set("month", m);
-  } else {
-    if(el("from").value) params.set("from", el("from").value);
-    if(el("to").value) params.set("to", el("to").value);
+  function showError(msg){
+    if(!msg){ errBox.style.display="none"; errBox.textContent=""; return; }
+    errBox.style.display="block";
+    errBox.textContent = msg;
   }
-  return params.toString();
-}
 
-function showError(msg){
-  el("err").style.display = msg ? "" : "none";
-  el("errTxt").textContent = msg || "";
-}
+  function money(n){
+    const x = Number(n||0);
+    return "S/ " + x.toLocaleString("es-PE",{minimumFractionDigits:2, maximumFractionDigits:2});
+  }
 
-function renderTabs(){
-  const tabs = el("tabs");
-  tabs.innerHTML = "";
-  TABS.forEach((t,i)=>{
-    const b = document.createElement("button");
-    b.className = "tab" + (i===0?" active":"");
-    b.textContent = t;
-    b.onclick = ()=>{
-      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-      b.classList.add("active");
-      document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
-      document.querySelector(`.panel[data-panel="${t}"]`).classList.add("active");
-    };
-    tabs.appendChild(b);
-  });
-}
+  function buildQuery(){
+    const mode = $("mode").value;
+    const params = new URLSearchParams();
+    params.set("mode", mode);
 
-function renderKPIs(k){
-  const map = [
-    ["Ventas totales", money(k.ventasTotal)],
-    ["Gastos totales", money(k.gastosTotal)],
-    ["Utilidad", money(k.utilidad)],
-    ["Saldo pendiente", money(k.saldoPendiente)],
-    ["Delivery cobrado", money(k.deliveryCobrado)],
-    ["Costo delivery", money(k.deliveryCosto)],
-    ["Margen delivery", money(k.margenDelivery)],
-    ["Clientes (total hoja ventas)", intFmt(k.clientesTotalHojaVentas)],
-    ["Clientes (periodo)", intFmt(k.clientesPeriodo)],
-    ["Pedidos cerrados", intFmt(k.pedidosCerrados)],
-    ["Promedio diario", money(k.promedioDiario)],
-    ["Proyección mensual", money(k.proyeccionMensual)],
-    ["Boletas / Facturas", `${intFmt(k.boletas)} / ${intFmt(k.facturas)}`],
-    ["Servicios pendientes", money(k.serviciosPendientesMonto)]
-  ];
-
-  const box = el("kpis");
-  box.innerHTML = "";
-  map.forEach(([t,v])=>{
-    const d = document.createElement("div");
-    d.className="card";
-    d.innerHTML = `<div class="k">${t}</div><div class="v">${v}</div>`;
-    box.appendChild(d);
-  });
-}
-
-function renderCharts(s){
-  const labels = s.days || [];
-  const ventas = labels.map(d=>Number(s.ventasPorDia[d]||0));
-  const gastos = labels.map(d=>Number(s.gastosPorDia[d]||0));
-  const saldo  = labels.map(d=>Number(s.saldoPorDia[d]||0));
-
-  if(chart1) chart1.destroy();
-  chart1 = new Chart(el("chart1"),{
-    type:"line",
-    data:{labels, datasets:[
-      {label:"Ventas", data:ventas, borderWidth:2},
-      {label:"Gastos", data:gastos, borderWidth:2},
-      {label:"Saldo", data:saldo, borderWidth:2},
-    ]},
-    options:{responsive:true, plugins:{legend:{position:"bottom"}}}
-  });
-
-  if(chart2) chart2.destroy();
-  chart2 = new Chart(el("chart2"),{
-    type:"line",
-    data:{labels: (s.acumulado||[]).map(x=>x.date),
-      datasets:[{label:"Acumulado", data:(s.acumulado||[]).map(x=>x.value), borderWidth:2}]},
-    options:{responsive:true, plugins:{legend:{position:"bottom"}}}
-  });
-}
-
-function table(id, headers, rows){
-  const t = el(id);
-  const thead = `<thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead>`;
-  const tbody = `<tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody>`;
-  t.innerHTML = thead + tbody;
-}
-
-function renderAll(d){
-  renderKPIs(d.kpis);
-  renderCharts(d.series);
-
-  // Alertas
-  el("alertasBox").innerHTML = `
-    <p><b>Comprobantes pendientes:</b> ${intFmt(d.alertas.comprobantesPendientes)}</p>
-    <p><b>Saldo pendiente:</b> ${money(d.alertas.saldoPendiente)}</p>
-    <p><b>Servicios pendientes:</b> ${intFmt(d.alertas.serviciosPendientesCant)} (${money(d.alertas.serviciosPendientesMonto)})</p>
-  `;
-
-  // Distritos
-  table("tblDistritos",
-    ["Distrito","Cantidad","Monto (aprox delivery)"],
-    (d.tables.distritos||[]).slice(0,50).map(x=>[
-      x.name, intFmt(x.cant), money(x.monto)
-    ])
-  );
-
-  // Vendedoras
-  const vend = d.tables.vendedoras||[];
-  const totVentas = vend.reduce((a,b)=>a+Number(b.ventas||0),0);
-  const totSaldo = vend.reduce((a,b)=>a+Number(b.saldo||0),0);
-  const totPedidos = vend.reduce((a,b)=>a+Number(b.pedidos||0),0);
-  el("vendTot").innerHTML = `<p><b>Total periodo:</b> Ventas ${money(totVentas)} | Saldo ${money(totSaldo)} | Pedidos ${intFmt(totPedidos)}</p>`;
-  table("tblVend", ["Fecha","Vendedora","Ventas","Saldo","Pedidos"], vend.map(x=>[
-    x.date, x.vendedor, money(x.ventas), money(x.saldo), intFmt(x.pedidos)
-  ]));
-
-  // Delivery
-  table("tblDelDia",
-    ["Fecha","Cobrado","Costo","Entregas","Recojo tienda"],
-    (d.tables.deliveryDia||[]).map(x=>[
-      x.date, money(x.cobrado), money(x.costo), intFmt(x.cant), intFmt(x.recojo)
-    ])
-  );
-  table("tblDelRep",
-    ["Repartidor","Cobrado","Costo","Entregas","Margen"],
-    (d.tables.deliveryRepartidor||[]).map(x=>[
-      x.name, money(x.cobrado), money(x.costo), intFmt(x.cant), money((x.cobrado||0)-(x.costo||0))
-    ])
-  );
-
-  // Productos
-  table("tblProdMonto", ["Producto","Monto"], (d.tables.topProductosMonto||[]).map(x=>[x.name, money(x.value)]));
-  table("tblProdCant",  ["Producto","Cantidad"], (d.tables.topProductosCant||[]).map(x=>[x.name, intFmt(x.value)]));
-
-  // Clientes
-  table("tblCli", ["Cliente","Doc","Celular","Última compra"], (d.tables.clientes||[]).slice(0,200).map(x=>[
-    x.cliente, x.doc, x.celular, x.ultimaCompra || ""
-  ]));
-
-  // Gastos
-  table("tblGastos", ["Categoría","Cantidad","Monto"], (d.tables.gastosCategoria||[]).map(x=>[
-    x.categoria, intFmt(x.cantidad), money(x.monto)
-  ]));
-
-  // Medios de pago
-  table("tblMP", ["Cuenta","Tipo","Monto"], (d.tables.mediosPago||[]).map(x=>[
-    x.cuenta, x.tipo, money(x.monto)
-  ]));
-
-  // Servicios
-  table("tblServ", ["Servicio","Fecha","Monto","Estado","Medio"], (d.tables.servicios||[]).map(x=>[
-    x.servicio, x.fecha||"", money(x.monto), x.estado, x.medio
-  ]));
-}
-
-async function load(){
-  showError("");
-  const q = buildQuery();
-  const url = API_URL + (q ? ("?"+q) : "");
-  try{
-    const res = await fetch(url);
-    const data = await res.json();
-    if(data.error){
-      showError("Error Apps Script: " + data.error);
-      return;
+    if(mode==="month"){
+      const m = $("month").value; // yyyy-mm
+      if(m) params.set("month", m);
+    }else{
+      const f = $("from").value;
+      const t = $("to").value;
+      if(f) params.set("from", f);
+      if(t) params.set("to", t);
     }
-    renderAll(data);
-  }catch(err){
-    showError("No se pudo cargar data desde Apps Script: " + err.message);
+    return params.toString();
   }
-}
 
-el("btn").addEventListener("click", load);
+  async function fetchJSON(){
+    const url = API_URL + "?" + buildQuery();
+    const res = await fetch(url, { redirect:"follow" });
+    const text = await res.text();
 
-renderTabs();
-setModeUI();
+    // si devuelve HTML -> este error te muestra el inicio
+    try{
+      return JSON.parse(text);
+    }catch(e){
+      throw new Error("Apps Script no devolvió JSON. Respuesta inicia: " + text.slice(0,100));
+    }
+  }
 
-// mes por defecto: actual
-const now = new Date();
-el("month").value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-load();
+  function renderKpis(k){
+    const cards = [
+      ["Ventas totales", money(k.ventasTotal)],
+      ["Gastos totales", money(k.gastosTotal)],
+      ["Utilidad", money(k.utilidad)],
+      ["Saldo pendiente", money(k.saldoPendiente)],
+      ["Delivery cobrado", money(k.deliveryCobrado)],
+      ["Costo delivery", money(k.costoDelivery)],
+      ["Margen delivery", money(k.margenDelivery)],
+      ["Clientes (periodo)", (k.clientesPeriodo||0).toLocaleString("es-PE")],
+      ["Promedio diario", money(k.promedioDiario)],
+      ["Proyección mensual", money(k.proyeccionMensual)],
+      ["Boletas / Facturas", (k.boletas||0) + " / " + (k.facturas||0)],
+      ["Pendientes comprobante", (k.pendientesComprobante||0).toLocaleString("es-PE")],
+    ];
+
+    $("kpis").innerHTML = cards.map(([t,v])=>`
+      <div class="card">
+        <p class="kpi-title">${t}</p>
+        <p class="kpi-value">${v}</p>
+      </div>
+    `).join("");
+  }
+
+  function drawFinanzas(series){
+    const data = new google.visualization.DataTable();
+    data.addColumn('string','Fecha');
+    data.addColumn('number','Ventas');
+    data.addColumn('number','Gastos');
+    data.addColumn('number','Saldo');
+
+    series.forEach(r=>{
+      data.addRow([r.date, r.ventas, r.gastos, r.saldo]);
+    });
+
+    const chart = new google.visualization.LineChart($("chart-finanzas"));
+    chart.draw(data, { legend:{position:'bottom'}, chartArea:{left:50,top:20,width:'85%',height:'70%'} });
+  }
+
+  function drawAcumulado(series){
+    const data = new google.visualization.DataTable();
+    data.addColumn('string','Fecha');
+    data.addColumn('number','Acumulado');
+    series.forEach(r=>data.addRow([r.date, r.acumulado]));
+    const chart = new google.visualization.LineChart($("chart-acumulado"));
+    chart.draw(data, { legend:{position:'bottom'}, chartArea:{left:50,top:20,width:'85%',height:'70%'} });
+  }
+
+  function drawDeliveryDia(rows){
+    const data = new google.visualization.DataTable();
+    data.addColumn('string','Fecha');
+    data.addColumn('number','Delivery cobrado');
+    data.addColumn('number','Costo delivery');
+    rows.forEach(r=>data.addRow([r.date, r.deliveryCobrado, r.costoDelivery]));
+    const chart = new google.visualization.ColumnChart($("chart-delivery-dia"));
+    chart.draw(data, { legend:{position:'bottom'}, chartArea:{left:60,top:20,width:'80%',height:'70%'} });
+  }
+
+  function drawGastosCat(rows){
+    const data = new google.visualization.DataTable();
+    data.addColumn('string','Categoría');
+    data.addColumn('number','Monto');
+    rows.slice(0,12).forEach(r=>data.addRow([r.categoria, r.monto]));
+    const chart = new google.visualization.PieChart($("chart-gastos-cat"));
+    chart.draw(data, { legend:{position:'right'} });
+  }
+
+  function drawTopProductos(rows){
+    const data = new google.visualization.DataTable();
+    data.addColumn('string','Producto');
+    data.addColumn('number','Monto');
+    rows.forEach(r=>data.addRow([r.producto, r.monto]));
+    const chart = new google.visualization.BarChart($("chart-top-prod"));
+    chart.draw(data, { legend:{position:'none'}, chartArea:{left:220,top:20,width:'70%',height:'80%'} });
+  }
+
+  function table(el, cols, rows){
+    const thead = `<tr>${cols.map(c=>`<th>${c}</th>`).join("")}</tr>`;
+    const body = rows.map(r=>`<tr>${cols.map(c=>`<td>${r[c] ?? ""}</td>`).join("")}</tr>`).join("");
+    el.innerHTML = thead + body;
+  }
+
+  function renderAll(payload){
+    const {kpis, series, tables, alertas, updatedAt, period} = payload;
+
+    renderKpis(kpis);
+
+    // finanzas charts
+    drawFinanzas(series.finanzasPorDia || []);
+    drawAcumulado(series.acumuladoVentas || []);
+
+    // delivery
+    drawDeliveryDia(series.deliveryPorDia || []);
+    table($("tbl-delivery-mot"),
+      ["motorizado","deliveryCobrado","costoDelivery","entregas"],
+      (tables.deliveryMotorizado||[]).map(x=>({
+        motorizado:x.motorizado,
+        deliveryCobrado:money(x.deliveryCobrado),
+        costoDelivery:money(x.costoDelivery),
+        entregas:x.entregas
+      }))
+    );
+
+    // distritos
+    table($("tbl-distritos"),
+      ["distrito","monto","veces"],
+      (tables.distritosRanking||[]).slice(0,50).map(x=>({
+        distrito:x.distrito,
+        monto:money(x.monto),
+        veces:x.veces
+      }))
+    );
+
+    // vendedoras
+    table($("tbl-vendedoras"),
+      ["date","seller","ventas","saldo","pedidos"],
+      (tables.vendedorasDia||[]).map(x=>({
+        date:x.date,
+        seller:x.seller,
+        ventas:money(x.ventas),
+        saldo:money(x.saldo),
+        pedidos:x.pedidos
+      }))
+    );
+
+    // productos
+    drawTopProductos(tables.topProductos||[]);
+    table($("tbl-top-prod"),
+      ["producto","cantidad","monto"],
+      (tables.topProductos||[]).map(x=>({
+        producto:x.producto,
+        cantidad:(x.cantidad||0).toLocaleString("es-PE"),
+        monto:money(x.monto)
+      }))
+    );
+
+    // gastos
+    drawGastosCat(tables.gastosPorCategoria||[]);
+    table($("tbl-gastos-cat"),
+      ["categoria","cantidad","monto"],
+      (tables.gastosPorCategoria||[]).map(x=>({
+        categoria:x.categoria,
+        cantidad:x.cantidad,
+        monto:money(x.monto)
+      }))
+    );
+
+    // medios pago
+    table($("tbl-medios"),
+      ["cuenta","monto"],
+      (tables.mediosPago||[]).map(x=>({
+        cuenta:x.cuenta,
+        monto:money(x.monto)
+      }))
+    );
+
+    // servicios
+    $("serviciosKpi").textContent =
+      `Total: ${money(tables.serviciosKpi?.total)} | Pendiente: ${money(tables.serviciosKpi?.pendientes)} | Pagado: ${money(tables.serviciosKpi?.pagados)}`;
+
+    table($("tbl-servicios"),
+      ["fecha","servicio","estado","monto"],
+      (tables.serviciosLista||[]).map(x=>({
+        fecha:x.fecha,
+        servicio:x.servicio,
+        estado:x.estado,
+        monto:money(x.monto)
+      }))
+    );
+
+    // clientes
+    $("clientesInfo").textContent =
+      `Clientes únicos en el periodo: ${(kpis.clientesPeriodo||0).toLocaleString("es-PE")}`;
+
+    // alertas
+    $("alertasBox").innerHTML = `
+      <b>Comprobantes pendientes:</b> ${alertas.pendientesComprobante}<br/>
+      <b>Boletas:</b> ${alertas.boletas} &nbsp; <b>Facturas:</b> ${alertas.facturas}<br/>
+      <b>Clientes únicos (periodo):</b> ${alertas.clientesPeriodo}
+    `;
+
+    $("updated").textContent =
+      `Periodo: ${period.from} → ${period.to} | Actualizado: ${updatedAt}`;
+  }
+
+  function setModeUI(){
+    const mode = $("mode").value;
+    $("month").style.display = (mode==="month") ? "" : "none";
+    $("from").style.display = (mode==="range") ? "" : "none";
+    $("to").style.display = (mode==="range") ? "" : "none";
+  }
+
+  function setTabs(){
+    $("tabs").addEventListener("click",(e)=>{
+      const t = e.target.closest(".tab");
+      if(!t) return;
+      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+      t.classList.add("active");
+
+      const view = t.dataset.view;
+      document.querySelectorAll("section[id^='view-']").forEach(s=>s.style.display="none");
+      $("view-"+view).style.display="";
+    });
+  }
+
+  async function load(){
+    showError("");
+    try{
+      const data = await fetchJSON();
+      if(data.error) { showError("Error Apps Script: " + data.error); return; }
+      google.charts.setOnLoadCallback(()=>renderAll(data));
+    }catch(err){
+      showError("No se pudo cargar data desde Apps Script: " + err.message);
+    }
+  }
+
+  // init
+  (function init(){
+    const now = new Date();
+    const ym = now.toISOString().slice(0,7);
+    $("month").value = ym;
+    $("mode").addEventListener("change", ()=>{ setModeUI(); });
+    $("btn").addEventListener("click", load);
+    setModeUI();
+    setTabs();
+    // primer load
+    load();
+  })();
 </script>
 </body>
 </html>
