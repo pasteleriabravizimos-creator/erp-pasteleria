@@ -1,280 +1,578 @@
 <!doctype html>
-<html>
+<html lang="es">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>BRAVIZIMO'S | Dashboard Financiero</title>
+
   <script src="https://www.gstatic.com/charts/loader.js"></script>
+
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:#f6f7fb;}
-    header{background:#111;color:#fff;padding:16px 20px;}
-    .wrap{max-width:1280px;margin:0 auto;padding:16px 20px;}
-    .grid{display:grid;gap:12px;}
-    .kpis{grid-template-columns:repeat(4,minmax(0,1fr));}
-    .card{background:#fff;border:1px solid #e9e9ef;border-radius:16px;padding:14px;box-shadow:0 2px 10px rgba(0,0,0,.04);}
-    .kpi-title{font-size:12px;color:#666;margin-bottom:6px;}
-    .kpi-value{font-size:22px;font-weight:800;}
-    .muted{color:#777;font-size:12px;}
-    .btn{border:1px solid #ddd;background:#fff;border-radius:12px;padding:8px 12px;cursor:pointer;font-weight:600;}
-    .two{grid-template-columns:repeat(2,minmax(0,1fr));}
-    .chart{height:360px;}
-    table{width:100%;border-collapse:collapse;}
-    th,td{padding:10px;border-bottom:1px solid #eee;text-align:left;font-size:13px;white-space:nowrap;}
-    th{color:#666;font-weight:700;}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;}
-    .tab{padding:8px 12px;border-radius:999px;border:1px solid #ddd;background:#fff;cursor:pointer;font-weight:700;}
-    .tab.active{background:#111;color:#fff;border-color:#111;}
-    .hide{display:none;}
-    @media(max-width:950px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr));}.two{grid-template-columns:1fr;}}
+    :root{
+      --bg:#0b0f17;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --radius:16px;
+      --line:#e5e7eb;
+    }
+    body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background:#f6f7fb; color:#0b0f17; }
+    header{
+      background:linear-gradient(135deg,#0b0f17,#111827);
+      color:#fff;
+      padding:22px 20px;
+      position:sticky; top:0; z-index:10;
+      box-shadow:0 8px 20px rgba(0,0,0,.2);
+    }
+    .wrap{ max-width:1200px; margin:0 auto; }
+    .topbar{ display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
+    .title{ font-size:18px; font-weight:800; letter-spacing:.2px; }
+    .subtitle{ font-size:12px; color:#cbd5e1; margin-top:2px; }
+
+    .controls{ display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+    select, input, button{
+      border-radius:12px; border:1px solid rgba(255,255,255,.2);
+      padding:10px 12px; background:rgba(255,255,255,.06); color:#fff;
+      outline:none;
+    }
+    button{ background:#fff; color:#0b0f17; font-weight:700; cursor:pointer; border:none; }
+    button:hover{ opacity:.92; }
+
+    main{ padding:18px 18px 40px; }
+    .grid{ display:grid; grid-template-columns: repeat(4,1fr); gap:14px; }
+    @media(max-width:1100px){ .grid{ grid-template-columns: repeat(2,1fr);} }
+    @media(max-width:600px){ .grid{ grid-template-columns: 1fr;} }
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
+      border:1px solid #f0f2f5;
+    }
+    .kpi-title{ font-size:12px; color:var(--muted); }
+    .kpi-value{ font-size:22px; font-weight:900; margin-top:6px; }
+    .kpi-sub{ font-size:12px; color:var(--muted); margin-top:4px; }
+
+    .tabs{ display:flex; gap:8px; flex-wrap:wrap; margin:14px 0; }
+    .tab{
+      padding:8px 12px; border-radius:999px; border:1px solid var(--line);
+      background:#fff; cursor:pointer; font-weight:700; font-size:12px;
+    }
+    .tab.active{ background:#0b0f17; color:#fff; border-color:#0b0f17; }
+
+    .two{ display:grid; grid-template-columns: 1.2fr .8fr; gap:14px; }
+    @media(max-width:950px){ .two{ grid-template-columns:1fr; } }
+
+    .chart{ height:360px; }
+    .chart-sm{ height:320px; }
+
+    table{ width:100%; border-collapse:collapse; font-size:12px; }
+    th, td{ padding:10px 8px; border-bottom:1px solid #eef0f3; text-align:left; }
+    th{ color:#111827; background:#fafafa; position:sticky; top:0; z-index:1; }
+    .scroll{ max-height:360px; overflow:auto; border:1px solid #eef0f3; border-radius:14px; }
+    .status{ font-size:12px; color:#6b7280; margin-top:10px; }
+    .pill{ display:inline-block; padding:4px 10px; border-radius:999px; background:#f1f5f9; font-size:12px; }
+    .danger{ background:#fee2e2; color:#991b1b; font-weight:800; }
   </style>
 </head>
 
 <body>
 <header>
-  <div style="max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px;">
-    <div>
-      <div style="font-weight:900;font-size:16px;">Dashboard Financiero</div>
-      <div class="muted">Sincronizado con Google Sheets (automático)</div>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <div class="title">BRAVIZIMO'S | Dashboard Financiero</div>
+        <div class="subtitle" id="sub">Sincronizado con Google Sheets</div>
+      </div>
+
+      <div class="controls">
+        <span class="pill" id="periodPill">Periodo: —</span>
+
+        <select id="monthSelect" title="Selecciona mes"></select>
+
+        <button id="btnRefresh">Actualizar</button>
+      </div>
     </div>
-    <button class="btn" id="btnReload">Actualizar</button>
   </div>
 </header>
 
-<div class="wrap">
-  <div id="status" class="muted">Cargando datos…</div>
+<main class="wrap">
+  <div id="err" class="status"></div>
 
   <!-- KPIs -->
-  <div class="grid kpis" style="margin-top:12px;">
-    <div class="card"><div class="kpi-title">Ventas totales</div><div id="k1" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Gastos totales</div><div id="k2" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Utilidad</div><div id="k3" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Saldo pendiente</div><div id="k4" class="kpi-value">—</div></div>
-
-    <div class="card"><div class="kpi-title">Delivery cobrado</div><div id="k5" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Costo delivery</div><div id="k6" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Margen delivery</div><div id="k7" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Clientes (total)</div><div id="k8" class="kpi-value">—</div></div>
-
-    <div class="card"><div class="kpi-title">Promedio diario</div><div id="k9" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Proyección mensual</div><div id="k10" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Boletas / Facturas</div><div id="k11" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Pendientes comprobante</div><div id="k12" class="kpi-value">—</div></div>
-  </div>
+  <div class="grid" id="kpis"></div>
 
   <!-- Tabs -->
   <div class="tabs">
-    <button class="tab active" data-tab="t_fin">Finanzas</button>
-    <button class="tab" data-tab="t_vend">Vendedoras</button>
-    <button class="tab" data-tab="t_del">Delivery</button>
-    <button class="tab" data-tab="t_prod">Productos</button>
-    <button class="tab" data-tab="t_cli">Clientes</button>
-    <button class="tab" data-tab="t_gas">Gastos</button>
+    <div class="tab active" data-view="finanzas">Finanzas</div>
+    <div class="tab" data-view="distritos">Distritos</div>
+    <div class="tab" data-view="vendedoras">Vendedoras</div>
+    <div class="tab" data-view="delivery">Delivery</div>
+    <div class="tab" data-view="productos">Productos</div>
+    <div class="tab" data-view="clientes">Clientes</div>
+    <div class="tab" data-view="gastos">Gastos</div>
+    <div class="tab" data-view="pagos">Medios de pago</div>
   </div>
 
   <!-- FINANZAS -->
-  <div id="t_fin">
-    <div class="grid two">
+  <section id="view-finanzas">
+    <div class="two">
       <div class="card">
-        <div style="font-weight:900;margin-bottom:8px;">Ventas vs Gastos (por día) + Saldo</div>
-        <div id="ch_vg" class="chart"></div>
+        <h3>Ventas vs Gastos (por día) + Saldo</h3>
+        <div class="chart" id="chartVGS"></div>
       </div>
       <div class="card">
-        <div style="font-weight:900;margin-bottom:8px;">Acumulado de ventas</div>
-        <div id="ch_acc" class="chart"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- VENDEDORAS -->
-  <div id="t_vend" class="hide">
-    <div class="card">
-      <div style="font-weight:900;margin-bottom:8px;">Vendedoras por día (ventas y saldo)</div>
-      <div style="overflow:auto;max-height:420px;">
-        <table id="tb_vend">
-          <thead><tr><th>Fecha</th><th>Vendedor(a)</th><th>Ventas</th><th>Saldo</th><th>Pedidos</th></tr></thead>
-          <tbody></tbody>
-        </table>
+        <h3>Acumulado de ventas</h3>
+        <div class="chart" id="chartAcum"></div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- DELIVERY -->
-  <div id="t_del" class="hide">
-    <div class="grid two">
+  <!-- DISTRITOS -->
+  <section id="view-distritos" style="display:none;">
+    <div class="two">
       <div class="card">
-        <div style="font-weight:900;margin-bottom:8px;">Delivery vs Costo (por día)</div>
-        <div id="ch_del" class="chart"></div>
+        <h3>Ranking distritos (monto)</h3>
+        <div class="chart-sm" id="chartDistritos"></div>
       </div>
       <div class="card">
-        <div style="font-weight:900;margin-bottom:8px;">Delivery por motorizado</div>
-        <div style="overflow:auto;max-height:360px;">
-          <table id="tb_del">
-            <thead><tr><th>Nombre</th><th>Delivery</th><th>Costo</th><th>Entregas</th></tr></thead>
-            <tbody></tbody>
+        <h3>Detalle distritos (cantidad + monto)</h3>
+        <div class="scroll">
+          <table>
+            <thead><tr><th>Distrito</th><th>Cantidad</th><th>Monto</th></tr></thead>
+            <tbody id="tblDistritos"></tbody>
           </table>
         </div>
       </div>
     </div>
-  </div>
+  </section>
+
+  <!-- VENDEDORAS -->
+  <section id="view-vendedoras" style="display:none;">
+    <div class="card">
+      <h3>Vendedoras por día (ventas, saldo y pedidos) + Total del periodo</h3>
+      <div class="status" id="vendTotal"></div>
+      <div class="scroll" style="max-height:420px;">
+        <table>
+          <thead><tr><th>Fecha</th><th>Vendedora</th><th>Ventas</th><th>Saldo</th><th>Pedidos</th></tr></thead>
+          <tbody id="tblVendedoras"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- DELIVERY -->
+  <section id="view-delivery" style="display:none;">
+    <div class="two">
+      <div class="card">
+        <h3>Delivery vs Costo (por día) + Entregas</h3>
+        <div class="chart-sm" id="chartDelivery"></div>
+        <div class="status" id="recojoInfo"></div>
+      </div>
+      <div class="card">
+        <h3>Personal delivery (por día) — “Lo que se le debe” (costo)</h3>
+        <div class="scroll">
+          <table>
+            <thead><tr><th>Fecha</th><th>Nombre</th><th>Entregas</th><th>Costo</th></tr></thead>
+            <tbody id="tblDeliveryPersonal"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <!-- PRODUCTOS -->
-  <div id="t_prod" class="hide">
-    <div class="card">
-      <div style="font-weight:900;margin-bottom:8px;">Top productos por monto (según fecha de entrega)</div>
-      <div id="ch_prod" class="chart"></div>
-      <div class="muted">Se basa en la hoja PRODUCTOS (Monto por producto).</div>
+  <section id="view-productos" style="display:none;">
+    <div class="two">
+      <div class="card">
+        <h3>Top 20 productos por monto</h3>
+        <div class="chart-sm" id="chartProdMonto"></div>
+      </div>
+      <div class="card">
+        <h3>Top 20 productos por cantidad</h3>
+        <div class="chart-sm" id="chartProdCant"></div>
+      </div>
     </div>
-  </div>
+
+    <div class="card" style="margin-top:14px;">
+      <h3>Lista Top 20 (cantidad y monto)</h3>
+      <div class="scroll" style="max-height:420px;">
+        <table>
+          <thead><tr><th>Producto</th><th>Cantidad</th><th>Monto</th></tr></thead>
+          <tbody id="tblProductos"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 
   <!-- CLIENTES -->
-  <div id="t_cli" class="hide">
+  <section id="view-clientes" style="display:none;">
     <div class="card">
-      <div style="font-weight:900;margin-bottom:8px;">Clientes por mes (según “Última compra”)</div>
-      <div id="ch_cli" class="chart"></div>
+      <h3>Clientes (nombre, celular, última compra)</h3>
+      <div class="status" id="clientesCount"></div>
+      <div class="scroll" style="max-height:420px;">
+        <table>
+          <thead><tr><th>Cliente</th><th>Celular</th><th>Última compra</th></tr></thead>
+          <tbody id="tblClientes"></tbody>
+        </table>
+      </div>
     </div>
-  </div>
+  </section>
 
   <!-- GASTOS -->
-  <div id="t_gas" class="hide">
-    <div class="card">
-      <div style="font-weight:900;margin-bottom:8px;">Gastos por categoría</div>
-      <div id="ch_gas" class="chart"></div>
+  <section id="view-gastos" style="display:none;">
+    <div class="two">
+      <div class="card">
+        <h3>Gastos por categoría</h3>
+        <div class="chart-sm" id="chartGastosCat"></div>
+      </div>
+      <div class="card">
+        <h3>Detalle (cantidad + monto)</h3>
+        <div class="scroll">
+          <table>
+            <thead><tr><th>Categoría</th><th>Cantidad</th><th>Monto</th></tr></thead>
+            <tbody id="tblGastosCat"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <div class="muted" id="footer" style="margin-top:12px;"></div>
-</div>
+  <!-- PAGOS -->
+  <section id="view-pagos" style="display:none;">
+    <div class="two">
+      <div class="card">
+        <h3>Resumen por cuenta (1er pago + 2do pago)</h3>
+        <div class="chart-sm" id="chartCuentas"></div>
+      </div>
+      <div class="card">
+        <h3>Detalle por cuenta</h3>
+        <div class="scroll">
+          <table>
+            <thead><tr><th>Cuenta</th><th>Monto</th></tr></thead>
+            <tbody id="tblCuentas"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="status" id="updated"></div>
+</main>
 
 <script>
-  // ✅ TU WEB APP DE APPS SCRIPT
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykGV3yTg5v1cKf9w50WAcr64ogSAyXkYGErBwAMvLsXlwXvPyqvcY3qFZZg59uuxsa/exec";
+  // ✅ Pega aquí tu URL /exec
+  const APPS_SCRIPT_URL = "TU_URL_EXEC";
 
-  google.charts.load('current', {packages:['corechart']});
+  google.charts.load("current", { packages: ["corechart"] });
 
-  const money = (n) => new Intl.NumberFormat('es-PE', {style:'currency', currency:'PEN'}).format(Number(n||0));
-  const num = (n) => new Intl.NumberFormat('es-PE').format(Number(n||0));
+  const $ = (id)=>document.getElementById(id);
+  const money = (n)=> (Number(n||0)).toLocaleString("es-PE",{style:"currency",currency:"PEN"});
+  const int = (n)=> (Number(n||0)).toLocaleString("es-PE");
 
-  function loadJSONP(){
-    return new Promise((resolve, reject) => {
-      const cbName = "cb_" + Math.random().toString(36).slice(2);
-      window[cbName] = (data) => { delete window[cbName]; script.remove(); resolve(data); };
+  let state = { payload:null };
 
-      const script = document.createElement("script");
-      script.src = `${APPS_SCRIPT_URL}?action=data&callback=${cbName}&_=${Date.now()}`;
-      script.onerror = () => { delete window[cbName]; script.remove(); reject(new Error("No se pudo cargar data desde Apps Script")); };
-      document.body.appendChild(script);
+  function jsonp(url){
+    return new Promise((resolve,reject)=>{
+      const cb = "CB_"+Math.random().toString(16).slice(2);
+      window[cb] = (data)=>{ cleanup(); resolve(data); };
+
+      const s = document.createElement("script");
+      s.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb + "&_=" + Date.now();
+      s.onerror = ()=>{ cleanup(); reject(new Error("No se pudo cargar JSONP")); };
+      document.body.appendChild(s);
+
+      function cleanup(){
+        try{ delete window[cb]; }catch(e){ window[cb]=undefined; }
+        s.remove();
+      }
     });
-  }
-
-  function drawAll(data){
-    // KPIs
-    const k = data.kpis;
-    document.getElementById("k1").textContent = money(k.totalVentas);
-    document.getElementById("k2").textContent = money(k.totalGastos);
-    document.getElementById("k3").textContent = money(k.utilidad);
-    document.getElementById("k4").textContent = money(k.saldoPendiente);
-    document.getElementById("k5").textContent = money(k.deliveryCobrado);
-    document.getElementById("k6").textContent = money(k.deliveryCosto);
-    document.getElementById("k7").textContent = money(k.deliveryMargen);
-    document.getElementById("k8").textContent = num(k.totalClientes);
-    document.getElementById("k9").textContent = money(k.promedioDiario);
-    document.getElementById("k10").textContent = money(k.proyeccionMensual);
-    document.getElementById("k11").textContent = `${num(k.comprobantes.boletas)} / ${num(k.comprobantes.facturas)}`;
-    document.getElementById("k12").textContent = num(k.comprobantes.pendientes);
-
-    // Finanzas: Ventas vs Gastos + Saldo
-    const vg = new google.visualization.DataTable();
-    vg.addColumn("string","Día");
-    vg.addColumn("number","Ventas");
-    vg.addColumn("number","Gastos");
-    vg.addColumn("number","Saldo pendiente");
-    data.series.ventasGastosSaldoDia.forEach(r => vg.addRow([r.date, Number(r.ventas), Number(r.gastos), Number(r.saldo)]));
-    new google.visualization.LineChart(document.getElementById("ch_vg")).draw(vg, {legend:{position:"bottom"}, height:360});
-
-    // Acumulado
-    const ac = new google.visualization.DataTable();
-    ac.addColumn("string","Día");
-    ac.addColumn("number","Acumulado");
-    data.series.acumulado.forEach(r => ac.addRow([r.date, Number(r.acumulado)]));
-    new google.visualization.LineChart(document.getElementById("ch_acc")).draw(ac, {legend:{position:"bottom"}, height:360});
-
-    // Delivery
-    const dl = new google.visualization.DataTable();
-    dl.addColumn("string","Día");
-    dl.addColumn("number","Delivery");
-    dl.addColumn("number","Costo");
-    dl.addColumn("number","Margen");
-    data.series.deliveryDia.forEach(r => dl.addRow([r.date, Number(r.delivery), Number(r.costo), Number(r.margen)]));
-    new google.visualization.ColumnChart(document.getElementById("ch_del")).draw(dl, {legend:{position:"bottom"}, height:360});
-
-    // Top productos
-    const pr = new google.visualization.DataTable();
-    pr.addColumn("string","Producto");
-    pr.addColumn("number","Monto");
-    (data.tables.topProductos||[]).slice(0,12).forEach(r => pr.addRow([r.name, Number(r.value)]));
-    new google.visualization.BarChart(document.getElementById("ch_prod")).draw(pr, {legend:{position:"none"}, height:360});
-
-    // Clientes por mes
-    const cl = new google.visualization.DataTable();
-    cl.addColumn("string","Mes");
-    cl.addColumn("number","Clientes");
-    (data.breakdowns.clientesPorMes||[]).forEach(r => cl.addRow([r.name, Number(r.value)]));
-    new google.visualization.ColumnChart(document.getElementById("ch_cli")).draw(cl, {legend:{position:"none"}, height:360});
-
-    // Gastos por categoría
-    const ga = new google.visualization.DataTable();
-    ga.addColumn("string","Categoría");
-    ga.addColumn("number","Gastos");
-    (data.breakdowns.gastosPorCategoria||[]).slice(0,12).forEach(r => ga.addRow([r.name, Number(r.value)]));
-    new google.visualization.PieChart(document.getElementById("ch_gas")).draw(ga, {legend:{position:"right"}, height:360});
-
-    // Tablas
-    const tbv = document.querySelector("#tb_vend tbody");
-    tbv.innerHTML = "";
-    (data.tables.vendedorasPorDia||[]).forEach(r=>{
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${r.date}</td><td>${r.vendedor}</td><td>${money(r.ventas)}</td><td>${money(r.saldo)}</td><td>${num(r.pedidos)}</td>`;
-      tbv.appendChild(tr);
-    });
-
-    const tbd = document.querySelector("#tb_del tbody");
-    tbd.innerHTML = "";
-    (data.tables.deliveryPorNombre||[]).forEach(r=>{
-      const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${r.nombre}</td><td>${money(r.delivery)}</td><td>${money(r.costo)}</td><td>${num(r.entregas)}</td>`;
-      tbd.appendChild(tr);
-    });
-
-    document.getElementById("footer").textContent = `Actualizado: ${data.meta.generatedAt}`;
   }
 
   async function load(){
-    document.getElementById("status").textContent = "Cargando datos…";
-    try{
-      const data = await loadJSONP();
-      document.getElementById("status").textContent = "";
-      drawAll(data);
-      window.onresize = () => drawAll(data);
-    }catch(err){
-      document.getElementById("status").textContent = "Error: " + err.message;
-      console.error(err);
+    $("err").textContent = "";
+    const month = $("monthSelect").value || "";
+    const url = `${APPS_SCRIPT_URL}?action=data&month=${encodeURIComponent(month)}`;
+
+    const res = await jsonp(url);
+    if(!res.ok){
+      $("err").innerHTML = `<span class="pill danger">Error Apps Script:</span> ${res.error}`;
+      return;
+    }
+    state.payload = res.payload;
+    drawAll();
+  }
+
+  function drawAll(){
+    const p = state.payload;
+    if(!p) return;
+
+    // header
+    $("periodPill").textContent = `Periodo: ${p.meta.selectedPeriod.from} → ${p.meta.selectedPeriod.to}`;
+    $("sub").textContent = `Sincronizado con Google Sheets (hoy: ${p.meta.today})`;
+
+    // months
+    fillMonths(p.meta.availableMonths, p.meta.selectedPeriod.month);
+
+    // KPIs (incluye alerta comprobantes)
+    renderKpis(p.kpis);
+
+    // Charts
+    google.charts.setOnLoadCallback(()=>{
+      drawFinanzas(p.series);
+      drawDistritos(p.tables.distritosRank);
+      drawDelivery(p.series.deliveryDia);
+      drawProductos(p.tables.top20ProdMonto, p.tables.top20ProdCant);
+      drawGastos(p.tables.gastosPorCategoria);
+      drawCuentas(p.tables.pagosPorCuenta);
+    });
+
+    // Tables
+    renderVendedoras(p.tables.vendedorasPorDia);
+    renderDeliveryPersonal(p.tables.deliveryPersonalDia);
+    renderProductosTable(p.tables.top20ProdMonto);
+    renderDistritosTable(p.tables.distritosRank);
+    renderClientes(p.tables.clientesList, p.kpis.clientesTotalNotaVenta);
+    renderGastosCatTable(p.tables.gastosPorCategoria);
+    renderCuentasTable(p.tables.pagosPorCuenta);
+
+    $("recojoInfo").textContent = `Recojo en tienda (sin delivery cobrado): ${int(p.kpis.recojoTienda)} entregas`;
+    $("updated").textContent = `Actualizado: ${p.meta.generatedAt}`;
+  }
+
+  function fillMonths(months, selected){
+    const sel = $("monthSelect");
+    const current = sel.value;
+    sel.innerHTML = "";
+    const arr = (months||[]).slice().sort();
+    if(arr.length===0){
+      const opt = document.createElement("option");
+      opt.value=""; opt.textContent="(sin meses)";
+      sel.appendChild(opt);
+      return;
+    }
+    for(const m of arr){
+      const opt = document.createElement("option");
+      opt.value = m;
+      opt.textContent = m;
+      sel.appendChild(opt);
+    }
+    sel.value = selected || current || arr[arr.length-1];
+  }
+
+  function renderKpis(k){
+    const items = [
+      ["Ventas totales", money(k.totalVentas)],
+      ["Gastos totales", money(k.totalGastos)],
+      ["Utilidad", money(k.utilidad)],
+      ["Saldo pendiente", money(k.saldoPendiente)],
+      ["Delivery cobrado", money(k.deliveryCobrado)],
+      ["Costo delivery", money(k.deliveryCosto)],
+      ["Margen delivery", money(k.deliveryMargen)],
+      ["Clientes (nota venta)", int(k.clientesTotalNotaVenta)],
+      ["Promedio diario", money(k.promedioDiario)],
+      ["Proyección mensual", money(k.proyeccionMensual)],
+      ["Boletas / Facturas", `${int(k.comprobantes.boletas)} / ${int(k.comprobantes.facturas)}`],
+      ["⚠️ Comprobantes faltantes", int(k.alertaComprobantesFaltan)],
+    ];
+    const box = $("kpis");
+    box.innerHTML = "";
+    for(const [t,v] of items){
+      const d = document.createElement("div");
+      d.className="card";
+      d.innerHTML = `<div class="kpi-title">${t}</div><div class="kpi-value">${v}</div>`;
+      box.appendChild(d);
     }
   }
 
+  // FINANZAS
+  function drawFinanzas(series){
+    const vgs = series.ventasGastosSaldoDia || [];
+    const dt = new google.visualization.DataTable();
+    dt.addColumn("string","Fecha");
+    dt.addColumn("number","Ventas");
+    dt.addColumn("number","Gastos");
+    dt.addColumn("number","Saldo");
+
+    vgs.forEach(x=> dt.addRow([x.date, Number(x.ventas||0), Number(x.gastos||0), Number(x.saldo||0)]));
+
+    new google.visualization.LineChart($("chartVGS"))
+      .draw(dt, { legend:{position:"bottom"}, chartArea:{left:50, top:20, width:"85%", height:"70%"} });
+
+    const acum = series.acumulado || [];
+    const dt2 = new google.visualization.DataTable();
+    dt2.addColumn("string","Fecha");
+    dt2.addColumn("number","Acumulado");
+    acum.forEach(x=> dt2.addRow([x.date, Number(x.acumulado||0)]));
+
+    new google.visualization.LineChart($("chartAcum"))
+      .draw(dt2, { legend:{position:"bottom"}, chartArea:{left:50, top:20, width:"85%", height:"70%"} });
+  }
+
+  // DISTRITOS
+  function drawDistritos(rows){
+    const top = (rows||[]).slice(0,10);
+    const dt = new google.visualization.DataTable();
+    dt.addColumn("string","Distrito");
+    dt.addColumn("number","Monto");
+    top.forEach(r=> dt.addRow([r.distrito, Number(r.monto||0)]));
+
+    new google.visualization.BarChart($("chartDistritos"))
+      .draw(dt, { legend:"none", chartArea:{left:140, top:20, width:"70%", height:"75%"} });
+  }
+  function renderDistritosTable(rows){
+    const tb = $("tblDistritos"); tb.innerHTML="";
+    (rows||[]).forEach(r=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${r.distrito}</td><td>${int(r.cantidad)}</td><td>${money(r.monto)}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+
+  // VENDEDORAS
+  function renderVendedoras(rows){
+    const tb = $("tblVendedoras"); tb.innerHTML="";
+    let totV=0, totS=0, totP=0;
+    (rows||[]).forEach(r=>{
+      totV += Number(r.ventas||0);
+      totS += Number(r.saldo||0);
+      totP += Number(r.pedidos||0);
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${r.date}</td><td>${r.vendedor}</td><td>${money(r.ventas)}</td><td>${money(r.saldo)}</td><td>${int(r.pedidos)}</td>`;
+      tb.appendChild(tr);
+    });
+    $("vendTotal").textContent = `Total periodo → Ventas: ${money(totV)} | Saldo: ${money(totS)} | Pedidos: ${int(totP)}`;
+  }
+
+  // DELIVERY
+  function drawDelivery(series){
+    const dt = new google.visualization.DataTable();
+    dt.addColumn("string","Fecha");
+    dt.addColumn("number","Delivery cobrado");
+    dt.addColumn("number","Costo delivery");
+    dt.addColumn("number","Entregas");
+
+    (series||[]).forEach(x=>{
+      dt.addRow([x.date, Number(x.delivery||0), Number(x.costo||0), Number(x.entregas||0)]);
+    });
+
+    new google.visualization.ColumnChart($("chartDelivery"))
+      .draw(dt, { legend:{position:"bottom"}, chartArea:{left:50, top:20, width:"85%", height:"70%"} });
+  }
+
+  function renderDeliveryPersonal(rows){
+    const tb = $("tblDeliveryPersonal"); tb.innerHTML="";
+    (rows||[]).forEach(r=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${r.date}</td><td>${r.nombre}</td><td>${int(r.entregas)}</td><td>${money(r.costo)}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+
+  // PRODUCTOS
+  function drawProductos(topMonto, topCant){
+    const dt1 = new google.visualization.DataTable();
+    dt1.addColumn("string","Producto");
+    dt1.addColumn("number","Monto");
+    (topMonto||[]).forEach(r=> dt1.addRow([r.producto, Number(r.monto||0)]));
+    new google.visualization.BarChart($("chartProdMonto"))
+      .draw(dt1, { legend:"none", chartArea:{left:180, top:20, width:"65%", height:"75%"} });
+
+    const dt2 = new google.visualization.DataTable();
+    dt2.addColumn("string","Producto");
+    dt2.addColumn("number","Cantidad");
+    (topCant||[]).forEach(r=> dt2.addRow([r.producto, Number(r.cantidad||0)]));
+    new google.visualization.BarChart($("chartProdCant"))
+      .draw(dt2, { legend:"none", chartArea:{left:180, top:20, width:"65%", height:"75%"} });
+  }
+
+  function renderProductosTable(topMonto){
+    const tb = $("tblProductos"); tb.innerHTML="";
+    (topMonto||[]).forEach(r=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${r.producto}</td><td>${int(r.cantidad)}</td><td>${money(r.monto)}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+
+  // CLIENTES
+  function renderClientes(list, totalNotaVenta){
+    const tb = $("tblClientes"); tb.innerHTML="";
+    const rows = (list||[]).slice(0,2000);
+    $("clientesCount").textContent = `Clientes en hoja clientes (mostrando ${rows.length}). Clientes únicos según Nota de ventas en este periodo: ${int(totalNotaVenta)}.`;
+    rows.forEach(r=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${r.cliente}</td><td>${r.celular||""}</td><td>${r.ultimaCompra||""}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+
+  // GASTOS
+  function drawGastos(rows){
+    const top = (rows||[]).slice(0,10);
+    const dt = new google.visualization.DataTable();
+    dt.addColumn("string","Categoría");
+    dt.addColumn("number","Monto");
+    top.forEach(r=> dt.addRow([r.categoria, Number(r.monto||0)]));
+    new google.visualization.PieChart($("chartGastosCat"))
+      .draw(dt, { legend:{position:"right"}, chartArea:{left:20, top:10, width:"80%", height:"80%"} });
+  }
+
+  function renderGastosCatTable(rows){
+    const tb = $("tblGastosCat"); tb.innerHTML="";
+    (rows||[]).forEach(r=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${r.categoria}</td><td>${int(r.cantidad)}</td><td>${money(r.monto)}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+
+  // CUENTAS
+  function drawCuentas(rows){
+    const top = (rows||[]).slice(0,10);
+    const dt = new google.visualization.DataTable();
+    dt.addColumn("string","Cuenta");
+    dt.addColumn("number","Monto");
+    top.forEach(r=> dt.addRow([r.cuenta, Number(r.monto||0)]));
+    new google.visualization.BarChart($("chartCuentas"))
+      .draw(dt, { legend:"none", chartArea:{left:180, top:20, width:"65%", height:"75%"} });
+  }
+  function renderCuentasTable(rows){
+    const tb = $("tblCuentas"); tb.innerHTML="";
+    (rows||[]).forEach(r=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${r.cuenta}</td><td>${money(r.monto)}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+
   // Tabs
-  document.querySelectorAll(".tab").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
-      btn.classList.add("active");
-      const id = btn.getAttribute("data-tab");
-      ["t_fin","t_vend","t_del","t_prod","t_cli","t_gas"].forEach(x=>{
-        document.getElementById(x).classList.toggle("hide", x!==id);
-      });
+  document.querySelectorAll(".tab").forEach(t=>{
+    t.addEventListener("click", ()=>{
+      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+      t.classList.add("active");
+      const view = t.dataset.view;
+      document.querySelectorAll("section[id^='view-']").forEach(s=>s.style.display="none");
+      $("view-"+view).style.display = "block";
     });
   });
 
-  document.getElementById("btnReload").addEventListener("click", load);
-  google.charts.setOnLoadCallback(load);
+  $("btnRefresh").addEventListener("click", load);
+  $("monthSelect").addEventListener("change", load);
+
+  // init
+  (async function init(){
+    try{
+      // carga inicial sin month para que el script devuelva availableMonths, luego load() usará el select
+      const res = await jsonp(`${APPS_SCRIPT_URL}?action=data`);
+      if(!res.ok){ $("err").textContent = res.error; return; }
+      state.payload = res.payload;
+      fillMonths(state.payload.meta.availableMonths, state.payload.meta.selectedPeriod.month);
+      await load();
+    }catch(e){
+      $("err").textContent = "No se pudo cargar desde Apps Script: " + e.message;
+    }
+  })();
 </script>
 </body>
 </html>
