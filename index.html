@@ -1,215 +1,1087 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="es">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>ERP Dashboard</title>
-  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERP Dashboard - Pastelería</title>
+  
+  <!-- Google Charts -->
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; margin:0; background:#fafafa;}
-    header{padding:16px 20px; background:#111; color:#fff;}
-    .wrap{padding:16px 20px; max-width:1200px; margin:0 auto;}
-    .grid{display:grid; gap:12px;}
-    .kpis{grid-template-columns:repeat(4,minmax(0,1fr));}
-    .card{background:#fff; border:1px solid #eee; border-radius:14px; padding:14px;}
-    .kpi-title{font-size:12px; color:#666; margin-bottom:6px;}
-    .kpi-value{font-size:22px; font-weight:700;}
-    .two{grid-template-columns:repeat(2,minmax(0,1fr));}
-    .chart{height:360px;}
-    table{width:100%; border-collapse:collapse;}
-    th,td{padding:10px; border-bottom:1px solid #eee; text-align:left; font-size:14px;}
-    th{color:#666; font-weight:600;}
-    .muted{color:#777; font-size:12px;}
-    .btn{border:1px solid #ddd; background:#fff; border-radius:10px; padding:8px 10px; cursor:pointer;}
-    @media(max-width:900px){
-      .kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
-      .two{grid-template-columns:1fr;}
+    /* =============================================================================
+       VARIABLES Y RESET
+       ============================================================================= */
+    :root {
+      --color-primary: #1a1a2e;
+      --color-secondary: #16213e;
+      --color-accent: #e94560;
+      --color-accent-light: #ff6b88;
+      --color-success: #06d6a0;
+      --color-warning: #ffd23f;
+      --color-info: #118ab2;
+      --color-danger: #ef476f;
+      
+      --color-bg: #f8f9fa;
+      --color-surface: #ffffff;
+      --color-border: #e9ecef;
+      
+      --color-text-primary: #2d3748;
+      --color-text-secondary: #718096;
+      --color-text-light: #a0aec0;
+      
+      --font-display: 'Poppins', -apple-system, sans-serif;
+      --font-body: 'Inter', -apple-system, sans-serif;
+      
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+      --shadow-xl: 0 20px 40px rgba(0,0,0,0.15);
+      
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      
+      --spacing-xs: 8px;
+      --spacing-sm: 12px;
+      --spacing-md: 20px;
+      --spacing-lg: 32px;
+      --spacing-xl: 48px;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    /* =============================================================================
+       TIPOGRAFÍA
+       ============================================================================= */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    /* =============================================================================
+       LAYOUT BASE
+       ============================================================================= */
+    body {
+      font-family: var(--font-body);
+      background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+      color: var(--color-text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    
+    /* =============================================================================
+       HEADER
+       ============================================================================= */
+    .header {
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+      color: white;
+      padding: var(--spacing-lg) var(--spacing-md);
+      box-shadow: var(--shadow-lg);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      animation: slideDown 0.5s ease-out;
+    }
+    
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--spacing-md);
+    }
+    
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    
+    .header-title h1 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin: 0;
+    }
+    
+    .header-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--color-accent);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 4px 12px rgba(233, 69, 96, 0.3);
+    }
+    
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .last-update {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.1);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      backdrop-filter: blur(10px);
+    }
+    
+    .refresh-btn {
+      background: var(--color-accent);
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(233, 69, 96, 0.3);
+    }
+    
+    .refresh-btn:hover {
+      background: var(--color-accent-light);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(233, 69, 96, 0.4);
+    }
+    
+    .refresh-btn:active {
+      transform: translateY(0);
+    }
+    
+    /* =============================================================================
+       CONTAINER
+       ============================================================================= */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: var(--spacing-lg) var(--spacing-md);
+    }
+    
+    /* =============================================================================
+       LOADING
+       ============================================================================= */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 400px;
+      gap: var(--spacing-md);
+    }
+    
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid var(--color-border);
+      border-top-color: var(--color-accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* =============================================================================
+       KPI CARDS
+       ============================================================================= */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-xl);
+      animation: fadeInUp 0.6s ease-out 0.1s both;
+    }
+    
+    .kpi-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-md);
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+    
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--card-color), transparent);
+    }
+    
+    .kpi-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .kpi-card.ventas { --card-color: var(--color-success); }
+    .kpi-card.gastos { --card-color: var(--color-danger); }
+    .kpi-card.utilidad { --card-color: var(--color-info); }
+    .kpi-card.pedidos { --card-color: var(--color-warning); }
+    .kpi-card.clientes { --card-color: var(--color-accent); }
+    .kpi-card.comprobantes { --card-color: #8b5cf6; }
+    
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .kpi-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .kpi-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background: linear-gradient(135deg, var(--card-color), transparent);
+      opacity: 0.2;
+    }
+    
+    .kpi-value {
+      font-family: var(--font-display);
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--color-text-primary);
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+    
+    .kpi-subtext {
+      font-size: 12px;
+      color: var(--color-text-light);
+    }
+    
+    /* =============================================================================
+       CHARTS SECTION
+       ============================================================================= */
+    .charts-section {
+      animation: fadeInUp 0.6s ease-out 0.2s both;
+    }
+    
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-md);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: var(--color-accent);
+      border-radius: 2px;
+    }
+    
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .chart-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-md);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--color-border);
+    }
+    
+    .chart-card.full-width {
+      grid-column: 1 / -1;
+    }
+    
+    .chart-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-sm);
+      padding-bottom: var(--spacing-sm);
+      border-bottom: 2px solid var(--color-border);
+    }
+    
+    .chart-container {
+      min-height: 300px;
+      position: relative;
+    }
+    
+    /* =============================================================================
+       TABLE
+       ============================================================================= */
+    .table-card {
+      background: var(--color-surface);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-md);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease-out 0.3s both;
+    }
+    
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    
+    thead {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      color: white;
+    }
+    
+    th {
+      padding: var(--spacing-sm) var(--spacing-md);
+      text-align: left;
+      font-weight: 600;
+      font-family: var(--font-display);
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+    
+    td {
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-bottom: 1px solid var(--color-border);
+    }
+    
+    tbody tr {
+      transition: background 0.2s ease;
+    }
+    
+    tbody tr:hover {
+      background: #f8f9fa;
+    }
+    
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .table-number {
+      font-family: var(--font-display);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+    
+    .table-highlight {
+      background: linear-gradient(135deg, rgba(6, 214, 160, 0.1), transparent);
+    }
+    
+    /* =============================================================================
+       ERROR
+       ============================================================================= */
+    .error {
+      background: #fee;
+      border: 2px solid var(--color-danger);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-lg);
+      margin: var(--spacing-lg) 0;
+      color: var(--color-danger);
+      text-align: center;
+    }
+    
+    .error h3 {
+      margin-bottom: var(--spacing-sm);
+      font-family: var(--font-display);
+    }
+    
+    /* =============================================================================
+       RESPONSIVE
+       ============================================================================= */
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .header-title h1 {
+        font-size: 22px;
+      }
+      
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .chart-card.full-width {
+        grid-column: 1;
+      }
+      
+      table {
+        font-size: 12px;
+      }
+      
+      th, td {
+        padding: 8px;
+      }
+    }
+    
+    /* =============================================================================
+       UTILITIES
+       ============================================================================= */
+    .hidden {
+      display: none !important;
+    }
+    
+    .text-center {
+      text-align: center;
     }
   </style>
 </head>
-
 <body>
-<header>
-  <div style="max-width:1200px;margin:0 auto; display:flex; justify-content:space-between; gap:12px; align-items:center;">
-    <div>
-      <div style="font-weight:700;">ERP Dashboard</div>
-      <div class="muted">Sincronizado con Google Sheets</div>
-    </div>
-    <button class="btn" id="btnReload">Actualizar</button>
-  </div>
-</header>
-
-<div class="wrap">
-  <div id="status" class="muted">Cargando datos…</div>
-
-  <div class="grid kpis" style="margin-top:12px;">
-    <div class="card"><div class="kpi-title">Ventas totales</div><div id="kpiVentas" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Gastos totales</div><div id="kpiGastos" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Utilidad</div><div id="kpiUtilidad" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Pedidos</div><div id="kpiPedidos" class="kpi-value">—</div></div>
-
-    <div class="card"><div class="kpi-title">Clientes nuevos</div><div id="kpiNuevos" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Clientes recurrentes</div><div id="kpiRecurrentes" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Boletas</div><div id="kpiBoletas" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Facturas / Pendientes</div><div id="kpiFactPend" class="kpi-value">—</div></div>
-  </div>
-
-  <div class="grid two" style="margin-top:12px;">
-    <div class="card">
-      <div style="font-weight:700; margin-bottom:8px;">Ventas vs Gastos por día</div>
-      <div id="chartVentasGastos" class="chart"></div>
-    </div>
-    <div class="card">
-      <div style="font-weight:700; margin-bottom:8px;">Total acumulado</div>
-      <div id="chartAcumulado" class="chart"></div>
-    </div>
-  </div>
-
-  <div class="grid two" style="margin-top:12px;">
-    <div class="card">
-      <div style="font-weight:700; margin-bottom:8px;">Delivery (cobrado vs pagado)</div>
-      <div id="chartDelivery" class="chart"></div>
-    </div>
-    <div class="card">
-      <div style="font-weight:700; margin-bottom:8px;">Ventas por categoría</div>
-      <div id="chartCategorias" class="chart"></div>
-    </div>
-  </div>
-
-  <div class="grid two" style="margin-top:12px;">
-    <div class="card">
-      <div style="font-weight:700; margin-bottom:8px;">Ventas por distrito</div>
-      <div id="chartDistritos" class="chart"></div>
-    </div>
-    <div class="card">
-      <div style="font-weight:700; margin-bottom:8px;">Reporte de vendedoras</div>
-      <div style="overflow:auto; max-height:360px;">
-        <table id="tablaVendedoras">
-          <thead>
-            <tr><th>Vendedora</th><th>Ventas</th><th>Pedidos</th><th>Ticket prom.</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+  
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-content">
+      <div class="header-title">
+        <div class="header-icon">🍰</div>
+        <div>
+          <h1>ERP Dashboard</h1>
+          <div style="font-size: 14px; opacity: 0.8; font-weight: 400;">Pastelería & Bocaditos</div>
+        </div>
+      </div>
+      <div class="header-meta">
+        <div class="last-update">
+          <span>⏱️</span>
+          <span id="lastUpdate">Cargando...</span>
+        </div>
+        <button class="refresh-btn" onclick="loadData()">
+          🔄 Actualizar
+        </button>
       </div>
     </div>
+  </header>
+  
+  <!-- MAIN CONTAINER -->
+  <div class="container">
+    
+    <!-- LOADING STATE -->
+    <div id="loadingState" class="loading">
+      <div class="spinner"></div>
+      <p style="color: var(--color-text-secondary); font-weight: 500;">Cargando datos del ERP...</p>
+    </div>
+    
+    <!-- ERROR STATE -->
+    <div id="errorState" class="error hidden">
+      <h3>⚠️ Error al cargar datos</h3>
+      <p id="errorMessage"></p>
+    </div>
+    
+    <!-- DASHBOARD CONTENT -->
+    <div id="dashboardContent" class="hidden">
+      
+      <!-- KPI CARDS -->
+      <div class="kpi-grid">
+        <div class="kpi-card ventas">
+          <div class="kpi-header">
+            <span class="kpi-label">Ventas Totales</span>
+            <div class="kpi-icon">💰</div>
+          </div>
+          <div class="kpi-value" id="kpi-ventas">S/ 0.00</div>
+          <div class="kpi-subtext">Total del período</div>
+        </div>
+        
+        <div class="kpi-card gastos">
+          <div class="kpi-header">
+            <span class="kpi-label">Gastos Totales</span>
+            <div class="kpi-icon">📊</div>
+          </div>
+          <div class="kpi-value" id="kpi-gastos">S/ 0.00</div>
+          <div class="kpi-subtext">Total del período</div>
+        </div>
+        
+        <div class="kpi-card utilidad">
+          <div class="kpi-header">
+            <span class="kpi-label">Utilidad</span>
+            <div class="kpi-icon">📈</div>
+          </div>
+          <div class="kpi-value" id="kpi-utilidad">S/ 0.00</div>
+          <div class="kpi-subtext">Ventas - Gastos</div>
+        </div>
+        
+        <div class="kpi-card pedidos">
+          <div class="kpi-header">
+            <span class="kpi-label">Pedidos</span>
+            <div class="kpi-icon">🎂</div>
+          </div>
+          <div class="kpi-value" id="kpi-pedidos">0</div>
+          <div class="kpi-subtext">Total de pedidos</div>
+        </div>
+        
+        <div class="kpi-card clientes">
+          <div class="kpi-header">
+            <span class="kpi-label">Clientes</span>
+            <div class="kpi-icon">👥</div>
+          </div>
+          <div class="kpi-value" id="kpi-clientes-nuevos">0</div>
+          <div class="kpi-subtext">
+            <span id="kpi-clientes-nuevos-label">Nuevos</span> · 
+            <span id="kpi-clientes-recurrentes">0</span> Recurrentes
+          </div>
+        </div>
+        
+        <div class="kpi-card comprobantes">
+          <div class="kpi-header">
+            <span class="kpi-label">Comprobantes</span>
+            <div class="kpi-icon">📋</div>
+          </div>
+          <div class="kpi-value" id="kpi-comprobantes-pendientes">0</div>
+          <div class="kpi-subtext">
+            Pendientes · 
+            <span id="kpi-boletas">0</span> B · 
+            <span id="kpi-facturas">0</span> F
+          </div>
+        </div>
+      </div>
+      
+      <!-- CHARTS -->
+      <div class="charts-section">
+        <h2 class="section-title">📊 Análisis Visual</h2>
+        
+        <div class="charts-grid">
+          <!-- Ventas vs Gastos por Día -->
+          <div class="chart-card full-width">
+            <h3 class="chart-title">Ventas vs Gastos por Día</h3>
+            <div id="chart-ventas-gastos" class="chart-container"></div>
+          </div>
+          
+          <!-- Ventas Acumuladas -->
+          <div class="chart-card">
+            <h3 class="chart-title">Ventas Acumuladas</h3>
+            <div id="chart-acumuladas" class="chart-container"></div>
+          </div>
+          
+          <!-- Delivery Cobrado vs Pagado -->
+          <div class="chart-card">
+            <h3 class="chart-title">Delivery: Cobrado vs Pagado</h3>
+            <div id="chart-delivery" class="chart-container"></div>
+          </div>
+          
+          <!-- Ventas por Categoría -->
+          <div class="chart-card">
+            <h3 class="chart-title">Ventas por Categoría</h3>
+            <div id="chart-categorias" class="chart-container"></div>
+          </div>
+          
+          <!-- Ventas por Distrito -->
+          <div class="chart-card">
+            <h3 class="chart-title">Ventas por Distrito</h3>
+            <div id="chart-distritos" class="chart-container"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- TABLA VENDEDORAS -->
+      <div class="table-card">
+        <h2 class="section-title">👩‍💼 Reporte de Vendedoras</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Vendedora</th>
+                <th>Ventas Totales</th>
+                <th>N° Pedidos</th>
+                <th>Ticket Promedio</th>
+              </tr>
+            </thead>
+            <tbody id="table-vendedoras">
+              <tr>
+                <td colspan="4" class="text-center" style="padding: 40px;">
+                  Cargando datos...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+    </div>
   </div>
-
-  <div class="muted" style="margin-top:12px;" id="footerMeta"></div>
-</div>
-
-<script>
-  // ✅ TU URL DE APPS SCRIPT (la que me pasaste)
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyfPaptyVNwsVD6YSn3Qe1Jnou6u8oEOUFWRQUkpkcstvw0nWBQwM4SS2oApqe3LZPZ/exec";
-
-  google.charts.load('current', {packages:['corechart']});
-
-  const money = (n) => new Intl.NumberFormat('es-PE', {style:'currency', currency:'PEN'}).format(Number(n||0));
-  const num = (n) => new Intl.NumberFormat('es-PE').format(Number(n||0));
-
-  // ✅ JSONP loader (sin CORS)
-  function loadJSONP() {
-    return new Promise((resolve, reject) => {
-      const cbName = "cb_" + Math.random().toString(36).slice(2);
-
-      window[cbName] = (data) => {
-        delete window[cbName];
-        script.remove();
-        resolve(data);
-      };
-
-      const script = document.createElement("script");
-      script.src = `${APPS_SCRIPT_URL}?action=data&callback=${cbName}&_=${Date.now()}`;
-      script.onerror = () => {
-        delete window[cbName];
-        script.remove();
-        reject(new Error("No se pudo cargar data desde Apps Script"));
-      };
-
-      document.body.appendChild(script);
+  
+  <script>
+    /* =============================================================================
+       GOOGLE CHARTS LOADER
+       ============================================================================= */
+    google.charts.load('current', {
+      'packages': ['corechart', 'line', 'bar'],
+      'language': 'es'
     });
-  }
-
-  function draw(data){
-    document.getElementById('kpiVentas').textContent = money(data.kpis.totalVentas);
-    document.getElementById('kpiGastos').textContent = money(data.kpis.totalGastos);
-    document.getElementById('kpiUtilidad').textContent = money(data.kpis.utilidad);
-    document.getElementById('kpiPedidos').textContent = num(data.kpis.pedidos);
-    document.getElementById('kpiNuevos').textContent = num(data.kpis.clientesNuevos);
-    document.getElementById('kpiRecurrentes').textContent = num(data.kpis.clientesRecurrentes);
-    document.getElementById('kpiBoletas').textContent = num(data.kpis.comprobantes.boletas);
-    document.getElementById('kpiFactPend').textContent =
-      `${num(data.kpis.comprobantes.facturas)} / ${num(data.kpis.comprobantes.pendientes)}`;
-
-    const vg = new google.visualization.DataTable();
-    vg.addColumn('string','Día');
-    vg.addColumn('number','Ventas');
-    vg.addColumn('number','Gastos');
-    data.series.ventasGastosDia.forEach(r => vg.addRow([r.date, Number(r.ventas), Number(r.gastos)]));
-    new google.visualization.LineChart(document.getElementById('chartVentasGastos'))
-      .draw(vg, {legend:{position:'bottom'}, height:360});
-
-    const ac = new google.visualization.DataTable();
-    ac.addColumn('string','Día');
-    ac.addColumn('number','Acumulado');
-    data.series.acumulado.forEach(r => ac.addRow([r.date, Number(r.acumulado)]));
-    new google.visualization.LineChart(document.getElementById('chartAcumulado'))
-      .draw(ac, {legend:{position:'bottom'}, height:360});
-
-    const dl = new google.visualization.DataTable();
-    dl.addColumn('string','Día');
-    dl.addColumn('number','Cobrado');
-    dl.addColumn('number','Pagado');
-    dl.addColumn('number','Margen');
-    data.series.deliveryDia.forEach(r => dl.addRow([r.date, Number(r.cobrado), Number(r.pagado), Number(r.margen)]));
-    new google.visualization.ColumnChart(document.getElementById('chartDelivery'))
-      .draw(dl, {legend:{position:'bottom'}, height:360});
-
-    const cat = new google.visualization.DataTable();
-    cat.addColumn('string','Categoría');
-    cat.addColumn('number','Ventas');
-    data.breakdowns.categorias.slice(0,12).forEach(r => cat.addRow([r.name, Number(r.value)]));
-    new google.visualization.PieChart(document.getElementById('chartCategorias'))
-      .draw(cat, {legend:{position:'right'}, height:360});
-
-    const dist = new google.visualization.DataTable();
-    dist.addColumn('string','Distrito');
-    dist.addColumn('number','Ventas');
-    data.breakdowns.distritos.slice(0,12).forEach(r => dist.addRow([r.name, Number(r.value)]));
-    new google.visualization.BarChart(document.getElementById('chartDistritos'))
-      .draw(dist, {legend:{position:'none'}, height:360});
-
-    const tbody = document.querySelector('#tablaVendedoras tbody');
-    tbody.innerHTML = '';
-    data.breakdowns.vendedoras.forEach(r => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${r.name}</td>
-        <td>${money(r.ventas)}</td>
-        <td>${num(r.pedidos)}</td>
-        <td>${money(r.ticketProm)}</td>
-      `;
-      tbody.appendChild(tr);
+    
+    /* =============================================================================
+       ESTADO GLOBAL
+       ============================================================================= */
+    let globalData = null;
+    
+    /* =============================================================================
+       INICIALIZACIÓN
+       ============================================================================= */
+    document.addEventListener('DOMContentLoaded', function() {
+      loadData();
     });
-
-    document.getElementById('footerMeta').textContent = `Actualizado: ${data.meta.generatedAt}`;
-  }
-
-  async function loadAndRender(){
-    document.getElementById('status').textContent = 'Cargando datos…';
-    try{
-      const data = await loadJSONP();
-      document.getElementById('status').textContent = '';
-      draw(data);
-      window.onresize = () => draw(data);
-    }catch(err){
-      document.getElementById('status').textContent = 'Error: ' + err.message;
-      console.error(err);
+    
+    /* =============================================================================
+       CARGAR DATOS
+       ============================================================================= */
+    function loadData() {
+      showLoading();
+      
+      // Obtener la URL del script actual
+      const scriptUrl = getScriptUrl();
+      
+      fetch(scriptUrl + '?action=data')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            globalData = data.data;
+            renderDashboard(globalData);
+          } else {
+            showError(data.message || 'Error desconocido');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showError('Error al conectar con el servidor: ' + error.message);
+        });
     }
-  }
-
-  document.getElementById('btnReload').addEventListener('click', loadAndRender);
-  google.charts.setOnLoadCallback(loadAndRender);
-</script>
-
+    
+    /* =============================================================================
+       OBTENER URL DEL SCRIPT
+       ============================================================================= */
+    function getScriptUrl() {
+      // Si estamos en un iframe o Web App, usar la URL actual
+      return window.location.href.split('?')[0];
+    }
+    
+    /* =============================================================================
+       RENDERIZAR DASHBOARD
+       ============================================================================= */
+    function renderDashboard(data) {
+      const metrics = data.metrics;
+      
+      // Actualizar timestamp
+      document.getElementById('lastUpdate').textContent = 
+        new Date().toLocaleString('es-PE', {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      
+      // Actualizar KPIs
+      updateKPIs(metrics);
+      
+      // Cargar gráficos cuando Google Charts esté listo
+      google.charts.setOnLoadCallback(function() {
+        renderCharts(metrics);
+      });
+      
+      // Actualizar tabla
+      renderVendedorasTable(metrics.ventasPorVendedora);
+      
+      // Mostrar contenido
+      hideLoading();
+    }
+    
+    /* =============================================================================
+       ACTUALIZAR KPIs
+       ============================================================================= */
+    function updateKPIs(metrics) {
+      document.getElementById('kpi-ventas').textContent = 
+        'S/ ' + formatNumber(metrics.ventasTotales);
+      
+      document.getElementById('kpi-gastos').textContent = 
+        'S/ ' + formatNumber(metrics.gastosTotales);
+      
+      document.getElementById('kpi-utilidad').textContent = 
+        'S/ ' + formatNumber(metrics.utilidad);
+      
+      document.getElementById('kpi-pedidos').textContent = 
+        formatNumber(metrics.pedidosTotal);
+      
+      document.getElementById('kpi-clientes-nuevos').textContent = 
+        formatNumber(metrics.clientesNuevos);
+      
+      document.getElementById('kpi-clientes-recurrentes').textContent = 
+        formatNumber(metrics.clientesRecurrentes);
+      
+      document.getElementById('kpi-comprobantes-pendientes').textContent = 
+        formatNumber(metrics.comprobantesPendientes);
+      
+      document.getElementById('kpi-boletas').textContent = 
+        formatNumber(metrics.totalBoletas);
+      
+      document.getElementById('kpi-facturas').textContent = 
+        formatNumber(metrics.totalFacturas);
+    }
+    
+    /* =============================================================================
+       RENDERIZAR GRÁFICOS
+       ============================================================================= */
+    function renderCharts(metrics) {
+      // 1. Ventas vs Gastos por Día
+      renderVentasGastosChart(metrics.ventasPorDia, metrics.gastosPorDia);
+      
+      // 2. Ventas Acumuladas
+      renderAcumuladasChart(metrics.ventasAcumuladas);
+      
+      // 3. Delivery
+      renderDeliveryChart(metrics.deliveryPorDia);
+      
+      // 4. Categorías
+      renderCategoriasChart(metrics.ventasPorCategoria);
+      
+      // 5. Distritos
+      renderDistritosChart(metrics.ventasPorDistrito);
+    }
+    
+    /* =============================================================================
+       GRÁFICO: VENTAS VS GASTOS
+       ============================================================================= */
+    function renderVentasGastosChart(ventasPorDia, gastosPorDia) {
+      // Crear mapa de fechas
+      const fechasMap = {};
+      
+      ventasPorDia.forEach(item => {
+        fechasMap[item.fecha] = { ventas: item.valor, gastos: 0 };
+      });
+      
+      gastosPorDia.forEach(item => {
+        if (fechasMap[item.fecha]) {
+          fechasMap[item.fecha].gastos = item.valor;
+        } else {
+          fechasMap[item.fecha] = { ventas: 0, gastos: item.valor };
+        }
+      });
+      
+      // Convertir a array y ordenar
+      const fechas = Object.keys(fechasMap).sort();
+      
+      const dataArray = [['Fecha', 'Ventas', 'Gastos']];
+      fechas.forEach(fecha => {
+        dataArray.push([
+          fecha,
+          fechasMap[fecha].ventas,
+          fechasMap[fecha].gastos
+        ]);
+      });
+      
+      const data = google.visualization.arrayToDataTable(dataArray);
+      
+      const options = {
+        curveType: 'function',
+        legend: { position: 'top' },
+        colors: ['#06d6a0', '#ef476f'],
+        chartArea: { width: '85%', height: '70%' },
+        hAxis: {
+          title: 'Fecha',
+          slantedText: true,
+          slantedTextAngle: 45
+        },
+        vAxis: {
+          title: 'Monto (S/)',
+          format: 'S/ #,###'
+        },
+        animation: {
+          startup: true,
+          duration: 1000,
+          easing: 'out'
+        }
+      };
+      
+      const chart = new google.visualization.LineChart(
+        document.getElementById('chart-ventas-gastos')
+      );
+      
+      chart.draw(data, options);
+    }
+    
+    /* =============================================================================
+       GRÁFICO: VENTAS ACUMULADAS
+       ============================================================================= */
+    function renderAcumuladasChart(ventasAcumuladas) {
+      const dataArray = [['Fecha', 'Acumulado']];
+      
+      ventasAcumuladas.forEach(item => {
+        dataArray.push([item.fecha, item.valor]);
+      });
+      
+      const data = google.visualization.arrayToDataTable(dataArray);
+      
+      const options = {
+        curveType: 'function',
+        legend: { position: 'none' },
+        colors: ['#118ab2'],
+        chartArea: { width: '85%', height: '70%' },
+        hAxis: {
+          title: 'Fecha',
+          slantedText: true,
+          slantedTextAngle: 45
+        },
+        vAxis: {
+          title: 'Ventas Acumuladas (S/)',
+          format: 'S/ #,###'
+        },
+        animation: {
+          startup: true,
+          duration: 1000,
+          easing: 'out'
+        }
+      };
+      
+      const chart = new google.visualization.AreaChart(
+        document.getElementById('chart-acumuladas')
+      );
+      
+      chart.draw(data, options);
+    }
+    
+    /* =============================================================================
+       GRÁFICO: DELIVERY
+       ============================================================================= */
+    function renderDeliveryChart(deliveryPorDia) {
+      const dataArray = [['Fecha', 'Cobrado', 'Pagado']];
+      
+      deliveryPorDia.forEach(item => {
+        dataArray.push([item.fecha, item.cobrado, item.pagado]);
+      });
+      
+      const data = google.visualization.arrayToDataTable(dataArray);
+      
+      const options = {
+        legend: { position: 'top' },
+        colors: ['#ffd23f', '#e94560'],
+        chartArea: { width: '85%', height: '70%' },
+        hAxis: {
+          title: 'Fecha',
+          slantedText: true,
+          slantedTextAngle: 45
+        },
+        vAxis: {
+          title: 'Monto (S/)',
+          format: 'S/ #,###'
+        },
+        animation: {
+          startup: true,
+          duration: 1000,
+          easing: 'out'
+        }
+      };
+      
+      const chart = new google.visualization.ColumnChart(
+        document.getElementById('chart-delivery')
+      );
+      
+      chart.draw(data, options);
+    }
+    
+    /* =============================================================================
+       GRÁFICO: CATEGORÍAS
+       ============================================================================= */
+    function renderCategoriasChart(ventasPorCategoria) {
+      const dataArray = [['Categoría', 'Ventas']];
+      
+      ventasPorCategoria.forEach(item => {
+        dataArray.push([item.nombre, item.valor]);
+      });
+      
+      const data = google.visualization.arrayToDataTable(dataArray);
+      
+      const options = {
+        pieHole: 0.4,
+        legend: { position: 'right' },
+        chartArea: { width: '90%', height: '80%' },
+        colors: ['#e94560', '#06d6a0', '#118ab2', '#ffd23f', '#8b5cf6', '#f97316'],
+        animation: {
+          startup: true,
+          duration: 1000,
+          easing: 'out'
+        }
+      };
+      
+      const chart = new google.visualization.PieChart(
+        document.getElementById('chart-categorias')
+      );
+      
+      chart.draw(data, options);
+    }
+    
+    /* =============================================================================
+       GRÁFICO: DISTRITOS
+       ============================================================================= */
+    function renderDistritosChart(ventasPorDistrito) {
+      const dataArray = [['Distrito', 'Ventas']];
+      
+      // Tomar solo los top 10
+      const top10 = ventasPorDistrito.slice(0, 10);
+      
+      top10.forEach(item => {
+        dataArray.push([item.nombre, item.valor]);
+      });
+      
+      const data = google.visualization.arrayToDataTable(dataArray);
+      
+      const options = {
+        legend: { position: 'none' },
+        colors: ['#1a1a2e'],
+        chartArea: { width: '75%', height: '80%' },
+        hAxis: {
+          title: 'Ventas (S/)',
+          format: 'S/ #,###'
+        },
+        vAxis: {
+          title: 'Distrito'
+        },
+        animation: {
+          startup: true,
+          duration: 1000,
+          easing: 'out'
+        }
+      };
+      
+      const chart = new google.visualization.BarChart(
+        document.getElementById('chart-distritos')
+      );
+      
+      chart.draw(data, options);
+    }
+    
+    /* =============================================================================
+       TABLA: VENDEDORAS
+       ============================================================================= */
+    function renderVendedorasTable(ventasPorVendedora) {
+      const tbody = document.getElementById('table-vendedoras');
+      
+      if (!ventasPorVendedora || ventasPorVendedora.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="text-center" style="padding: 40px;">
+              No hay datos de vendedoras
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      
+      let html = '';
+      ventasPorVendedora.forEach((item, index) => {
+        const rowClass = index === 0 ? 'table-highlight' : '';
+        html += `
+          <tr class="${rowClass}">
+            <td><strong>${item.vendedora}</strong></td>
+            <td class="table-number">S/ ${formatNumber(item.ventas)}</td>
+            <td class="table-number">${formatNumber(item.pedidos)}</td>
+            <td class="table-number">S/ ${formatNumber(item.ticketPromedio)}</td>
+          </tr>
+        `;
+      });
+      
+      tbody.innerHTML = html;
+    }
+    
+    /* =============================================================================
+       UTILIDADES
+       ============================================================================= */
+    function formatNumber(num) {
+      return new Intl.NumberFormat('es-PE', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(num);
+    }
+    
+    function showLoading() {
+      document.getElementById('loadingState').classList.remove('hidden');
+      document.getElementById('errorState').classList.add('hidden');
+      document.getElementById('dashboardContent').classList.add('hidden');
+    }
+    
+    function hideLoading() {
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('errorState').classList.add('hidden');
+      document.getElementById('dashboardContent').classList.remove('hidden');
+    }
+    
+    function showError(message) {
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('dashboardContent').classList.add('hidden');
+      document.getElementById('errorState').classList.remove('hidden');
+      document.getElementById('errorMessage').textContent = message;
+    }
+    
+    /* =============================================================================
+       RESPONSIVE CHARTS
+       ============================================================================= */
+    window.addEventListener('resize', function() {
+      if (globalData) {
+        renderCharts(globalData.metrics);
+      }
+    });
+  </script>
+  
 </body>
 </html>
