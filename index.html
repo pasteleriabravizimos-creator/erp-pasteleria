@@ -5,639 +5,456 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>BRAVIZIMO'S | Dashboard Financiero</title>
 
-  <!-- Tailwind (CDN) -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
-    body { background: #f6f7fb; }
-    .glass {
-      background: radial-gradient(1200px 600px at 10% 10%, rgba(255,255,255,0.18), rgba(255,255,255,0.02));
-      backdrop-filter: blur(10px);
+    :root{
+      --bg:#0b1020;
+      --panel:#0f1730;
+      --card:#ffffff;
+      --muted:#96a0b5;
+      --text:#0d1220;
+      --line:#e8edf7;
+      --shadow:0 18px 40px rgba(2,10,30,.10);
+      --radius:16px;
     }
-    .card { box-shadow: 0 12px 30px rgba(18, 28, 45, 0.08); }
-    .tab-active { background:#111827; color:#fff; }
-    .tab { transition: .15s ease; }
-    .mono { font-variant-numeric: tabular-nums; }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,Segoe UI,Arial;
+      background:linear-gradient(180deg,var(--bg) 0%, #111a33 36%, #f3f6fb 36%, #f3f6fb 100%);
+      color:#111;
+    }
+    .topbar{
+      position:sticky; top:0;
+      background:linear-gradient(180deg, rgba(11,16,32,.95), rgba(15,23,48,.80));
+      backdrop-filter: blur(10px);
+      padding:18px 20px;
+      z-index:10;
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .topbar-inner{
+      max-width:1200px;
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+    .brand{color:#fff}
+    .brand .title{font-weight:800; letter-spacing:.3px}
+    .brand .sub{font-size:12px; color:rgba(255,255,255,.75); margin-top:4px}
+
+    .controls{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    select,input,button{
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      padding:10px 12px;
+      outline:none;
+      font-weight:600;
+    }
+    input[type="month"], input[type="date"]{ color:#fff; }
+    button{
+      background:#fff; color:#0b1020;
+      border:1px solid rgba(255,255,255,.18);
+      cursor:pointer;
+      padding:10px 14px;
+    }
+    button:hover{opacity:.94}
+
+    .wrap{max-width:1200px; margin:0 auto; padding:18px 20px 60px;}
+    .error{
+      margin-top:14px;
+      border-radius:14px;
+      padding:12px 14px;
+      background:#ffe7e7;
+      color:#7a1313;
+      border:1px solid #ffc6c6;
+      display:none;
+      font-weight:700;
+    }
+    .tabs{
+      margin-top:16px;
+      display:flex; gap:10px; flex-wrap:wrap;
+    }
+    .tab{
+      border:1px solid rgba(255,255,255,.18);
+      background:#fff;
+      padding:9px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:800;
+      color:#0b1020;
+      box-shadow: 0 8px 20px rgba(0,0,0,.04);
+    }
+    .tab.active{
+      background:#0b1020;
+      color:#fff;
+      border-color:#0b1020;
+    }
+
+    .kpis{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0,1fr));
+      gap:14px;
+    }
+    @media (max-width: 980px){ .kpis{grid-template-columns:repeat(2,1fr);} }
+    @media (max-width: 520px){ .kpis{grid-template-columns:1fr;} }
+
+    .kpi{
+      background:#fff;
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px 14px;
+      border:1px solid var(--line);
+    }
+    .kpi .label{font-size:12px; color:#6c7892; font-weight:700}
+    .kpi .value{font-size:22px; font-weight:900; margin-top:8px}
+
+    .grid2{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap:14px;
+    }
+    @media (max-width: 980px){ .grid2{grid-template-columns:1fr;} }
+
+    .card{
+      background:#fff;
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px 14px;
+      border:1px solid var(--line);
+      min-height: 320px;
+    }
+    .card h3{margin:0 0 10px; font-size:16px}
+    .muted{color:#6c7892; font-size:12px; font-weight:700}
+
+    .section{display:none; margin-top:14px;}
+    .section.active{display:block;}
+
+    table{width:100%; border-collapse:collapse; font-size:13px;}
+    th,td{padding:10px 8px; border-bottom:1px solid #eef2fb; text-align:left;}
+    th{color:#6c7892; font-size:12px; text-transform:uppercase; letter-spacing:.4px;}
+    .right{text-align:right;}
   </style>
 </head>
 
-<body class="min-h-screen">
-  <header class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 text-white">
-    <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col gap-3">
-      <div class="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <div class="text-xl font-bold tracking-tight">BRAVIZIMO'S | Dashboard Financiero</div>
-          <div class="text-sm text-slate-200">Sincronizado con Google Sheets (Apps Script)</div>
-        </div>
-
-        <div class="flex items-center gap-2 flex-wrap">
-          <div class="glass rounded-xl px-3 py-2 flex items-center gap-2">
-            <span class="text-xs text-slate-200">Modo</span>
-            <select id="mode" class="bg-transparent text-white outline-none text-sm">
-              <option value="month">Mes</option>
-              <option value="range">Rango</option>
-            </select>
-          </div>
-
-          <div id="monthWrap" class="glass rounded-xl px-3 py-2 flex items-center gap-2">
-            <span class="text-xs text-slate-200">Mes</span>
-            <input id="month" type="month" class="bg-transparent text-white outline-none text-sm" />
-          </div>
-
-          <div id="rangeWrap" class="glass rounded-xl px-3 py-2 items-center gap-2 hidden">
-            <span class="text-xs text-slate-200">Desde</span>
-            <input id="from" type="date" class="bg-transparent text-white outline-none text-sm" />
-            <span class="text-xs text-slate-200 ml-2">Hasta</span>
-            <input id="to" type="date" class="bg-transparent text-white outline-none text-sm" />
-          </div>
-
-          <button id="btnReload" class="bg-white text-slate-900 font-semibold rounded-xl px-4 py-2 hover:bg-slate-100">
-            Actualizar
-          </button>
-        </div>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="title">BRAVIZIMO'S | Dashboard Financiero</div>
+        <div class="sub">Sincronizado con Google Sheets (Apps Script)</div>
       </div>
 
-      <div id="errorBox" class="hidden bg-red-50 text-red-700 border border-red-200 rounded-xl px-4 py-3 text-sm"></div>
+      <div class="controls">
+        <select id="mode">
+          <option value="month">Mes</option>
+          <option value="range">Rango</option>
+        </select>
+
+        <input id="month" type="month" />
+        <input id="from" type="date" style="display:none" />
+        <input id="to" type="date" style="display:none" />
+
+        <button id="btn">Actualizar</button>
+      </div>
     </div>
-  </header>
+  </div>
 
-  <main class="max-w-7xl mx-auto px-4 py-6">
-    <!-- KPIs -->
-    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-white rounded-2xl p-4 card">
-        <div class="text-xs text-slate-500">Ventas totales</div>
-        <div id="k_ventas" class="text-2xl font-bold mono">—</div>
-      </div>
-      <div class="bg-white rounded-2xl p-4 card">
-        <div class="text-xs text-slate-500">Gastos totales</div>
-        <div id="k_gastos" class="text-2xl font-bold mono">—</div>
-      </div>
-      <div class="bg-white rounded-2xl p-4 card">
-        <div class="text-xs text-slate-500">Utilidad</div>
-        <div id="k_utilidad" class="text-2xl font-bold mono">—</div>
-      </div>
-      <div class="bg-white rounded-2xl p-4 card">
-        <div class="text-xs text-slate-500">Saldo pendiente</div>
-        <div id="k_saldo" class="text-2xl font-bold mono">—</div>
-      </div>
+  <div class="wrap">
+    <div id="err" class="error"></div>
 
-      <div class="bg-white rounded-2xl p-4 card">
-        <div class="text-xs text-slate-500">Delivery cobrado</div>
-        <div id="k_delCob" class="text-2xl font-bold mono">—</div>
-      </div>
-      <div class="bg-white rounded-2xl p-4 card">
-        <div class="text-xs text-slate-500">Costo delivery</div>
-        <div id="k_delCost" class="text-2xl font-bold mono">—</div>
-      </div>
-      <div class="bg-white rounded-2xl p-4 card">
-        <div class="text-xs text-slate-500">Margen delivery</div>
-        <div id="k_delMarg" class="text-2xl font-bold mono">—</div>
-      </div>
-      <div class="bg-white rounded-2xl p-4 card">
-        <div class="text-xs text-slate-500">Clientes (total)</div>
-        <div id="k_clientes" class="text-2xl font-bold mono">—</div>
-      </div>
+    <div class="tabs">
+      <div class="tab active" data-tab="finanzas">Finanzas</div>
+      <div class="tab" data-tab="servicios">Servicios</div>
+    </div>
 
-      <div class="bg-white rounded-2xl p-4 card">
-        <div class="text-xs text-slate-500">Promedio diario (hasta hoy)</div>
-        <div id="k_prom" class="text-2xl font-bold mono">—</div>
-      </div>
-      <div class="bg-white rounded-2xl p-4 card">
-        <div class="text-xs text-slate-500">Proyección mensual (prom * 30)</div>
-        <div id="k_proj" class="text-2xl font-bold mono">—</div>
-      </div>
-      <div class="bg-white rounded-2xl p-4 card">
-        <div class="text-xs text-slate-500">Boletas / Facturas</div>
-        <div id="k_bf" class="text-2xl font-bold mono">—</div>
-      </div>
-      <div class="bg-white rounded-2xl p-4 card">
-        <div class="text-xs text-slate-500">Comprobantes faltantes</div>
-        <div id="k_falt" class="text-2xl font-bold mono">—</div>
-      </div>
-    </section>
+    <div class="kpis" id="kpis"></div>
 
-    <!-- Tabs -->
-    <section class="mt-6">
-      <div class="flex flex-wrap gap-2">
-        <button class="tab tab-active rounded-full px-4 py-2 text-sm font-semibold" data-tab="finanzas">Finanzas</button>
-        <button class="tab rounded-full px-4 py-2 text-sm font-semibold bg-white" data-tab="alertas">Alertas</button>
-        <button class="tab rounded-full px-4 py-2 text-sm font-semibold bg-white" data-tab="distritos">Distritos</button>
-        <button class="tab rounded-full px-4 py-2 text-sm font-semibold bg-white" data-tab="vendedoras">Vendedoras</button>
-        <button class="tab rounded-full px-4 py-2 text-sm font-semibold bg-white" data-tab="delivery">Delivery</button>
-        <button class="tab rounded-full px-4 py-2 text-sm font-semibold bg-white" data-tab="productos">Productos</button>
-        <button class="tab rounded-full px-4 py-2 text-sm font-semibold bg-white" data-tab="clientes">Clientes</button>
-        <button class="tab rounded-full px-4 py-2 text-sm font-semibold bg-white" data-tab="gastos">Gastos</button>
-        <button class="tab rounded-full px-4 py-2 text-sm font-semibold bg-white" data-tab="medios">Medios de pago</button>
-        <button class="tab rounded-full px-4 py-2 text-sm font-semibold bg-white" data-tab="servicios">Servicios</button>
-      </div>
-    </section>
-
-    <!-- Panels -->
-    <section class="mt-4">
-      <!-- FINANZAS -->
-      <div class="panel" id="panel-finanzas">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="bg-white rounded-2xl p-4 card">
-            <div class="font-bold">Ventas vs Gastos (por día) + Saldo</div>
-            <div class="text-xs text-slate-500 mb-2">Según fecha de emisión (ventas) y fecha de pago (gastos).</div>
-            <canvas id="chartVG" height="130"></canvas>
-          </div>
-          <div class="bg-white rounded-2xl p-4 card">
-            <div class="font-bold">Acumulado de ventas</div>
-            <div class="text-xs text-slate-500 mb-2">Acumulado del período seleccionado.</div>
-            <canvas id="chartAcc" height="130"></canvas>
-          </div>
+    <!-- FINANZAS -->
+    <div class="section active" id="sec-finanzas">
+      <div class="grid2">
+        <div class="card">
+          <h3>Ventas vs Gastos (por día) + Saldo</h3>
+          <div class="muted">Basado en fecha de emisión (ventas) y fecha de pago (gastos).</div>
+          <canvas id="ch1" height="140"></canvas>
         </div>
-        <div class="text-xs text-slate-500 mt-2" id="updatedAt"></div>
-      </div>
-
-      <!-- ALERTAS -->
-      <div class="panel hidden" id="panel-alertas">
-        <div class="bg-white rounded-2xl p-4 card">
-          <div class="font-bold mb-2">Alertas clave</div>
-          <div id="alertList" class="text-sm text-slate-700 space-y-2"></div>
+        <div class="card">
+          <h3>Acumulado de ventas</h3>
+          <div class="muted">Suma progresiva por día.</div>
+          <canvas id="ch2" height="140"></canvas>
         </div>
       </div>
+    </div>
 
-      <!-- DISTRITOS -->
-      <div class="panel hidden" id="panel-distritos">
-        <div class="bg-white rounded-2xl p-4 card">
-          <div class="font-bold mb-2">Ranking por distrito (monto y cantidad)</div>
-          <div class="overflow-auto">
-            <table class="min-w-full text-sm">
-              <thead class="text-slate-500">
+    <!-- SERVICIOS -->
+    <div class="section" id="sec-servicios">
+      <div class="grid2">
+        <div class="card">
+          <h3>Servicios: Pagado vs Pendiente (por día)</h3>
+          <div class="muted">Se toma TIPO / FECHA / MONTO / ESTADO.</div>
+          <canvas id="chServ" height="140"></canvas>
+        </div>
+        <div class="card">
+          <h3>Servicios (lista)</h3>
+          <div class="muted">Hasta 200 filas del periodo.</div>
+          <div style="max-height:260px; overflow:auto; margin-top:10px;">
+            <table>
+              <thead>
                 <tr>
-                  <th class="text-left py-2">Distrito</th>
-                  <th class="text-right py-2">Cantidad</th>
-                  <th class="text-right py-2">Monto</th>
+                  <th>Tipo</th>
+                  <th>Fecha</th>
+                  <th class="right">Monto</th>
+                  <th>Estado</th>
                 </tr>
               </thead>
-              <tbody id="tbDistritos"></tbody>
+              <tbody id="tbServ"></tbody>
             </table>
           </div>
+          <div class="muted" id="servErr" style="margin-top:10px;"></div>
         </div>
       </div>
+    </div>
 
-      <!-- VENDEDORAS -->
-      <div class="panel hidden" id="panel-vendedoras">
-        <div class="bg-white rounded-2xl p-4 card">
-          <div class="font-bold mb-2">Vendedoras por día (ventas, saldo y pedidos)</div>
-          <div class="overflow-auto max-h-[520px]">
-            <table class="min-w-full text-sm">
-              <thead class="text-slate-500">
-                <tr>
-                  <th class="text-left py-2">Fecha</th>
-                  <th class="text-left py-2">Vendedora</th>
-                  <th class="text-right py-2">Ventas</th>
-                  <th class="text-right py-2">Saldo</th>
-                  <th class="text-right py-2">Pedidos</th>
-                </tr>
-              </thead>
-              <tbody id="tbVendedoras"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- DELIVERY -->
-      <div class="panel hidden" id="panel-delivery">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="bg-white rounded-2xl p-4 card">
-            <div class="font-bold mb-2">Delivery por día</div>
-            <canvas id="chartDelDia" height="140"></canvas>
-            <div class="text-xs text-slate-500 mt-2" id="recojoTxt"></div>
-          </div>
-          <div class="bg-white rounded-2xl p-4 card">
-            <div class="font-bold mb-2">Delivery por motorizado</div>
-            <div class="overflow-auto max-h-[520px]">
-              <table class="min-w-full text-sm">
-                <thead class="text-slate-500">
-                  <tr>
-                    <th class="text-left py-2">Motorizado</th>
-                    <th class="text-right py-2">Cobrado</th>
-                    <th class="text-right py-2">Costo</th>
-                    <th class="text-right py-2">Entregas</th>
-                  </tr>
-                </thead>
-                <tbody id="tbMotorizados"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PRODUCTOS -->
-      <div class="panel hidden" id="panel-productos">
-        <div class="bg-white rounded-2xl p-4 card">
-          <div class="font-bold mb-2">Top 20 productos (según fecha de entrega)</div>
-          <div class="overflow-auto max-h-[520px]">
-            <table class="min-w-full text-sm">
-              <thead class="text-slate-500">
-                <tr>
-                  <th class="text-left py-2">Producto</th>
-                  <th class="text-right py-2">Cantidad</th>
-                  <th class="text-right py-2">Monto</th>
-                </tr>
-              </thead>
-              <tbody id="tbProductos"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- CLIENTES -->
-      <div class="panel hidden" id="panel-clientes">
-        <div class="bg-white rounded-2xl p-4 card">
-          <div class="font-bold mb-2">Clientes del período (hasta 200)</div>
-          <div class="text-xs text-slate-500 mb-2">Para seguimiento: nombre, celular, última compra.</div>
-          <div class="overflow-auto max-h-[520px]">
-            <table class="min-w-full text-sm">
-              <thead class="text-slate-500">
-                <tr>
-                  <th class="text-left py-2">Cliente</th>
-                  <th class="text-left py-2">Celular</th>
-                  <th class="text-left py-2">Doc</th>
-                  <th class="text-left py-2">Última compra</th>
-                </tr>
-              </thead>
-              <tbody id="tbClientes"></tbody>
-            </table>
-          </div>
-          <div class="text-xs text-slate-500 mt-2" id="clientesCount"></div>
-        </div>
-      </div>
-
-      <!-- GASTOS -->
-      <div class="panel hidden" id="panel-gastos">
-        <div class="bg-white rounded-2xl p-4 card">
-          <div class="font-bold mb-2">Gastos por categoría (monto y cantidad)</div>
-          <div class="overflow-auto">
-            <table class="min-w-full text-sm">
-              <thead class="text-slate-500">
-                <tr>
-                  <th class="text-left py-2">Categoría</th>
-                  <th class="text-right py-2">Cantidad</th>
-                  <th class="text-right py-2">Monto</th>
-                </tr>
-              </thead>
-              <tbody id="tbGastos"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- MEDIOS DE PAGO -->
-      <div class="panel hidden" id="panel-medios">
-        <div class="bg-white rounded-2xl p-4 card">
-          <div class="font-bold mb-2">Cuentas destino (1er pago + 2do pago)</div>
-          <div class="text-xs text-slate-500 mb-2">Suma por cuenta según “Cuenta destino” y “Cuenta destino2”.</div>
-          <div class="overflow-auto">
-            <table class="min-w-full text-sm">
-              <thead class="text-slate-500">
-                <tr>
-                  <th class="text-left py-2">Cuenta</th>
-                  <th class="text-right py-2">Monto</th>
-                </tr>
-              </thead>
-              <tbody id="tbMedios"></tbody>
-            </table>
-          </div>
-          <div class="text-xs text-slate-500 mt-2" id="mediosTotal"></div>
-        </div>
-      </div>
-
-      <!-- SERVICIOS -->
-      <div class="panel hidden" id="panel-servicios">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="bg-white rounded-2xl p-4 card">
-            <div class="font-bold mb-2">Servicios (KPI)</div>
-            <div class="text-sm text-slate-700 space-y-2" id="servKpi"></div>
-          </div>
-          <div class="bg-white rounded-2xl p-4 card">
-            <div class="font-bold mb-2">Servicios (lista)</div>
-            <div class="overflow-auto max-h-[520px]">
-              <table class="min-w-full text-sm">
-                <thead class="text-slate-500">
-                  <tr>
-                    <th class="text-left py-2">Servicio</th>
-                    <th class="text-left py-2">Fecha</th>
-                    <th class="text-right py-2">Monto</th>
-                    <th class="text-left py-2">Estado</th>
-                  </tr>
-                </thead>
-                <tbody id="tbServicios"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </section>
-  </main>
+  </div>
 
 <script>
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzxZ-2pTE5ltSDXXVn9Wjd9USG1FomaTScLuM-wDQMuKiu92mzwGQhnkL0mZYZF9AtI/exec";
+  // ✅ TU WEB APP
+  const API_URL = "https://script.google.com/macros/s/AKfycbzxZ-2pTE5ltSDXXVn9Wjd9USG1FomaTScLuM-wDQMuKiu92mzwGQhnkL0mZYZF9AtI/exec";
 
-  // Charts
-  let chartVG = null, chartAcc = null, chartDel = null;
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => new Intl.NumberFormat("es-PE", { style:"currency", currency:"PEN" }).format(Number(n||0));
+  const fmtN = (n) => new Intl.NumberFormat("es-PE").format(Number(n||0));
 
-  // UI init
-  const modeEl = document.getElementById("mode");
-  const monthEl = document.getElementById("month");
-  const fromEl = document.getElementById("from");
-  const toEl = document.getElementById("to");
-  const monthWrap = document.getElementById("monthWrap");
-  const rangeWrap = document.getElementById("rangeWrap");
+  let ch1, ch2, chServ;
 
-  const now = new Date();
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth()+1).padStart(2,"0");
-  monthEl.value = `${yyyy}-${mm}`;
+  function setError(msg){
+    const el = $("err");
+    if(!msg){ el.style.display="none"; el.textContent=""; return; }
+    el.style.display="block";
+    el.textContent = msg;
+  }
 
-  modeEl.addEventListener("change", () => {
-    const m = modeEl.value;
-    if (m === "range") {
-      monthWrap.classList.add("hidden");
-      rangeWrap.classList.remove("hidden");
-      rangeWrap.classList.add("flex");
-      // default rango: 1..hoy del mes
-      const d1 = `${yyyy}-${mm}-01`;
-      const d2 = `${yyyy}-${mm}-${String(now.getDate()).padStart(2,"0")}`;
-      fromEl.value = d1;
-      toEl.value = d2;
-    } else {
-      rangeWrap.classList.add("hidden");
-      rangeWrap.classList.remove("flex");
-      monthWrap.classList.remove("hidden");
+  function setModeUI(){
+    const mode = $("mode").value;
+    $("month").style.display = mode === "month" ? "inline-flex" : "none";
+    $("from").style.display = mode === "range" ? "inline-flex" : "none";
+    $("to").style.display = mode === "range" ? "inline-flex" : "none";
+  }
+
+  function buildParams(){
+    const mode = $("mode").value;
+    const p = new URLSearchParams();
+    p.set("mode", mode);
+
+    if(mode === "month"){
+      // input month devuelve YYYY-MM
+      const m = $("month").value;
+      if(m) p.set("month", m);
+    }else{
+      const from = $("from").value;
+      const to = $("to").value;
+      if(from) p.set("from", from);
+      if(to) p.set("to", to);
     }
-  });
+    return p;
+  }
 
-  // Tabs
-  document.querySelectorAll(".tab").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".tab").forEach(b => b.classList.remove("tab-active"));
-      btn.classList.add("tab-active");
-
-      const tab = btn.dataset.tab;
-      document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
-      document.getElementById("panel-" + tab).classList.remove("hidden");
-    });
-  });
-
-  // JSONP fetch (sin CORS)
-  function fetchJSONP(url) {
+  // ✅ JSONP loader (evita CORS + evita error HTML)
+  function fetchJSONP(url){
     return new Promise((resolve, reject) => {
-      const cbName = "jsonp_cb_" + Math.random().toString(36).slice(2);
+      const cbName = "cb_" + Math.random().toString(36).slice(2);
       const script = document.createElement("script");
-      const sep = url.includes("?") ? "&" : "?";
-      script.src = `${url}${sep}callback=${cbName}`;
 
       window[cbName] = (data) => {
+        cleanup();
         resolve(data);
-        cleanup();
       };
 
-      script.onerror = () => {
-        reject(new Error("No se pudo cargar data (script error)."));
-        cleanup();
-      };
-
-      function cleanup() {
-        delete window[cbName];
-        script.remove();
+      function cleanup(){
+        if(script && script.parentNode) script.parentNode.removeChild(script);
+        try { delete window[cbName]; } catch(e){ window[cbName] = undefined; }
       }
 
+      script.onerror = () => {
+        cleanup();
+        reject(new Error("No se pudo cargar Apps Script (script error / permisos / URL)."));
+      };
+
+      const sep = url.includes("?") ? "&" : "?";
+      script.src = url + sep + "callback=" + cbName;
       document.body.appendChild(script);
     });
   }
 
-  function money(n){ return "S/ " + (Number(n||0)).toLocaleString("es-PE", {minimumFractionDigits:2, maximumFractionDigits:2}); }
-  function num(n){ return (Number(n||0)).toLocaleString("es-PE"); }
+  function renderKPIs(data){
+    const k = data.kpis || {};
+    const cards = [
+      ["Ventas totales", fmt(k.ventasTotales)],
+      ["Gastos totales", fmt(k.gastosTotales)],
+      ["Utilidad", fmt(k.utilidad)],
+      ["Saldo pendiente", fmt(k.saldoPendiente)],
+      ["Delivery cobrado", fmt(k.deliveryCobrado)],
+      ["Costo delivery", fmt(k.costoDelivery)],
+      ["Margen delivery", fmt(k.margenDelivery)],
+      ["Clientes (total)", fmtN(k.clientesTotal)],
+      ["Promedio diario (hasta hoy)", fmt(k.promedioDiario)],
+      ["Proyección mensual (prom * 30)", fmt(k.proyeccionMensual)],
+      ["Boletas / Facturas", `${fmtN(k.boletasFacturas?.boletas||0)} / ${fmtN(k.boletasFacturas?.facturas||0)}`],
+      ["Comprobantes faltantes", fmtN(k.boletasFacturas?.sinComprobante||0)],
+    ];
 
-  function setError(msg){
-    const box = document.getElementById("errorBox");
-    if (!msg) { box.classList.add("hidden"); box.textContent = ""; return; }
-    box.classList.remove("hidden");
-    box.textContent = msg;
+    $("kpis").innerHTML = cards.map(([label,value]) => `
+      <div class="kpi">
+        <div class="label">${label}</div>
+        <div class="value">${value}</div>
+      </div>
+    `).join("");
   }
 
-  function buildURL(){
-    const mode = modeEl.value;
-    const u = new URL(APPS_SCRIPT_URL);
-    u.searchParams.set("mode", mode);
+  function renderCharts(data){
+    const rows = data.series?.daily || [];
+    const labels = rows.map(r => r.date);
+    const ventas = rows.map(r => r.ventas);
+    const gastos = rows.map(r => r.gastos);
+    const saldo  = rows.map(r => r.saldo);
+    const acumulado = rows.map(r => r.acumulado);
 
-    if (mode === "range") {
-      u.searchParams.set("from", fromEl.value);
-      u.searchParams.set("to", toEl.value);
-    } else {
-      u.searchParams.set("month", monthEl.value); // YYYY-MM
-    }
-    return u.toString();
+    if(ch1) ch1.destroy();
+    if(ch2) ch2.destroy();
+
+    ch1 = new Chart($("ch1"),{
+      type:"line",
+      data:{
+        labels,
+        datasets:[
+          { label:"Ventas", data:ventas, tension:.25 },
+          { label:"Gastos", data:gastos, tension:.25 },
+          { label:"Saldo pendiente", data:saldo, tension:.25 }
+        ]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{ legend:{ position:"bottom" } },
+        scales:{ x:{ ticks:{ maxRotation:50, minRotation:50 } } }
+      }
+    });
+
+    ch2 = new Chart($("ch2"),{
+      type:"line",
+      data:{
+        labels,
+        datasets:[
+          { label:"Acumulado", data:acumulado, tension:.25 }
+        ]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{ legend:{ position:"bottom" } },
+        scales:{ x:{ ticks:{ maxRotation:50, minRotation:50 } } }
+      }
+    });
+  }
+
+  function renderServicios(data){
+    const sec = data.sections?.servicios || {};
+    const err = sec.error || "";
+    $("servErr").textContent = err ? ("Aviso servicios: " + err) : "";
+
+    // tabla
+    const list = sec.lista || [];
+    $("tbServ").innerHTML = list.map(r => `
+      <tr>
+        <td>${(r.servicio||"")}</td>
+        <td>${(r.fecha||"")}</td>
+        <td class="right">${fmt(r.monto||0)}</td>
+        <td>${(r.estado||"")}</td>
+      </tr>
+    `).join("");
+
+    // grafico
+    const daily = sec.daily || [];
+    const labels = daily.map(d => d.date);
+    const pagado = daily.map(d => d.pagado);
+    const pendiente = daily.map(d => d.pendiente);
+
+    if(chServ) chServ.destroy();
+    chServ = new Chart($("chServ"),{
+      type:"bar",
+      data:{
+        labels,
+        datasets:[
+          { label:"Pagado", data: pagado },
+          { label:"Pendiente", data: pendiente }
+        ]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{ legend:{ position:"bottom" } },
+        scales:{
+          x:{ stacked:true, ticks:{ maxRotation:50, minRotation:50 } },
+          y:{ stacked:true }
+        }
+      }
+    });
+  }
+
+  function setTab(tab){
+    document.querySelectorAll(".tab").forEach(t=>{
+      t.classList.toggle("active", t.dataset.tab === tab);
+    });
+    document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+    $("sec-"+tab).classList.add("active");
   }
 
   async function load(){
     setError("");
-    const url = buildURL();
+    const params = buildParams();
+    const url = API_URL + "?" + params.toString();
 
-    try {
+    try{
       const data = await fetchJSONP(url);
-
-      if (!data || data.ok !== true) {
-        setError("Error Apps Script: " + (data?.error || "desconocido"));
+      if(!data || data.ok !== true){
+        setError("Error Apps Script: " + (data?.error || "Respuesta inválida"));
         return;
       }
+      renderKPIs(data);
+      renderCharts(data);
+      renderServicios(data);
 
-      // KPIs
-      const k = data.kpis;
-      document.getElementById("k_ventas").textContent = money(k.ventasTotales);
-      document.getElementById("k_gastos").textContent = money(k.gastosTotales);
-      document.getElementById("k_utilidad").textContent = money(k.utilidad);
-      document.getElementById("k_saldo").textContent = money(k.saldoPendiente);
-
-      document.getElementById("k_delCob").textContent = money(k.deliveryCobrado);
-      document.getElementById("k_delCost").textContent = money(k.costoDelivery);
-      document.getElementById("k_delMarg").textContent = money(k.margenDelivery);
-      document.getElementById("k_clientes").textContent = num(k.clientesTotal);
-
-      document.getElementById("k_prom").textContent = money(k.promedioDiario);
-      document.getElementById("k_proj").textContent = money(k.proyeccionMensual);
-
-      document.getElementById("k_bf").textContent = `${k.boletasFacturas.boletas} / ${k.boletasFacturas.facturas}`;
-      document.getElementById("k_falt").textContent = num(k.boletasFacturas.sinComprobante);
-
-      document.getElementById("updatedAt").textContent = "Actualizado: " + data.generatedAt;
-
-      // Alertas
-      const a = data.sections.alertas;
-      document.getElementById("alertList").innerHTML = `
-        <div>📌 Comprobantes faltantes: <b>${a.comprobantesFaltantes}</b></div>
-        <div>💸 Saldo pendiente: <b>${money(a.saldoPendiente)}</b></div>
-        <div>🧾 Servicios pendientes: <b>${a.serviciosPendientes}</b></div>
-      `;
-
-      // Charts Finanzas
-      const daily = data.series.daily;
-      const labels = daily.map(x => x.date);
-      const ventas = daily.map(x => x.ventas);
-      const gastos = daily.map(x => x.gastos);
-      const saldo = daily.map(x => x.saldo);
-      const acc = daily.map(x => x.acumulado);
-
-      if (chartVG) chartVG.destroy();
-      chartVG = new Chart(document.getElementById("chartVG"), {
-        type: "line",
-        data: {
-          labels,
-          datasets: [
-            { label: "Ventas", data: ventas },
-            { label: "Gastos", data: gastos },
-            { label: "Saldo pendiente", data: saldo }
-          ]
-        },
-        options: {
-          responsive: true,
-          interaction: { mode: "index", intersect: false },
-          scales: { x: { ticks: { maxRotation: 45, minRotation: 45 } } }
-        }
-      });
-
-      if (chartAcc) chartAcc.destroy();
-      chartAcc = new Chart(document.getElementById("chartAcc"), {
-        type: "line",
-        data: {
-          labels,
-          datasets: [{ label: "Acumulado", data: acc }]
-        },
-        options: {
-          responsive: true,
-          interaction: { mode: "index", intersect: false },
-          scales: { x: { ticks: { maxRotation: 45, minRotation: 45 } } }
-        }
-      });
-
-      // Distritos
-      const dist = data.sections.distritos;
-      document.getElementById("tbDistritos").innerHTML = dist.map(r => `
-        <tr class="border-t">
-          <td class="py-2">${r.distrito}</td>
-          <td class="py-2 text-right mono">${r.cantidad}</td>
-          <td class="py-2 text-right mono">${money(r.monto)}</td>
-        </tr>
-      `).join("");
-
-      // Vendedoras
-      const vend = data.sections.vendedorasDia;
-      document.getElementById("tbVendedoras").innerHTML = vend.map(r => `
-        <tr class="border-t">
-          <td class="py-2 mono">${r.date}</td>
-          <td class="py-2">${r.vendedora}</td>
-          <td class="py-2 text-right mono">${money(r.ventas)}</td>
-          <td class="py-2 text-right mono">${money(r.saldo)}</td>
-          <td class="py-2 text-right mono">${r.pedidos}</td>
-        </tr>
-      `).join("");
-
-      // Delivery
-      const delDia = data.sections.delivery.porDia;
-      const dl = delDia.map(x => x.date);
-      const dc = delDia.map(x => x.deliveryCobrado);
-      const dcost = delDia.map(x => x.costoDelivery);
-
-      if (chartDel) chartDel.destroy();
-      chartDel = new Chart(document.getElementById("chartDelDia"), {
-        type: "bar",
-        data: { labels: dl, datasets: [
-          { label:"Delivery cobrado", data: dc },
-          { label:"Costo delivery", data: dcost },
-        ]},
-        options: {
-          responsive:true,
-          scales:{ x:{ ticks:{ maxRotation:45, minRotation:45 } } }
-        }
-      });
-
-      const rec = data.sections.delivery.recojoEnTienda;
-      document.getElementById("recojoTxt").textContent =
-        `Recojo en tienda: ${rec.recojos} de ${rec.totalPedidos} pedidos (delivery cobrado = 0).`;
-
-      const mot = data.sections.delivery.porMotorizado;
-      document.getElementById("tbMotorizados").innerHTML = mot.map(r => `
-        <tr class="border-t">
-          <td class="py-2">${r.motorizado}</td>
-          <td class="py-2 text-right mono">${money(r.deliveryCobrado)}</td>
-          <td class="py-2 text-right mono">${money(r.costoDelivery)}</td>
-          <td class="py-2 text-right mono">${r.entregas}</td>
-        </tr>
-      `).join("");
-
-      // Productos
-      const top = data.sections.productos.top;
-      document.getElementById("tbProductos").innerHTML = top.map(r => `
-        <tr class="border-t">
-          <td class="py-2">${r.producto}</td>
-          <td class="py-2 text-right mono">${r.cantidad}</td>
-          <td class="py-2 text-right mono">${money(r.monto)}</td>
-        </tr>
-      `).join("");
-
-      // Clientes
-      const cl = data.sections.clientes;
-      document.getElementById("clientesCount").textContent = `Clientes en el período: ${cl.count}`;
-      document.getElementById("tbClientes").innerHTML = cl.list.map(r => `
-        <tr class="border-t">
-          <td class="py-2">${r.cliente || ""}</td>
-          <td class="py-2 mono">${r.celular || ""}</td>
-          <td class="py-2 mono">${r.doc || ""}</td>
-          <td class="py-2 mono">${r.ultimaCompra || ""}</td>
-        </tr>
-      `).join("");
-
-      // Gastos
-      const gp = data.sections.gastos.porCategoria;
-      document.getElementById("tbGastos").innerHTML = gp.map(r => `
-        <tr class="border-t">
-          <td class="py-2">${r.categoria}</td>
-          <td class="py-2 text-right mono">${r.cantidad}</td>
-          <td class="py-2 text-right mono">${money(r.monto)}</td>
-        </tr>
-      `).join("");
-
-      // Medios de pago
-      const mp = data.sections.mediosPago;
-      document.getElementById("mediosTotal").textContent = `Total pagos registrados: ${money(mp.total)}`;
-      document.getElementById("tbMedios").innerHTML = mp.porCuenta.map(r => `
-        <tr class="border-t">
-          <td class="py-2">${r.cuenta}</td>
-          <td class="py-2 text-right mono">${money(r.monto)}</td>
-        </tr>
-      `).join("");
-
-      // Servicios
-      const sk = data.sections.servicios.kpi;
-      document.getElementById("servKpi").innerHTML = `
-        <div>Total: <b>${money(sk.total)}</b></div>
-        <div>Pagados: <b>${money(sk.pagados)}</b></div>
-        <div>Pendientes: <b>${money(sk.pendientes)}</b> (<b>${sk.pendientesCount}</b> items)</div>
-      `;
-
-      document.getElementById("tbServicios").innerHTML = data.sections.servicios.lista.map(r => `
-        <tr class="border-t">
-          <td class="py-2">${r.servicio || ""}</td>
-          <td class="py-2 mono">${r.fecha || ""}</td>
-          <td class="py-2 text-right mono">${money(r.monto)}</td>
-          <td class="py-2">${r.estado || ""}</td>
-        </tr>
-      `).join("");
-
-    } catch (err) {
-      setError("No se pudo cargar data: " + (err?.message || err));
+    }catch(err){
+      setError("No se pudo sincronizar: " + (err?.message || String(err)));
     }
   }
 
-  document.getElementById("btnReload").addEventListener("click", load);
+  // init
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth()+1).padStart(2,"0");
+  $("month").value = `${yyyy}-${mm}`;
+
+  $("mode").addEventListener("change", () => { setModeUI(); });
+  $("btn").addEventListener("click", load);
+
+  document.querySelectorAll(".tab").forEach(t=>{
+    t.addEventListener("click", ()=> setTab(t.dataset.tab));
+  });
+
+  setModeUI();
   load();
 </script>
 </body>
