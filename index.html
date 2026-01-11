@@ -365,7 +365,7 @@
 
 <script>
   // ✅ Pega aquí tu URL /exec
-  const APPS_SCRIPT_URL = "TU_URL_EXEC";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykGV3yTg5v1cKf9w50WAcr64ogSAyXkYGErBwAMvLsXlwXvPyqvcY3qFZZg59uuxsa/exec";
 
   google.charts.load("current", { packages: ["corechart"] });
 
@@ -799,7 +799,7 @@
   // eventos
   $("btnRefresh").addEventListener("click", load);
   $("monthSelect").addEventListener("change", ()=>{
-    // si cambias mes, limpio rango para evitar confusión
+    // si cambias mes, limpio rango para evitar confusión 
     $("fromDate").value = "";
     $("toDate").value = "";
     load();
