@@ -1,115 +1,193 @@
 <!doctype html>
 <html>
-  <head>
-    <base target="_top">
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      body { font-family: Arial, sans-serif; margin: 18px; }
-      .grid { display: grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap: 12px; }
-      .card { border: 1px solid #e5e5e5; border-radius: 12px; padding: 12px; }
-      .k { font-size: 12px; color: #666; }
-      .v { font-size: 20px; font-weight: 700; margin-top: 6px; }
-      h2 { margin-top: 22px; }
-      table { width: 100%; border-collapse: collapse; }
-      th, td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; font-size: 14px; }
-      .row { display:flex; gap:12px; flex-wrap:wrap; }
-      .pill { padding: 4px 10px; border-radius: 999px; background:#f3f3f3; display:inline-block; font-size:12px; }
-      @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
-    </style>
-  </head>
-  <body>
-    <div class="row">
-      <div class="pill" id="range"></div>
-      <div class="pill" id="tipo"></div>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>ERP Dashboard</title>
+
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; margin:0; background:#fafafa;}
+    header{padding:16px 20px; background:#111; color:#fff;}
+    .wrap{padding:16px 20px; max-width:1200px; margin:0 auto;}
+    .grid{display:grid; gap:12px;}
+    .kpis{grid-template-columns:repeat(4,minmax(0,1fr));}
+    .card{background:#fff; border:1px solid #eee; border-radius:14px; padding:14px;}
+    .kpi-title{font-size:12px; color:#666; margin-bottom:6px;}
+    .kpi-value{font-size:22px; font-weight:700;}
+    .two{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .chart{height:360px;}
+    table{width:100%; border-collapse:collapse;}
+    th,td{padding:10px; border-bottom:1px solid #eee; text-align:left; font-size:14px;}
+    th{color:#666; font-weight:600;}
+    .muted{color:#777; font-size:12px;}
+    @media(max-width:900px){
+      .kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
+      .two{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div style="max-width:1200px;margin:0 auto;">
+    <div style="font-weight:700;">ERP Dashboard</div>
+    <div class="muted">Ventas • Gastos • Vendedoras • Categorías • Distritos • Delivery • Clientes • Comprobantes</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div id="status" class="muted">Cargando datos…</div>
+
+  <div class="grid kpis" style="margin-top:12px;">
+    <div class="card"><div class="kpi-title">Ventas totales</div><div id="kpiVentas" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Gastos totales</div><div id="kpiGastos" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Utilidad</div><div id="kpiUtilidad" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Pedidos</div><div id="kpiPedidos" class="kpi-value">—</div></div>
+
+    <div class="card"><div class="kpi-title">Clientes nuevos</div><div id="kpiNuevos" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Clientes recurrentes</div><div id="kpiRecurrentes" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Boletas</div><div id="kpiBoletas" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Facturas / Pendientes</div><div id="kpiFactPend" class="kpi-value">—</div></div>
+  </div>
+
+  <div class="grid two" style="margin-top:12px;">
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:8px;">Ventas vs Gastos por día</div>
+      <div id="chartVentasGastos" class="chart"></div>
     </div>
-
-    <div class="grid" style="margin-top:12px">
-      <div class="card"><div class="k">Ingresos</div><div class="v" id="ingresos">-</div></div>
-      <div class="card"><div class="k">Gastos</div><div class="v" id="gastos">-</div></div>
-      <div class="card"><div class="k">Utilidad</div><div class="v" id="utilidad">-</div></div>
-      <div class="card"><div class="k">Margen</div><div class="v" id="margen">-</div></div>
-
-      <div class="card"><div class="k">Ventas (N°)</div><div class="v" id="ventasCount">-</div></div>
-      <div class="card"><div class="k">Doc. Pendientes (N°)</div><div class="v" id="docPendCount">-</div></div>
-      <div class="card"><div class="k">Monto Doc. Pendiente</div><div class="v" id="docPendMonto">-</div></div>
-      <div class="card"><div class="k">Monto Pago Pendiente</div><div class="v" id="pagoPendMonto">-</div></div>
-
-      <div class="card"><div class="k">Clientes Nuevos</div><div class="v" id="clientesNuevos">-</div></div>
-      <div class="card"><div class="k">Clientes Frecuentes</div><div class="v" id="clientesFrecuentes">-</div></div>
-      <div class="card"><div class="k">Días alerta servicios</div><div class="v" id="diasAlerta">-</div></div>
-      <div class="card"><div class="k">Tipo de fecha</div><div class="v" id="tipoFecha2">-</div></div>
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:8px;">Total acumulado</div>
+      <div id="chartAcumulado" class="chart"></div>
     </div>
+  </div>
 
-    <h2>Top productos (por monto)</h2>
-    <table id="topProductos">
-      <thead><tr><th>Producto</th><th>Cantidad</th><th>Monto</th></tr></thead>
-      <tbody></tbody>
-    </table>
+  <div class="grid two" style="margin-top:12px;">
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:8px;">Delivery (cobrado vs pagado)</div>
+      <div id="chartDelivery" class="chart"></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:8px;">Ventas por categoría</div>
+      <div id="chartCategorias" class="chart"></div>
+    </div>
+  </div>
 
-    <h2>Servicios próximos a vencer</h2>
-    <table id="servicios">
-      <thead><tr><th>Servicio</th><th>Categoría</th><th>Vencimiento</th><th>Monto</th></tr></thead>
-      <tbody></tbody>
-    </table>
+  <div class="grid two" style="margin-top:12px;">
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:8px;">Ventas por distrito</div>
+      <div id="chartDistritos" class="chart"></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:8px;">Reporte de vendedoras</div>
+      <div style="overflow:auto; max-height:360px;">
+        <table id="tablaVendedoras">
+          <thead>
+            <tr><th>Vendedora</th><th>Ventas</th><th>Pedidos</th><th>Ticket prom.</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-    <script>
-      const money = (n) => {
-        const v = Number(n || 0);
-        return v.toLocaleString(undefined, { style: "currency", currency: "PEN" });
-      };
-      const pct = (n) => (Number(n||0)*100).toFixed(1) + "%";
+  <div class="muted" style="margin-top:12px;" id="footerMeta"></div>
+</div>
 
-      function set(id, text) { document.getElementById(id).textContent = text; }
+<script>
+  google.charts.load('current', {packages:['corechart','table']});
 
-      function load() {
-        google.script.run.withSuccessHandler((res) => {
-          if (!res || !res.ok) {
-            document.body.insertAdjacentHTML("afterbegin",
-              `<div class="card" style="border-color:#f99;background:#fff0f0">
-                ${res?.error || "Error cargando datos"}
-              </div>`);
-            return;
-          }
+  const money = (n) => new Intl.NumberFormat('es-PE', {style:'currency', currency:'PEN'}).format(Number(n||0));
+  const num = (n) => new Intl.NumberFormat('es-PE').format(Number(n||0));
 
-          const k = res.kpi || {};
-          set("range", `Rango: ${k.Desde} → ${k.Hasta}`);
-          set("tipo", `Filtro: ${k.TipoFecha}`);
+  async function fetchData(){
+    const res = await fetch('?action=data');
+    if(!res.ok) throw new Error('No se pudo cargar data');
+    return await res.json();
+  }
 
-          set("ingresos", money(k.Ingresos));
-          set("gastos", money(k.Gastos));
-          set("utilidad", money(k.Utilidad));
-          set("margen", pct(k.Margen));
+  function draw(data){
+    // KPIs
+    document.getElementById('kpiVentas').textContent = money(data.kpis.totalVentas);
+    document.getElementById('kpiGastos').textContent = money(data.kpis.totalGastos);
+    document.getElementById('kpiUtilidad').textContent = money(data.kpis.utilidad);
+    document.getElementById('kpiPedidos').textContent = num(data.kpis.pedidos);
+    document.getElementById('kpiNuevos').textContent = num(data.kpis.clientesNuevos);
+    document.getElementById('kpiRecurrentes').textContent = num(data.kpis.clientesRecurrentes);
+    document.getElementById('kpiBoletas').textContent = num(data.kpis.comprobantes.boletas);
+    document.getElementById('kpiFactPend').textContent =
+      `${num(data.kpis.comprobantes.facturas)} / ${num(data.kpis.comprobantes.pendientes)}`;
 
-          set("ventasCount", k.VentasCount ?? "-");
-          set("docPendCount", k.DocPendCount ?? "-");
-          set("docPendMonto", money(k.DocPendMonto));
-          set("pagoPendMonto", money(k.PagoPendMonto));
+    // Chart: Ventas vs Gastos
+    const vg = new google.visualization.DataTable();
+    vg.addColumn('string','Día');
+    vg.addColumn('number','Ventas');
+    vg.addColumn('number','Gastos');
+    data.series.ventasGastosDia.forEach(r => vg.addRow([r.date, Number(r.ventas), Number(r.gastos)]));
+    new google.visualization.LineChart(document.getElementById('chartVentasGastos'))
+      .draw(vg, {legend:{position:'bottom'}, height:360});
 
-          set("clientesNuevos", k.ClientesNuevos ?? "-");
-          set("clientesFrecuentes", k.ClientesFrecuentes ?? "-");
-          set("diasAlerta", k.DiasAlertaServicios ?? "-");
-          set("tipoFecha2", k.TipoFecha ?? "-");
+    // Chart: Acumulado
+    const ac = new google.visualization.DataTable();
+    ac.addColumn('string','Día');
+    ac.addColumn('number','Acumulado');
+    data.series.acumulado.forEach(r => ac.addRow([r.date, Number(r.acumulado)]));
+    new google.visualization.LineChart(document.getElementById('chartAcumulado'))
+      .draw(ac, {legend:{position:'bottom'}, height:360});
 
-          // Top productos
-          const tb1 = document.querySelector("#topProductos tbody");
-          tb1.innerHTML = "";
-          (res.topProductos || []).forEach(x => {
-            tb1.insertAdjacentHTML("beforeend",
-              `<tr><td>${x.producto}</td><td>${x.cantidad}</td><td>${money(x.monto)}</td></tr>`);
-          });
+    // Chart: Delivery
+    const dl = new google.visualization.DataTable();
+    dl.addColumn('string','Día');
+    dl.addColumn('number','Cobrado');
+    dl.addColumn('number','Pagado');
+    dl.addColumn('number','Margen');
+    data.series.deliveryDia.forEach(r => dl.addRow([r.date, Number(r.cobrado), Number(r.pagado), Number(r.margen)]));
+    new google.visualization.ColumnChart(document.getElementById('chartDelivery'))
+      .draw(dl, {legend:{position:'bottom'}, height:360});
 
-          // Servicios alerta
-          const tb2 = document.querySelector("#servicios tbody");
-          tb2.innerHTML = "";
-          (res.servicios || []).forEach(x => {
-            const d = new Date(x.vencimiento);
-            tb2.insertAdjacentHTML("beforeend",
-              `<tr><td>${x.servicio}</td><td>${x.categoria}</td><td>${d.toLocaleDateString()}</td><td>${money(x.monto)}</td></tr>`);
-          });
+    // Chart: Categorías (top 12)
+    const cat = new google.visualization.DataTable();
+    cat.addColumn('string','Categoría');
+    cat.addColumn('number','Ventas');
+    data.breakdowns.categorias.slice(0,12).forEach(r => cat.addRow([r.name, Number(r.value)]));
+    new google.visualization.PieChart(document.getElementById('chartCategorias'))
+      .draw(cat, {legend:{position:'right'}, height:360});
 
-        }).getResumenData();
-      }
-      load();
-    </script>
-  </body>
+    // Chart: Distritos (top 12)
+    const dist = new google.visualization.DataTable();
+    dist.addColumn('string','Distrito');
+    dist.addColumn('number','Ventas');
+    data.breakdowns.distritos.slice(0,12).forEach(r => dist.addRow([r.name, Number(r.value)]));
+    new google.visualization.BarChart(document.getElementById('chartDistritos'))
+      .draw(dist, {legend:{position:'none'}, height:360});
+
+    // Tabla: Vendedoras
+    const tbody = document.querySelector('#tablaVendedoras tbody');
+    tbody.innerHTML = '';
+    data.breakdowns.vendedoras.forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${r.name}</td>
+        <td>${money(r.ventas)}</td>
+        <td>${num(r.pedidos)}</td>
+        <td>${money(r.ticketProm)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('footerMeta').textContent = `Actualizado: ${data.meta.generatedAt}`;
+  }
+
+  google.charts.setOnLoadCallback(async () => {
+    try{
+      const data = await fetchData();
+      document.getElementById('status').textContent = '';
+      draw(data);
+      window.addEventListener('resize', () => draw(data));
+    }catch(err){
+      document.getElementById('status').textContent = 'Error cargando dashboard: ' + err.message;
+    }
+  });
+</script>
+</body>
 </html>
