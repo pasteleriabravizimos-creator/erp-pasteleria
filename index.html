@@ -2,461 +2,839 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>BRAVIZIMO'S | Dashboard Financiero</title>
 
-  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
   <style>
     :root{
-      --bg:#f4f6fb; --card:#fff; --text:#0f172a; --muted:#64748b;
-      --shadow:0 10px 25px rgba(15,23,42,.08);
-      --radius:18px;
+      --bg:#f4f6fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+      --brand:#0b1220;
+      --brand2:#111827;
+      --accent:#2563eb;
+      --ok:#16a34a;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --shadow: 0 16px 40px rgba(15,23,42,.10);
+      --radius: 18px;
     }
-    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;}
-    body{margin:0;background:var(--bg);color:var(--text);}
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:linear-gradient(180deg,#0b1220 0,#0b1220 240px,var(--bg) 240px);
+      color:var(--text);
+    }
+    .wrap{max-width:1280px;margin:0 auto;padding:26px 18px 56px}
     header{
-      background: radial-gradient(1200px 500px at 70% 10%, #2b3a55 0%, #0b1220 55%, #05070e 100%);
-      color:#fff;padding:22px 22px 18px;
-      position:sticky;top:0;z-index:10;
-      box-shadow: var(--shadow);
+      display:flex;align-items:flex-end;justify-content:space-between;gap:14px;
+      padding:12px 0 18px;
     }
-    header .top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-    h1{font-size:18px;margin:0;}
-    .sub{font-size:12px;opacity:.85;margin-top:4px;}
-    .filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-    select,input,button{
-      border-radius:999px;border:1px solid rgba(255,255,255,.22);
-      padding:10px 12px;background:rgba(255,255,255,.08);color:#fff;outline:none;
+    .title h1{
+      margin:0;
+      color:#fff;
+      font-size:20px;
+      letter-spacing:.2px;
     }
-    input{width:150px}
-    button{background:#fff;color:#0b1220;border:none;font-weight:700;cursor:pointer}
-    button:hover{opacity:.9}
+    .title p{margin:6px 0 0;color:rgba(255,255,255,.72);font-size:12px}
+    .controls{
+      display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;
+    }
+    .chip{
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:999px;
+      padding:8px 10px;
+      color:#fff;
+      display:flex;gap:10px;align-items:center;
+      backdrop-filter: blur(8px);
+    }
+    .chip label{font-size:12px;color:rgba(255,255,255,.72)}
+    .chip select,.chip input{
+      appearance:none;
+      background:rgba(0,0,0,.18);
+      border:1px solid rgba(255,255,255,.16);
+      color:#fff;
+      border-radius:10px;
+      padding:8px 10px;
+      font-size:12px;
+      outline:none;
+      min-width:150px;
+    }
+    .btn{
+      background:#fff;
+      color:#0b1220;
+      border:0;
+      border-radius:14px;
+      padding:10px 14px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow: 0 10px 24px rgba(0,0,0,.18);
+    }
+    .btn:active{transform:translateY(1px)}
+    .bar{
+      margin-top:10px;
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:14px;
+      box-shadow:var(--shadow);
+    }
 
-    main{max-width:1200px;margin:18px auto;padding:0 16px 60px;}
-    .error{display:none;background:#ffe4e6;color:#9f1239;border:1px solid #fecdd3;padding:10px 12px;border-radius:999px;margin:10px 0;}
-    .grid-kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px;}
-    .card{
-      background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
-      padding:14px 14px;
+    .error{
+      display:none;
+      margin-bottom:10px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:rgba(239,68,68,.12);
+      border:1px solid rgba(239,68,68,.28);
+      color:#991b1b;
+      font-weight:700;
     }
-    .kpi-title{font-size:12px;color:var(--muted);margin:0 0 6px}
-    .kpi-value{font-size:20px;font-weight:800;margin:0}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 10px;}
-    .tab{background:#fff;border:1px solid #e2e8f0;border-radius:999px;padding:8px 12px;cursor:pointer;font-weight:700;font-size:12px;}
-    .tab.active{background:#0b1220;color:#fff;border-color:#0b1220;}
-    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-    .grid-1{display:grid;grid-template-columns:1fr;gap:12px;}
-    .table{width:100%;border-collapse:collapse;font-size:12px;}
-    .table th,.table td{padding:10px;border-bottom:1px solid #eef2f7;text-align:left;}
-    .table th{color:var(--muted);font-weight:800;font-size:11px;text-transform:uppercase;}
-    .muted{color:var(--muted);font-size:12px;}
-    .foot{margin-top:10px;color:var(--muted);font-size:12px;}
-    @media(max-width:980px){.grid-kpi{grid-template-columns:repeat(2,1fr)} .grid-2{grid-template-columns:1fr}}
+
+    .kpis{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+      margin:16px 0 10px;
+    }
+    .kpi{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:14px 14px 12px;
+      box-shadow:var(--shadow);
+    }
+    .kpi .label{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+    .kpi .value{margin-top:8px;font-size:20px;font-weight:900;letter-spacing:.2px}
+    .badge{
+      font-size:11px;font-weight:800;padding:4px 8px;border-radius:999px;
+      border:1px solid rgba(0,0,0,.06); background:#f1f5f9; color:#0f172a;
+    }
+    .badge.ok{background:rgba(22,163,74,.12);border-color:rgba(22,163,74,.25);color:#166534}
+    .badge.warn{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.25);color:#92400e}
+    .badge.bad{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.25);color:#991b1b}
+
+    .tabs{
+      display:flex;gap:8px;flex-wrap:wrap;
+      margin:16px 0 10px;
+    }
+    .tab{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.9);
+      color:#0b1220;
+      padding:8px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:800;
+      font-size:12px;
+    }
+    .tab.active{
+      background:#0b1220;
+      color:#fff;
+      border-color:#0b1220;
+    }
+
+    .grid2{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:12px;
+    }
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:14px;
+      box-shadow:var(--shadow);
+      min-height:280px;
+    }
+    .card h3{
+      margin:0 0 10px;
+      font-size:14px;
+      letter-spacing:.2px;
+    }
+    .sub{
+      margin:0 0 12px;color:var(--muted);font-size:12px
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+    }
+    th,td{
+      padding:10px 10px;
+      border-bottom:1px solid var(--line);
+      text-align:left;
+      vertical-align:top;
+      white-space:nowrap;
+    }
+    th{color:var(--muted);font-weight:800;font-size:11px;letter-spacing:.2px}
+    tbody tr:hover{background:#f8fafc}
+    .scroll{max-height:360px;overflow:auto;border-radius:14px;border:1px solid var(--line)}
+    .muted{color:var(--muted)}
+    footer{margin-top:14px;color:rgba(255,255,255,.65);font-size:11px}
+    .hidden{display:none !important}
+
+    @media (max-width:1024px){
+      .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .grid2{grid-template-columns:1fr}
+      .chip select,.chip input{min-width:140px}
+    }
   </style>
 </head>
 
 <body>
-<header>
-  <div class="top">
-    <div>
-      <h1>BRAVIZIMO'S | Dashboard Financiero</h1>
-      <div class="sub">Sincronizado con Google Sheets (Apps Script)</div>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>BRAVIZIMO'S | Dashboard Financiero</h1>
+        <p>Sincronizado con Google Sheets (Apps Script)</p>
+      </div>
+
+      <div class="controls">
+        <div class="chip">
+          <label>Modo</label>
+          <select id="mode">
+            <option value="month">Mes</option>
+            <option value="range">Rango</option>
+          </select>
+        </div>
+
+        <div class="chip" id="monthBox">
+          <label>Mes</label>
+          <input id="month" type="month"/>
+        </div>
+
+        <div class="chip hidden" id="rangeBox">
+          <label>Desde</label><input id="from" placeholder="dd/mm/aaaa" />
+          <label>Hasta</label><input id="to" placeholder="dd/mm/aaaa" />
+        </div>
+
+        <button class="btn" id="refreshBtn">Actualizar</button>
+      </div>
+    </header>
+
+    <div class="bar">
+      <div class="error" id="errBox"></div>
+
+      <div class="kpis" id="kpis"></div>
+
+      <div class="tabs" id="tabs"></div>
+
+      <!-- PANELS -->
+      <div id="panel-finanzas">
+        <div class="grid2">
+          <div class="card">
+            <h3>Ventas vs Gastos (por día) + Saldo</h3>
+            <p class="sub">Comparativo diario según el periodo seleccionado.</p>
+            <canvas id="chartFinanzas" height="120"></canvas>
+          </div>
+          <div class="card">
+            <h3>Acumulado de ventas</h3>
+            <p class="sub">Suma acumulada de ventas por día.</p>
+            <canvas id="chartAcum" height="120"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-alertas" class="hidden">
+        <div class="grid2">
+          <div class="card">
+            <h3>Alertas</h3>
+            <p class="sub">Pendientes y control administrativo.</p>
+            <div id="alertasBox"></div>
+          </div>
+          <div class="card">
+            <h3>Estado general</h3>
+            <p class="sub">Resumen rápido para tomar decisiones.</p>
+            <div id="alertasExtra"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-distritos" class="hidden">
+        <div class="card">
+          <h3>Ranking por distritos</h3>
+          <p class="sub">Cuántas veces se lleva pedido y monto total.</p>
+          <div class="scroll">
+            <table>
+              <thead><tr><th>Distrito</th><th>Veces</th><th>Monto</th></tr></thead>
+              <tbody id="tblDistritos"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-vendedoras" class="hidden">
+        <div class="card">
+          <h3>Vendedoras por día</h3>
+          <p class="sub">Ventas, saldo y cantidad de pedidos cerrados.</p>
+          <div class="scroll">
+            <table>
+              <thead><tr><th>Fecha</th><th>Vendedora</th><th>Ventas</th><th>Saldo</th><th>Pedidos</th></tr></thead>
+              <tbody id="tblVendedoras"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-delivery" class="hidden">
+        <div class="grid2">
+          <div class="card">
+            <h3>Delivery cobrado vs costo (por día)</h3>
+            <p class="sub">Control para ver margen por periodo.</p>
+            <canvas id="chartDelivery" height="120"></canvas>
+          </div>
+          <div class="card">
+            <h3>Delivery por motorizado</h3>
+            <p class="sub">Monto/costo y cantidad de entregas para calcular pago.</p>
+            <div class="scroll">
+              <table>
+                <thead><tr><th>Motorizado</th><th>Delivery cobrado</th><th>Costo</th><th>Entregas</th></tr></thead>
+                <tbody id="tblDeliveryMot"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-productos" class="hidden">
+        <div class="card">
+          <h3>Top 20 productos (por monto)</h3>
+          <p class="sub">Monto y cantidad (según fecha de entrega en hoja PRODUCTOS).</p>
+          <div class="scroll">
+            <table>
+              <thead><tr><th>#</th><th>Producto</th><th>Cantidad</th><th>Monto</th></tr></thead>
+              <tbody id="tblProductos"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-clientes" class="hidden">
+        <div class="card">
+          <h3>Clientes (seguimiento)</h3>
+          <p class="sub">Por ahora se usa el conteo único desde Nota de ventas en el periodo. (Podemos enriquecer con hoja CLIENTES después.)</p>
+          <div id="clientesBox"></div>
+        </div>
+      </div>
+
+      <div id="panel-gastos" class="hidden">
+        <div class="grid2">
+          <div class="card">
+            <h3>Gastos por categoría</h3>
+            <p class="sub">Distribución (monto).</p>
+            <canvas id="chartGastosCat" height="120"></canvas>
+          </div>
+          <div class="card">
+            <h3>Detalle por categoría</h3>
+            <p class="sub">Cantidad de registros y monto total.</p>
+            <div class="scroll">
+              <table>
+                <thead><tr><th>Categoría</th><th>Cantidad</th><th>Monto</th></tr></thead>
+                <tbody id="tblGastosCat"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-medios" class="hidden">
+        <div class="card">
+          <h3>Medios de pago (sumando 1er y 2do pago)</h3>
+          <p class="sub">Útil para ver cómo va el acumulado por cuentas.</p>
+          <div class="scroll">
+            <table>
+              <thead><tr><th>Cuenta</th><th>Monto</th></tr></thead>
+              <tbody id="tblMedios"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-servicios" class="hidden">
+        <div class="grid2">
+          <div class="card">
+            <h3>Servicios (KPI)</h3>
+            <p class="sub">Total, pagados y pendientes.</p>
+            <div id="servKpi"></div>
+          </div>
+          <div class="card">
+            <h3>Servicios (lista)</h3>
+            <p class="sub">Hasta 200 filas para revisión rápida.</p>
+            <div class="scroll">
+              <table>
+                <thead><tr><th>Servicio</th><th>Fecha</th><th>Monto</th><th>Estado</th></tr></thead>
+                <tbody id="tblServicios"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="muted" id="updatedAt" style="margin:14px 2px 0;font-size:11px"></p>
     </div>
-    <div class="filters">
-      <select id="mode">
-        <option value="month">Mes</option>
-        <option value="range">Rango</option>
-      </select>
-      <input id="month" type="month" />
-      <input id="from" type="date" style="display:none;" />
-      <input id="to" type="date" style="display:none;" />
-      <button id="btn">Actualizar</button>
-    </div>
+
+    <footer>© BRAVIZIMO'S — Dashboard financiero</footer>
   </div>
-</header>
-
-<main>
-  <div id="err" class="error"></div>
-
-  <div class="grid-kpi" id="kpis">
-    <!-- KPI cards -->
-  </div>
-
-  <div class="tabs" id="tabs">
-    <div class="tab active" data-view="finanzas">Finanzas</div>
-    <div class="tab" data-view="alertas">Alertas</div>
-    <div class="tab" data-view="distritos">Distritos</div>
-    <div class="tab" data-view="vendedoras">Vendedoras</div>
-    <div class="tab" data-view="delivery">Delivery</div>
-    <div class="tab" data-view="productos">Productos</div>
-    <div class="tab" data-view="clientes">Clientes</div>
-    <div class="tab" data-view="gastos">Gastos</div>
-    <div class="tab" data-view="medios">Medios de pago</div>
-    <div class="tab" data-view="servicios">Servicios</div>
-  </div>
-
-  <section id="view-finanzas" class="grid-2">
-    <div class="card">
-      <h3>Ventas vs Gastos (por día) + Saldo</h3>
-      <div id="chart-finanzas" style="height:320px;"></div>
-    </div>
-    <div class="card">
-      <h3>Acumulado de ventas</h3>
-      <div id="chart-acumulado" style="height:320px;"></div>
-    </div>
-  </section>
-
-  <section id="view-alertas" class="grid-1" style="display:none;">
-    <div class="card">
-      <h3>Alertas</h3>
-      <div id="alertasBox" class="muted"></div>
-    </div>
-  </section>
-
-  <section id="view-distritos" class="grid-1" style="display:none;">
-    <div class="card">
-      <h3>Ranking por distrito (monto y veces)</h3>
-      <table class="table" id="tbl-distritos"></table>
-    </div>
-  </section>
-
-  <section id="view-vendedoras" class="grid-1" style="display:none;">
-    <div class="card">
-      <h3>Vendedoras por día (ventas, saldo, pedidos)</h3>
-      <table class="table" id="tbl-vendedoras"></table>
-    </div>
-  </section>
-
-  <section id="view-delivery" class="grid-2" style="display:none;">
-    <div class="card">
-      <h3>Delivery vs Costo (por día)</h3>
-      <div id="chart-delivery-dia" style="height:320px;"></div>
-    </div>
-    <div class="card">
-      <h3>Delivery por motorizado</h3>
-      <table class="table" id="tbl-delivery-mot"></table>
-    </div>
-  </section>
-
-  <section id="view-productos" class="grid-1" style="display:none;">
-    <div class="card">
-      <h3>Top 20 productos (según fecha de entrega)</h3>
-      <div id="chart-top-prod" style="height:360px;"></div>
-      <table class="table" id="tbl-top-prod"></table>
-    </div>
-  </section>
-
-  <section id="view-clientes" class="grid-1" style="display:none;">
-    <div class="card">
-      <h3>Clientes (se toma el total de clientes únicos del periodo desde Nota de Ventas)</h3>
-      <div class="muted" id="clientesInfo"></div>
-    </div>
-  </section>
-
-  <section id="view-gastos" class="grid-1" style="display:none;">
-    <div class="card">
-      <h3>Gastos por categoría</h3>
-      <div id="chart-gastos-cat" style="height:320px;"></div>
-      <table class="table" id="tbl-gastos-cat"></table>
-    </div>
-  </section>
-
-  <section id="view-medios" class="grid-1" style="display:none;">
-    <div class="card">
-      <h3>Medios de pago (suma 1er pago + 2do pago)</h3>
-      <table class="table" id="tbl-medios"></table>
-    </div>
-  </section>
-
-  <section id="view-servicios" class="grid-1" style="display:none;">
-    <div class="card">
-      <h3>Servicios (pendiente / pagado)</h3>
-      <div class="muted" id="serviciosKpi"></div>
-      <table class="table" id="tbl-servicios"></table>
-    </div>
-  </section>
-
-  <div class="foot" id="updated"></div>
-</main>
 
 <script>
-  // 🔥 PEGA TU URL /exec AQUÍ:
-  const API_URL = "https://script.google.com/macros/s/AKfycbyydt-z7J02V5uuVbyh_AQjWfP6b5ncI9mxWw2CWqnY2ywQ7cDweD4NeqBB7yyZYUaa/exec";
+  /************ CONFIG ************/
+  // 🔥 PEGA AQUÍ TU URL /exec del Web App (Apps Script)
+  const APPS_SCRIPT_URL = "PEGA_AQUI_TU_URL_EXEC";
 
-  google.charts.load('current', {'packages':['corechart','bar']});
-
+  /************ STATE ************/
+  let charts = {};
   const $ = (id)=>document.getElementById(id);
-  const errBox = $("err");
 
-  function showError(msg){
-    if(!msg){ errBox.style.display="none"; errBox.textContent=""; return; }
-    errBox.style.display="block";
-    errBox.textContent = msg;
+  const TABS = [
+    { id:"finanzas", label:"Finanzas", panel:"panel-finanzas"},
+    { id:"alertas", label:"Alertas", panel:"panel-alertas"},
+    { id:"distritos", label:"Distritos", panel:"panel-distritos"},
+    { id:"vendedoras", label:"Vendedoras", panel:"panel-vendedoras"},
+    { id:"delivery", label:"Delivery", panel:"panel-delivery"},
+    { id:"productos", label:"Productos", panel:"panel-productos"},
+    { id:"clientes", label:"Clientes", panel:"panel-clientes"},
+    { id:"gastos", label:"Gastos", panel:"panel-gastos"},
+    { id:"medios", label:"Medios de pago", panel:"panel-medios"},
+    { id:"servicios", label:"Servicios", panel:"panel-servicios"},
+  ];
+
+  /************ INIT ************/
+  initUI();
+  loadData();
+
+  function initUI(){
+    // default month = current
+    const now = new Date();
+    const m = String(now.getMonth()+1).padStart(2,"0");
+    $("month").value = `${now.getFullYear()}-${m}`;
+
+    // Tabs
+    const tabsEl = $("tabs");
+    tabsEl.innerHTML = "";
+    TABS.forEach((t, idx)=>{
+      const btn = document.createElement("button");
+      btn.className = "tab" + (idx===0 ? " active":"");
+      btn.textContent = t.label;
+      btn.onclick = ()=>setTab(t.id);
+      btn.dataset.tab = t.id;
+      tabsEl.appendChild(btn);
+    });
+
+    $("mode").addEventListener("change", ()=>{
+      const mode = $("mode").value;
+      $("monthBox").classList.toggle("hidden", mode !== "month");
+      $("rangeBox").classList.toggle("hidden", mode !== "range");
+    });
+
+    $("refreshBtn").addEventListener("click", loadData);
   }
 
-  function money(n){
-    const x = Number(n||0);
-    return "S/ " + x.toLocaleString("es-PE",{minimumFractionDigits:2, maximumFractionDigits:2});
+  function setTab(id){
+    document.querySelectorAll(".tab").forEach(b=>{
+      b.classList.toggle("active", b.dataset.tab === id);
+    });
+    TABS.forEach(t=>{
+      $(t.panel).classList.toggle("hidden", t.id !== id);
+    });
+  }
+
+  /************ FETCH ************/
+  async function loadData(){
+    showError("");
+    const qs = buildQuery();
+    try{
+      const url = `${APPS_SCRIPT_URL}?${qs}`;
+      const res = await fetch(url, { cache:"no-store" });
+
+      const text = await res.text();
+      // Si devolvió HTML (error de permiso o URL incorrecta)
+      if (text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html")) {
+        throw new Error("La URL de Apps Script no está devolviendo JSON. Revisa que sea el /exec (Web App) y que tenga acceso 'Anyone'.");
+      }
+
+      const data = JSON.parse(text);
+      if (data.error) throw new Error(data.error);
+
+      render(data);
+    }catch(err){
+      showError("No se pudo cargar data desde Apps Script: " + err.message);
+      clearCharts();
+      $("kpis").innerHTML = "";
+      $("updatedAt").textContent = "";
+    }
   }
 
   function buildQuery(){
     const mode = $("mode").value;
-    const params = new URLSearchParams();
-    params.set("mode", mode);
-
-    if(mode==="month"){
-      const m = $("month").value; // yyyy-mm
-      if(m) params.set("month", m);
+    if (mode === "range"){
+      // dd/mm/aaaa -> yyyy-mm-dd
+      const from = parseDMY($("from").value);
+      const to = parseDMY($("to").value);
+      const params = new URLSearchParams();
+      params.set("mode","range");
+      if (from) params.set("from", from);
+      if (to) params.set("to", to);
+      return params.toString();
     }else{
-      const f = $("from").value;
-      const t = $("to").value;
-      if(f) params.set("from", f);
-      if(t) params.set("to", t);
-    }
-    return params.toString();
-  }
-
-  async function fetchJSON(){
-    const url = API_URL + "?" + buildQuery();
-    const res = await fetch(url, { redirect:"follow" });
-    const text = await res.text();
-
-    // si devuelve HTML -> este error te muestra el inicio
-    try{
-      return JSON.parse(text);
-    }catch(e){
-      throw new Error("Apps Script no devolvió JSON. Respuesta inicia: " + text.slice(0,100));
+      const month = $("month").value || "";
+      const params = new URLSearchParams();
+      params.set("mode","month");
+      if (month) params.set("month", month);
+      return params.toString();
     }
   }
 
-  function renderKpis(k){
-    const cards = [
-      ["Ventas totales", money(k.ventasTotal)],
-      ["Gastos totales", money(k.gastosTotal)],
-      ["Utilidad", money(k.utilidad)],
-      ["Saldo pendiente", money(k.saldoPendiente)],
-      ["Delivery cobrado", money(k.deliveryCobrado)],
-      ["Costo delivery", money(k.costoDelivery)],
-      ["Margen delivery", money(k.margenDelivery)],
-      ["Clientes (periodo)", (k.clientesPeriodo||0).toLocaleString("es-PE")],
-      ["Promedio diario", money(k.promedioDiario)],
-      ["Proyección mensual", money(k.proyeccionMensual)],
-      ["Boletas / Facturas", (k.boletas||0) + " / " + (k.facturas||0)],
-      ["Pendientes comprobante", (k.pendientesComprobante||0).toLocaleString("es-PE")],
+  function parseDMY(s){
+    if(!s) return "";
+    const t = s.trim();
+    // acepta dd/mm/aaaa o dd-mm-aaaa
+    const m = t.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+    if(!m) return "";
+    const dd = String(m[1]).padStart(2,"0");
+    const mm = String(m[2]).padStart(2,"0");
+    const yy = m[3];
+    return `${yy}-${mm}-${dd}`;
+  }
+
+  /************ RENDER ************/
+  function render(data){
+    // KPIs
+    renderKpis(data.kpis, data.alertas);
+
+    // Charts
+    renderFinanzasCharts(data.series?.finanzasPorDia || [], data.series?.acumuladoVentas || []);
+    renderDeliveryChart(data.series?.deliveryPorDia || []);
+    renderGastosCat(data.tables?.gastosPorCategoria || []);
+
+    // Tables
+    renderDistritos(data.tables?.distritosRanking || []);
+    renderVendedoras(data.tables?.vendedorasDia || []);
+    renderDeliveryMot(data.tables?.deliveryMotorizado || []);
+    renderProductos(data.tables?.topProductos || []);
+    renderGastosTable(data.tables?.gastosPorCategoria || []);
+    renderMedios(data.tables?.mediosPago || []);
+    renderServicios(data.tables?.serviciosKpi || {}, data.tables?.serviciosLista || []);
+    renderClientes(data);
+
+    // Alertas
+    renderAlertas(data);
+
+    $("updatedAt").textContent = "Actualizado: " + (data.updatedAt || "");
+  }
+
+  function renderKpis(kpis, alertas){
+    const items = [
+      { label:"Ventas totales", value: money(kpis.ventasTotal) },
+      { label:"Gastos totales", value: money(kpis.gastosTotal) },
+      { label:"Utilidad", value: money(kpis.utilidad), badge: kpis.utilidad>=0 ? ["ok","OK"] : ["bad","ALERTA"] },
+      { label:"Saldo pendiente", value: money(kpis.saldoPendiente), badge: kpis.saldoPendiente>0 ? ["warn","PEND"] : ["ok","OK"] },
+
+      { label:"Delivery cobrado", value: money(kpis.deliveryCobrado) },
+      { label:"Costo delivery", value: money(kpis.costoDelivery) },
+      { label:"Margen delivery", value: money(kpis.margenDelivery), badge: kpis.margenDelivery>=0 ? ["ok","OK"] : ["bad","ALERTA"] },
+      { label:"Clientes (periodo)", value: fmtInt(kpis.clientesPeriodo) },
+
+      { label:"Promedio diario", value: money(kpis.promedioDiario) },
+      { label:"Proyección mensual", value: money(kpis.proyeccionMensual) },
+      { label:"Boletas / Facturas", value: `${fmtInt(kpis.boletas)} / ${fmtInt(kpis.facturas)}` },
+      { label:"Pendientes comprobante", value: fmtInt(kpis.pendientesComprobante), badge: kpis.pendientesComprobante>0 ? ["warn","REVISAR"] : ["ok","OK"] },
     ];
 
-    $("kpis").innerHTML = cards.map(([t,v])=>`
-      <div class="card">
-        <p class="kpi-title">${t}</p>
-        <p class="kpi-value">${v}</p>
-      </div>
+    $("kpis").innerHTML = items.map(i=>{
+      const badge = i.badge ? `<span class="badge ${i.badge[0]}">${i.badge[1]}</span>` : "";
+      return `
+        <div class="kpi">
+          <div class="label"><span>${i.label}</span>${badge}</div>
+          <div class="value">${i.value}</div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function renderFinanzasCharts(fin, acum){
+    const labels = fin.map(x=>x.date);
+    const ventas = fin.map(x=>x.ventas||0);
+    const gastos = fin.map(x=>x.gastos||0);
+    const saldo = fin.map(x=>x.saldo||0);
+
+    charts.chartFinanzas = makeChart(
+      "chartFinanzas",
+      "bar",
+      labels,
+      [
+        { label:"Ventas", data: ventas },
+        { label:"Gastos", data: gastos },
+        { label:"Saldo pendiente", data: saldo }
+      ],
+      { stacked:false }
+    );
+
+    const labels2 = acum.map(x=>x.date);
+    const a = acum.map(x=>x.acumulado||0);
+
+    charts.chartAcum = makeChart(
+      "chartAcum",
+      "line",
+      labels2,
+      [{ label:"Acumulado", data:a }],
+      { tension:0.25 }
+    );
+  }
+
+  function renderDeliveryChart(del){
+    const labels = del.map(x=>x.date);
+    const cob = del.map(x=>x.deliveryCobrado||0);
+    const cost = del.map(x=>x.costoDelivery||0);
+
+    charts.chartDelivery = makeChart(
+      "chartDelivery",
+      "bar",
+      labels,
+      [
+        { label:"Delivery cobrado", data:cob },
+        { label:"Costo delivery", data:cost }
+      ],
+      {}
+    );
+  }
+
+  function renderGastosCat(rows){
+    const top = rows.slice(0,10);
+    const labels = top.map(x=>x.categoria);
+    const values = top.map(x=>x.monto||0);
+
+    charts.chartGastosCat = makeChart(
+      "chartGastosCat",
+      "pie",
+      labels,
+      [{ label:"Gastos", data: values }],
+      {}
+    );
+  }
+
+  function renderDistritos(rows){
+    $("tblDistritos").innerHTML = rows.map(r=>`
+      <tr>
+        <td>${escapeHtml(r.distrito)}</td>
+        <td>${fmtInt(r.veces)}</td>
+        <td>${money(r.monto)}</td>
+      </tr>
     `).join("");
   }
 
-  function drawFinanzas(series){
-    const data = new google.visualization.DataTable();
-    data.addColumn('string','Fecha');
-    data.addColumn('number','Ventas');
-    data.addColumn('number','Gastos');
-    data.addColumn('number','Saldo');
-
-    series.forEach(r=>{
-      data.addRow([r.date, r.ventas, r.gastos, r.saldo]);
-    });
-
-    const chart = new google.visualization.LineChart($("chart-finanzas"));
-    chart.draw(data, { legend:{position:'bottom'}, chartArea:{left:50,top:20,width:'85%',height:'70%'} });
+  function renderVendedoras(rows){
+    $("tblVendedoras").innerHTML = rows.map(r=>`
+      <tr>
+        <td>${r.date||""}</td>
+        <td>${escapeHtml(r.seller||"")}</td>
+        <td>${money(r.ventas)}</td>
+        <td>${money(r.saldo)}</td>
+        <td>${fmtInt(r.pedidos)}</td>
+      </tr>
+    `).join("");
   }
 
-  function drawAcumulado(series){
-    const data = new google.visualization.DataTable();
-    data.addColumn('string','Fecha');
-    data.addColumn('number','Acumulado');
-    series.forEach(r=>data.addRow([r.date, r.acumulado]));
-    const chart = new google.visualization.LineChart($("chart-acumulado"));
-    chart.draw(data, { legend:{position:'bottom'}, chartArea:{left:50,top:20,width:'85%',height:'70%'} });
+  function renderDeliveryMot(rows){
+    $("tblDeliveryMot").innerHTML = rows.map(r=>`
+      <tr>
+        <td>${escapeHtml(r.motorizado||"")}</td>
+        <td>${money(r.deliveryCobrado)}</td>
+        <td>${money(r.costoDelivery)}</td>
+        <td>${fmtInt(r.entregas)}</td>
+      </tr>
+    `).join("");
   }
 
-  function drawDeliveryDia(rows){
-    const data = new google.visualization.DataTable();
-    data.addColumn('string','Fecha');
-    data.addColumn('number','Delivery cobrado');
-    data.addColumn('number','Costo delivery');
-    rows.forEach(r=>data.addRow([r.date, r.deliveryCobrado, r.costoDelivery]));
-    const chart = new google.visualization.ColumnChart($("chart-delivery-dia"));
-    chart.draw(data, { legend:{position:'bottom'}, chartArea:{left:60,top:20,width:'80%',height:'70%'} });
+  function renderProductos(rows){
+    $("tblProductos").innerHTML = rows.map((r,i)=>`
+      <tr>
+        <td>${i+1}</td>
+        <td>${escapeHtml(r.producto||"")}</td>
+        <td>${fmtInt(r.cantidad)}</td>
+        <td>${money(r.monto)}</td>
+      </tr>
+    `).join("");
   }
 
-  function drawGastosCat(rows){
-    const data = new google.visualization.DataTable();
-    data.addColumn('string','Categoría');
-    data.addColumn('number','Monto');
-    rows.slice(0,12).forEach(r=>data.addRow([r.categoria, r.monto]));
-    const chart = new google.visualization.PieChart($("chart-gastos-cat"));
-    chart.draw(data, { legend:{position:'right'} });
+  function renderGastosTable(rows){
+    $("tblGastosCat").innerHTML = rows.map(r=>`
+      <tr>
+        <td>${escapeHtml(r.categoria||"")}</td>
+        <td>${fmtInt(r.cantidad)}</td>
+        <td>${money(r.monto)}</td>
+      </tr>
+    `).join("");
   }
 
-  function drawTopProductos(rows){
-    const data = new google.visualization.DataTable();
-    data.addColumn('string','Producto');
-    data.addColumn('number','Monto');
-    rows.forEach(r=>data.addRow([r.producto, r.monto]));
-    const chart = new google.visualization.BarChart($("chart-top-prod"));
-    chart.draw(data, { legend:{position:'none'}, chartArea:{left:220,top:20,width:'70%',height:'80%'} });
+  function renderMedios(rows){
+    $("tblMedios").innerHTML = rows.map(r=>`
+      <tr>
+        <td>${escapeHtml(r.cuenta||"")}</td>
+        <td>${money(r.monto)}</td>
+      </tr>
+    `).join("");
   }
 
-  function table(el, cols, rows){
-    const thead = `<tr>${cols.map(c=>`<th>${c}</th>`).join("")}</tr>`;
-    const body = rows.map(r=>`<tr>${cols.map(c=>`<td>${r[c] ?? ""}</td>`).join("")}</tr>`).join("");
-    el.innerHTML = thead + body;
-  }
+  function renderServicios(kpi, rows){
+    const total = kpi.total || 0;
+    const pend = kpi.pendientes || 0;
+    const pag = kpi.pagados || 0;
 
-  function renderAll(payload){
-    const {kpis, series, tables, alertas, updatedAt, period} = payload;
-
-    renderKpis(kpis);
-
-    // finanzas charts
-    drawFinanzas(series.finanzasPorDia || []);
-    drawAcumulado(series.acumuladoVentas || []);
-
-    // delivery
-    drawDeliveryDia(series.deliveryPorDia || []);
-    table($("tbl-delivery-mot"),
-      ["motorizado","deliveryCobrado","costoDelivery","entregas"],
-      (tables.deliveryMotorizado||[]).map(x=>({
-        motorizado:x.motorizado,
-        deliveryCobrado:money(x.deliveryCobrado),
-        costoDelivery:money(x.costoDelivery),
-        entregas:x.entregas
-      }))
-    );
-
-    // distritos
-    table($("tbl-distritos"),
-      ["distrito","monto","veces"],
-      (tables.distritosRanking||[]).slice(0,50).map(x=>({
-        distrito:x.distrito,
-        monto:money(x.monto),
-        veces:x.veces
-      }))
-    );
-
-    // vendedoras
-    table($("tbl-vendedoras"),
-      ["date","seller","ventas","saldo","pedidos"],
-      (tables.vendedorasDia||[]).map(x=>({
-        date:x.date,
-        seller:x.seller,
-        ventas:money(x.ventas),
-        saldo:money(x.saldo),
-        pedidos:x.pedidos
-      }))
-    );
-
-    // productos
-    drawTopProductos(tables.topProductos||[]);
-    table($("tbl-top-prod"),
-      ["producto","cantidad","monto"],
-      (tables.topProductos||[]).map(x=>({
-        producto:x.producto,
-        cantidad:(x.cantidad||0).toLocaleString("es-PE"),
-        monto:money(x.monto)
-      }))
-    );
-
-    // gastos
-    drawGastosCat(tables.gastosPorCategoria||[]);
-    table($("tbl-gastos-cat"),
-      ["categoria","cantidad","monto"],
-      (tables.gastosPorCategoria||[]).map(x=>({
-        categoria:x.categoria,
-        cantidad:x.cantidad,
-        monto:money(x.monto)
-      }))
-    );
-
-    // medios pago
-    table($("tbl-medios"),
-      ["cuenta","monto"],
-      (tables.mediosPago||[]).map(x=>({
-        cuenta:x.cuenta,
-        monto:money(x.monto)
-      }))
-    );
-
-    // servicios
-    $("serviciosKpi").textContent =
-      `Total: ${money(tables.serviciosKpi?.total)} | Pendiente: ${money(tables.serviciosKpi?.pendientes)} | Pagado: ${money(tables.serviciosKpi?.pagados)}`;
-
-    table($("tbl-servicios"),
-      ["fecha","servicio","estado","monto"],
-      (tables.serviciosLista||[]).map(x=>({
-        fecha:x.fecha,
-        servicio:x.servicio,
-        estado:x.estado,
-        monto:money(x.monto)
-      }))
-    );
-
-    // clientes
-    $("clientesInfo").textContent =
-      `Clientes únicos en el periodo: ${(kpis.clientesPeriodo||0).toLocaleString("es-PE")}`;
-
-    // alertas
-    $("alertasBox").innerHTML = `
-      <b>Comprobantes pendientes:</b> ${alertas.pendientesComprobante}<br/>
-      <b>Boletas:</b> ${alertas.boletas} &nbsp; <b>Facturas:</b> ${alertas.facturas}<br/>
-      <b>Clientes únicos (periodo):</b> ${alertas.clientesPeriodo}
+    $("servKpi").innerHTML = `
+      <div class="kpis" style="grid-template-columns:repeat(3,minmax(0,1fr));margin:0">
+        <div class="kpi"><div class="label">Total</div><div class="value">${money(total)}</div></div>
+        <div class="kpi"><div class="label">Pendiente <span class="badge warn">REVISAR</span></div><div class="value">${money(pend)}</div></div>
+        <div class="kpi"><div class="label">Pagado <span class="badge ok">OK</span></div><div class="value">${money(pag)}</div></div>
+      </div>
     `;
 
-    $("updated").textContent =
-      `Periodo: ${period.from} → ${period.to} | Actualizado: ${updatedAt}`;
+    $("tblServicios").innerHTML = rows.map(r=>`
+      <tr>
+        <td>${escapeHtml(r.servicio||"")}</td>
+        <td>${r.fecha||""}</td>
+        <td>${money(r.monto)}</td>
+        <td>${escapeHtml(r.estado||"")}</td>
+      </tr>
+    `).join("");
   }
 
-  function setModeUI(){
-    const mode = $("mode").value;
-    $("month").style.display = (mode==="month") ? "" : "none";
-    $("from").style.display = (mode==="range") ? "" : "none";
-    $("to").style.display = (mode==="range") ? "" : "none";
+  function renderClientes(data){
+    const k = data.kpis || {};
+    $("clientesBox").innerHTML = `
+      <div class="kpis" style="grid-template-columns:repeat(2,minmax(0,1fr));margin:0">
+        <div class="kpi">
+          <div class="label">Clientes únicos en el periodo</div>
+          <div class="value">${fmtInt(k.clientesPeriodo)}</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Tip</div>
+          <div class="value" style="font-size:13px;line-height:1.2">
+            Para lista de nombres/celulares por periodo, lo armamos leyendo “nota de ventas” + hoja “clientes”.
+          </div>
+        </div>
+      </div>
+    `;
   }
 
-  function setTabs(){
-    $("tabs").addEventListener("click",(e)=>{
-      const t = e.target.closest(".tab");
-      if(!t) return;
-      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-      t.classList.add("active");
+  function renderAlertas(data){
+    const k = data.kpis || {};
+    const a = data.alertas || {};
+    const pendComp = k.pendientesComprobante || 0;
+    const saldo = k.saldoPendiente || 0;
 
-      const view = t.dataset.view;
-      document.querySelectorAll("section[id^='view-']").forEach(s=>s.style.display="none");
-      $("view-"+view).style.display="";
-    });
+    $("alertasBox").innerHTML = `
+      <div class="kpis" style="grid-template-columns:repeat(2,minmax(0,1fr));margin:0">
+        <div class="kpi">
+          <div class="label">Comprobantes pendientes ${pendComp>0?'<span class="badge warn">URGENTE</span>':'<span class="badge ok">OK</span>'}</div>
+          <div class="value">${fmtInt(pendComp)}</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Saldo pendiente ${saldo>0?'<span class="badge warn">COBRAR</span>':'<span class="badge ok">OK</span>'}</div>
+          <div class="value">${money(saldo)}</div>
+        </div>
+      </div>
+    `;
+
+    $("alertasExtra").innerHTML = `
+      <div class="kpis" style="grid-template-columns:repeat(2,minmax(0,1fr));margin:0">
+        <div class="kpi">
+          <div class="label">Boletas</div>
+          <div class="value">${fmtInt(k.boletas||0)}</div>
+        </div>
+        <div class="kpi">
+          <div class="label">Facturas</div>
+          <div class="value">${fmtInt(k.facturas||0)}</div>
+        </div>
+      </div>
+      <div style="margin-top:12px" class="muted">
+        Si quieres: alertar “faltan X comprobantes” comparando Nota de venta vs Comprobante, lo añadimos en Apps Script con reglas.
+      </div>
+    `;
   }
 
-  async function load(){
-    showError("");
-    try{
-      const data = await fetchJSON();
-      if(data.error) { showError("Error Apps Script: " + data.error); return; }
-      google.charts.setOnLoadCallback(()=>renderAll(data));
-    }catch(err){
-      showError("No se pudo cargar data desde Apps Script: " + err.message);
+  /************ CHART HELPERS ************/
+  function makeChart(canvasId, type, labels, datasets, extra){
+    if(charts[canvasId]) {
+      try{ charts[canvasId].destroy(); }catch(e){}
     }
+    const ctx = document.getElementById(canvasId);
+    if(!ctx) return null;
+
+    const config = {
+      type,
+      data: { labels, datasets: datasets.map(ds=>({
+        ...ds,
+        borderWidth: 2,
+        fill: type==="line" ? false : true
+      }))},
+      options: {
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{
+          legend:{ position:"bottom" },
+          tooltip:{ callbacks:{
+            label: (c)=>{
+              const v = c.raw;
+              if(typeof v === "number") return `${c.dataset.label}: ${money(v)}`;
+              return `${c.dataset.label}: ${v}`;
+            }
+          }}
+        },
+        scales: (type==="pie" ? {} : {
+          y:{ ticks:{ callback:(v)=> money(v) } }
+        }),
+        ...extra
+      }
+    };
+    const chart = new Chart(ctx, config);
+    charts[canvasId] = chart;
+    return chart;
   }
 
-  // init
-  (function init(){
-    const now = new Date();
-    const ym = now.toISOString().slice(0,7);
-    $("month").value = ym;
-    $("mode").addEventListener("change", ()=>{ setModeUI(); });
-    $("btn").addEventListener("click", load);
-    setModeUI();
-    setTabs();
-    // primer load
-    load();
-  })();
+  function clearCharts(){
+    Object.keys(charts).forEach(k=>{
+      try{ charts[k].destroy(); }catch(e){}
+    });
+    charts = {};
+  }
+
+  /************ UTILS ************/
+  function showError(msg){
+    const box = $("errBox");
+    if(!msg){
+      box.style.display = "none";
+      box.textContent = "";
+      return;
+    }
+    box.style.display = "block";
+    box.textContent = msg;
+  }
+
+  function money(n){
+    const v = Number(n||0);
+    return "S/ " + v.toLocaleString("es-PE",{minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  function fmtInt(n){
+    const v = Number(n||0);
+    return v.toLocaleString("es-PE");
+  }
+  function escapeHtml(s){
+    return String(s||"").replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"
+    }[m]));
+  }
 </script>
 </body>
 </html>
