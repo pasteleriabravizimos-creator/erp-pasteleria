@@ -1,684 +1,750 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>BRAVIZIMO'S | Dashboard Financiero</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
   <style>
     :root{
-      --bg:#0b1220;
-      --bg2:#0f1a33;
-      --card:#0f172a;
-      --panel:#111c37;
-      --text:#e7eefc;
-      --muted:#a9b6d6;
-      --line:rgba(255,255,255,.08);
-      --accent:#ffffff;
-      --chip:#0b1220;
-      --ok:#2ecc71;
-      --bad:#ff5c7a;
-      --warn:#ffcc00;
+      --bg1:#050914;
+      --bg2:#0b1630;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.08);
+      --stroke: rgba(255,255,255,.10);
+      --txt: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.65);
+      --accent: rgba(120,180,255,.95);
+      --ok: rgba(98, 228, 155, .95);
+      --warn: rgba(255, 204, 102, .95);
+      --bad: rgba(255, 120, 120, .95);
     }
     *{box-sizing:border-box}
     body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial;
-      background: radial-gradient(1200px 600px at 30% 0%, #1b2a5a 0%, var(--bg) 40%, #070b15 100%);
-      color:var(--text);
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--txt);
+      background: radial-gradient(1200px 600px at 30% 0%, rgba(80,120,255,.18), transparent 60%),
+                  radial-gradient(1000px 700px at 80% 10%, rgba(120,255,210,.12), transparent 60%),
+                  linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100vh;
     }
-    header{
-      padding:26px 20px 16px;
-      background: linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,0) 100%);
-      border-bottom:1px solid var(--line);
+
+    .topbar{
+      position: sticky; top:0; z-index:10;
+      background: linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.15));
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--stroke);
+      padding: 18px 18px;
     }
-    .top{
-      max-width:1200px; margin:0 auto;
-      display:flex; align-items:center; justify-content:space-between; gap:16px;
-    }
-    .brand h1{margin:0; font-size:18px; letter-spacing:.2px}
-    .brand p{margin:2px 0 0; color:var(--muted); font-size:12px}
-    .controls{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;
-    }
-    select, input, button{
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.06);
-      color:var(--text);
+    .row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .brand{ font-weight:800; letter-spacing:.3px; }
+    .sub{ color:var(--muted); font-size:12px; margin-top:2px; }
+    .spacer{ flex:1; }
+
+    .ctl{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--stroke);
       padding:10px 12px;
-      border-radius:12px;
+      border-radius: 14px;
+    }
+    select,input,button{
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.14);
+      color: var(--txt);
+      padding: 8px 10px;
+      border-radius: 12px;
       outline:none;
-      font-size:13px;
     }
-    input[type="month"]{padding:9px 12px}
-    input[type="date"]{padding:9px 12px}
     button{
-      background:rgba(255,255,255,.9);
-      color:#0b1220;
-      font-weight:700;
       cursor:pointer;
+      background: rgba(255,255,255,.85);
+      color:#091026;
+      border:none;
+      font-weight:700;
+      padding: 10px 14px;
     }
-    button:hover{filter:brightness(.95)}
+    button:hover{ filter:brightness(.95); }
 
-    .wrap{max-width:1200px;margin:0 auto;padding:18px 20px 28px}
-    .error{
+    .container{ max-width: 1200px; margin: 0 auto; padding: 18px; }
+    .bannerErr{
+      margin: 14px 0 10px;
+      background: rgba(255, 80, 80, .15);
+      border:1px solid rgba(255,80,80,.45);
+      color: rgba(255,220,220,.95);
+      padding: 10px 12px;
+      border-radius: 14px;
       display:none;
-      margin:14px 0;
-      padding:12px 14px;
-      border-radius:14px;
-      background: rgba(255, 92, 122, .12);
-      border:1px solid rgba(255, 92, 122, .35);
-      color:#ffd6de;
-      font-weight:600;
     }
 
-    .tabs{
-      display:flex; gap:8px; flex-wrap:wrap;
-      margin:12px 0 14px;
-    }
+    .tabs{ display:flex; gap:10px; flex-wrap:wrap; padding: 12px 0 2px; }
     .tab{
-      padding:9px 12px; border-radius:999px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.05);
-      color:var(--text);
-      font-weight:700;
-      font-size:13px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.04);
+      color: var(--txt);
       cursor:pointer;
+      user-select:none;
+      font-weight:600;
+      font-size: 13px;
     }
     .tab.active{
-      background:rgba(255,255,255,.92);
-      color:#0b1220;
-      border-color:rgba(255,255,255,.6);
+      background: rgba(255,255,255,.92);
+      color:#0a1024;
+      border-color: transparent;
     }
 
-    .grid-kpi{
+    .gridKpi{
       display:grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap:10px;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 12px;
+      margin-top: 14px;
     }
-    @media(max-width:1000px){ .grid-kpi{grid-template-columns:repeat(2,minmax(0,1fr));} }
-    @media(max-width:520px){ .grid-kpi{grid-template-columns:1fr;} }
+    @media (max-width: 980px){ .gridKpi{ grid-template-columns: repeat(2,1fr);} }
+    @media (max-width: 520px){ .gridKpi{ grid-template-columns: 1fr;} }
 
     .card{
-      background:rgba(255,255,255,.05);
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:14px 14px;
-      box-shadow: 0 10px 26px rgba(0,0,0,.18);
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: 18px;
+      padding: 14px 14px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.22);
     }
-    .kpi-title{color:var(--muted); font-size:12px; margin:0 0 6px}
-    .kpi-value{font-size:20px; margin:0; font-weight:900; letter-spacing:.2px}
-    .kpi-sub{margin:4px 0 0; color:var(--muted); font-size:12px}
+    .kTitle{ color: var(--muted); font-size: 12px; }
+    .kVal{ font-size: 22px; font-weight: 800; margin-top: 6px; }
 
-    .grid-2{
-      display:grid; grid-template-columns: 1fr 1fr; gap:12px;
-      margin-top:12px;
+    .grid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
     }
-    @media(max-width:900px){ .grid-2{grid-template-columns:1fr;} }
+    @media (max-width: 980px){ .grid2{ grid-template-columns: 1fr;} }
 
-    .card h3{margin:0 0 6px;font-size:14px}
-    .muted{color:var(--muted); font-size:12px}
-    .chartBox{
-      height:280px; /* <- fijo para que NO se haga gigante */
-      margin-top:10px;
-    }
-    canvas{width:100% !important; height:100% !important;}
+    /* Charts: limitar altura para que no se vean enormes */
+    .chartBox{ height: 320px; }
+    .chartBox canvas{ width:100% !important; height:100% !important; }
+
+    h3{ margin:0 0 6px; font-size: 14px; }
+    .hint{ color:var(--muted); font-size:12px; margin-top:0; }
 
     table{
       width:100%;
-      border-collapse:separate;
-      border-spacing:0;
+      border-collapse: collapse;
+      font-size: 12.5px;
       overflow:hidden;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.03);
+      border-radius: 14px;
     }
     th, td{
-      padding:10px 10px;
-      border-bottom:1px solid var(--line);
-      font-size:13px;
-      text-align:left;
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      vertical-align: top;
     }
-    th{color:var(--muted); font-weight:800; font-size:12px; background:rgba(255,255,255,.04)}
-    tr:last-child td{border-bottom:none}
-    .right{text-align:right}
-    .pill{
-      display:inline-block; padding:4px 9px; border-radius:999px; font-weight:800; font-size:11px;
-      background:rgba(255,255,255,.08); border:1px solid var(--line);
+    th{ color: rgba(160,190,255,.95); text-align:left; font-size:12px; }
+    tfoot td{
+      border-top: 1px solid rgba(255,255,255,.18);
+      font-weight:800;
     }
-    .pill.ok{background:rgba(46,204,113,.12); border-color:rgba(46,204,113,.35); color:#cfffdf}
-    .pill.bad{background:rgba(255,92,122,.12); border-color:rgba(255,92,122,.35); color:#ffd6de}
+
+    .section{ display:none; margin-top: 10px; }
+    .section.active{ display:block; }
+
+    .badge{
+      display:inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--txt);
+      font-size: 12px;
+    }
+
+    .muted{ color: var(--muted); }
+
   </style>
 </head>
+
 <body>
-<header>
-  <div class="top">
-    <div class="brand">
-      <h1>BRAVIZIMO'S | Dashboard Financiero</h1>
-      <p>Sincronizado con Google Sheets (Apps Script)</p>
-    </div>
-
-    <div class="controls">
-      <select id="mode">
-        <option value="month">Mes</option>
-        <option value="range">Rango</option>
-      </select>
-
-      <input id="month" type="month"/>
-      <input id="from" type="date" style="display:none"/>
-      <input id="to" type="date" style="display:none"/>
-
-      <button id="btn">Actualizar</button>
-    </div>
-  </div>
-</header>
-
-<div class="wrap">
-  <div id="err" class="error"></div>
-
-  <div class="tabs" id="tabs"></div>
-
-  <div id="finanzas">
-    <div class="grid-kpi" id="kpis"></div>
-
-    <div class="grid-2">
-      <div class="card">
-        <h3>Ventas vs Gastos (por día) + Saldo</h3>
-        <div class="muted">Basado en fecha de emisión (ventas) y fecha de gasto (GASTOS).</div>
-        <div class="chartBox"><canvas id="chVG"></canvas></div>
+  <div class="topbar">
+    <div class="row">
+      <div>
+        <div class="brand">BRAVIZIMO'S | Dashboard Financiero</div>
+        <div class="sub">Sincronizado con Google Sheets (Apps Script)</div>
       </div>
-      <div class="card">
-        <h3>Acumulado de ventas</h3>
-        <div class="muted">Suma progresiva por día.</div>
-        <div class="chartBox"><canvas id="chAcc"></canvas></div>
+      <div class="spacer"></div>
+
+      <div class="ctl">
+        <label class="muted">Modo</label>
+        <select id="mode">
+          <option value="month" selected>Mes</option>
+          <option value="range">Rango</option>
+        </select>
+
+        <label class="muted" id="lblMonth">Mes</label>
+        <input id="month" type="month" />
+
+        <label class="muted" id="lblFrom" style="display:none;">Desde</label>
+        <input id="from" type="date" style="display:none;" />
+
+        <label class="muted" id="lblTo" style="display:none;">Hasta</label>
+        <input id="to" type="date" style="display:none;" />
+
+        <button id="btn">Actualizar</button>
       </div>
     </div>
   </div>
 
-  <div id="alertas" style="display:none"></div>
-  <div id="distritos" style="display:none"></div>
-  <div id="vendedoras" style="display:none"></div>
-  <div id="delivery" style="display:none"></div>
-  <div id="productos" style="display:none"></div>
-  <div id="clientes" style="display:none"></div>
-  <div id="gastos" style="display:none"></div>
-  <div id="mediosPago" style="display:none"></div>
-  <div id="servicios" style="display:none"></div>
-</div>
+  <div class="container">
+    <div id="err" class="bannerErr"></div>
 
-<script>
-  // === TU API
-  const API_URL = "https://script.google.com/macros/s/AKfycbyAC3c6iXRivyEuE1KTsGbZAg1QbW35ghX3ZExoQwxQeZPtkJylxoHLFmwaEGfceNUa/exec";
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-tab="finanzas">Finanzas</div>
+      <div class="tab" data-tab="alertas">Alertas</div>
+      <div class="tab" data-tab="distritos">Distritos</div>
+      <div class="tab" data-tab="vendedoras">Vendedoras</div>
+      <div class="tab" data-tab="delivery">Delivery</div>
+      <div class="tab" data-tab="productos">Productos</div>
+      <div class="tab" data-tab="clientes">Clientes</div>
+      <div class="tab" data-tab="gastos">Gastos</div>
+      <div class="tab" data-tab="medios">Medios de pago</div>
+      <div class="tab" data-tab="servicios">Servicios</div>
+    </div>
 
-  const state = { data:null, charts:{} };
+    <!-- FINANZAS -->
+    <div class="section active" id="sec-finanzas">
+      <div class="gridKpi">
+        <div class="card"><div class="kTitle">Ventas totales</div><div class="kVal" id="k-ventas">—</div></div>
+        <div class="card"><div class="kTitle">Gastos totales</div><div class="kVal" id="k-gastos">—</div></div>
+        <div class="card"><div class="kTitle">Utilidad</div><div class="kVal" id="k-utilidad">—</div></div>
+        <div class="card"><div class="kTitle">Saldo pendiente</div><div class="kVal" id="k-saldo">—</div></div>
 
-  const tabList = [
-    { id:"finanzas", label:"Finanzas" },
-    { id:"alertas", label:"Alertas" },
-    { id:"distritos", label:"Distritos" },
-    { id:"vendedoras", label:"Vendedoras" },
-    { id:"delivery", label:"Delivery" },
-    { id:"productos", label:"Productos" },
-    { id:"clientes", label:"Clientes" },
-    { id:"gastos", label:"Gastos" },
-    { id:"mediosPago", label:"Medios de pago" },
-    { id:"servicios", label:"Servicios" }
-  ];
+        <div class="card"><div class="kTitle">Delivery cobrado (ENVIOS → Delivery CLIENTE)</div><div class="kVal" id="k-delivery">—</div></div>
+        <div class="card"><div class="kTitle">Costo delivery (ENVIOS → Costo Delivery)</div><div class="kVal" id="k-costodel">—</div></div>
+        <div class="card"><div class="kTitle">Margen delivery</div><div class="kVal" id="k-margendel">—</div></div>
+        <div class="card"><div class="kTitle">Clientes (total)</div><div class="kVal" id="k-clientes">—</div></div>
 
-  const $ = (id)=>document.getElementById(id);
-
-  function money(n){
-    n = Number(n||0);
-    return "S/ " + n.toLocaleString("es-PE",{minimumFractionDigits:2, maximumFractionDigits:2});
-  }
-
-  function showError(msg){
-    const el = $("err");
-    if(!msg){ el.style.display="none"; el.textContent=""; return; }
-    el.style.display="block";
-    el.textContent = msg;
-  }
-
-  function setTabs(activeId){
-    const t = $("tabs");
-    t.innerHTML = "";
-    tabList.forEach(x=>{
-      const b=document.createElement("button");
-      b.className="tab"+(x.id===activeId?" active":"");
-      b.textContent=x.label;
-      b.onclick=()=>activateTab(x.id);
-      t.appendChild(b);
-    });
-  }
-
-  function activateTab(id){
-    tabList.forEach(x=>{
-      const el=$(x.id);
-      el.style.display = (x.id===id) ? "" : "none";
-    });
-    setTabs(id);
-  }
-
-  function bindMode(){
-    const mode = $("mode").value;
-    const month = $("month");
-    const from = $("from");
-    const to = $("to");
-
-    if(mode==="month"){
-      month.style.display="";
-      from.style.display="none";
-      to.style.display="none";
-    }else{
-      month.style.display="none";
-      from.style.display="";
-      to.style.display="";
-    }
-  }
-
-  $("mode").addEventListener("change", bindMode);
-
-  function buildUrl(){
-    const mode = $("mode").value;
-    const qs = new URLSearchParams({ action:"data", mode });
-    if(mode==="month"){
-      const m = $("month").value; // yyyy-mm
-      qs.set("month", m);
-    }else{
-      qs.set("from", $("from").value);
-      qs.set("to", $("to").value);
-    }
-    return API_URL + "?" + qs.toString();
-  }
-
-  async function load(){
-    showError("");
-    const url = buildUrl();
-
-    let json;
-    try{
-      const res = await fetch(url, { cache:"no-store" });
-      const text = await res.text();
-
-      // si devuelve HTML (por mala URL o despliegue), te avisamos claro
-      if(text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html")){
-        throw new Error("El endpoint está devolviendo HTML (no JSON). Revisa que el Apps Script esté desplegado como Web App y uses /exec.");
-      }
-      json = JSON.parse(text);
-    }catch(err){
-      showError("No se pudo cargar data desde Apps Script: " + (err.message || err));
-      return;
-    }
-
-    if(!json.ok){
-      showError("Error Apps Script: " + (json.error || "desconocido"));
-      return;
-    }
-
-    state.data = json;
-    renderAll();
-  }
-
-  function renderAll(){
-    const d = state.data;
-
-    // KPIs
-    const kpis = [
-      ["Ventas totales", money(d.kpis.ventasTotales)],
-      ["Gastos totales", money(d.kpis.gastosTotales)],
-      ["Utilidad", money(d.kpis.utilidad)],
-      ["Saldo pendiente", money(d.kpis.saldoPendiente)],
-
-      ["Delivery cobrado", money(d.kpis.deliveryCobrado)],
-      ["Costo delivery", money(d.kpis.costoDelivery)],
-      ["Margen delivery", money(d.kpis.margenDelivery)],
-      ["Clientes (total)", String(d.kpis.clientesTotal || 0)],
-
-      ["Promedio diario (hasta hoy)", money(d.kpis.promedioDiario)],
-      ["Proyección mensual (prom * 30)", money(d.kpis.proyeccionMensual)],
-      ["Boletas / Facturas", `${d.kpis.boletas || 0} / ${d.kpis.facturas || 0}`],
-      ["Comprobantes faltantes", String(d.kpis.comprobantesFaltantes || 0)]
-    ];
-
-    $("kpis").innerHTML = kpis.map(([t,v])=>`
-      <div class="card">
-        <p class="kpi-title">${t}</p>
-        <p class="kpi-value">${v}</p>
+        <div class="card"><div class="kTitle">Promedio diario (hasta hoy)</div><div class="kVal" id="k-prom">—</div></div>
+        <div class="card"><div class="kTitle">Proyección mensual (prom × 30)</div><div class="kVal" id="k-proy">—</div></div>
+        <div class="card"><div class="kTitle">Boletas / Facturas</div><div class="kVal" id="k-docs">—</div></div>
+        <div class="card"><div class="kTitle">Comprobantes faltantes</div><div class="kVal" id="k-faltantes">—</div></div>
       </div>
-    `).join("");
 
-    // Charts (limpiamos si existían)
-    Object.values(state.charts).forEach(ch=>{ try{ ch.destroy(); }catch(e){} });
-    state.charts = {};
+      <div class="grid2">
+        <div class="card">
+          <h3>Ventas vs Gastos (por día) + Saldo</h3>
+          <p class="hint">Basado en fecha de emisión (ventas) y fecha de pago (gastos).</p>
+          <div class="chartBox"><canvas id="chVentas"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Acumulado de ventas</h3>
+          <p class="hint">Suma progresiva por día.</p>
+          <div class="chartBox"><canvas id="chAcum"></canvas></div>
+        </div>
+      </div>
+    </div>
 
-    // Ventas vs gastos + saldo
-    state.charts.vg = new Chart($("chVG"),{
-      type:"line",
-      data:{
-        labels: d.charts.days,
-        datasets:[
-          { label:"Ventas", data:d.charts.ventasByDay, tension:.25 },
-          { label:"Gastos", data:d.charts.gastosByDay, tension:.25 },
-          { label:"Saldo pendiente", data:d.charts.saldoByDay, tension:.25 }
-        ]
-      },
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        plugins:{ legend:{ labels:{ color:"#e7eefc" } } },
-        scales:{
-          x:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } },
-          y:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } }
-        }
-      }
-    });
-
-    // acumulado ventas
-    state.charts.acc = new Chart($("chAcc"),{
-      type:"line",
-      data:{
-        labels: d.charts.days,
-        datasets:[
-          { label:"Acumulado", data:d.charts.acumuladoVentas, tension:.25 }
-        ]
-      },
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        plugins:{ legend:{ labels:{ color:"#e7eefc" } } },
-        scales:{
-          x:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } },
-          y:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } }
-        }
-      }
-    });
-
-    renderAlertas(d);
-    renderDistritos(d);
-    renderVendedoras(d);
-    renderDelivery(d);
-    renderProductos(d);
-    renderClientes(d);
-    renderGastos(d);
-    renderMediosPago(d);
-    renderServicios(d);
-  }
-
-  function renderAlertas(d){
-    const a = d.tabs.alertas;
-    $("alertas").innerHTML = `
+    <!-- ALERTAS -->
+    <div class="section" id="sec-alertas">
       <div class="card">
         <h3>Pendientes de comprobante (hasta 200)</h3>
-        <div class="muted">Si un comprobante está vacío o 0, aparece aquí.</div>
-        ${table(a.pendientesComprobante, [
-          ["fecha","Fecha"],
-          ["pedido","Pedido"],
-          ["nota","Nota"],
-          ["cliente","Cliente"],
-          ["total","Total", "money"]
-        ])}
+        <p class="hint">Si el comprobante está vacío, aparece aquí. Incluye numeración.</p>
+        <div style="overflow:auto; max-height: 520px;">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Fecha</th><th>Pedido</th><th>Nota</th><th>Cliente</th><th>Comprobante</th><th style="text-align:right;">Total</th></tr>
+            </thead>
+            <tbody id="tb-pendcomp"></tbody>
+          </table>
+        </div>
       </div>
+
       <div style="height:12px"></div>
+
       <div class="card">
         <h3>Saldos pendientes (hasta 200)</h3>
-        ${table(a.saldosPendientes, [
-          ["fecha","Fecha"],
-          ["cliente","Cliente"],
-          ["total","Total","money"],
-          ["porPagar","Por pagar","money"]
-        ])}
+        <p class="hint">Incluye total final (resultado monto final).</p>
+        <div style="overflow:auto; max-height: 520px;">
+          <table>
+            <thead>
+              <tr><th>Fecha</th><th>Cliente</th><th style="text-align:right;">Total</th><th style="text-align:right;">Por pagar</th></tr>
+            </thead>
+            <tbody id="tb-saldos"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3">TOTAL FINAL</td>
+                <td style="text-align:right;" id="tb-saldos-total">—</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </div>
-    `;
-  }
+    </div>
 
-  function renderDistritos(d){
-    const r = d.tabs.distritos.ranking;
-    $("distritos").innerHTML = `
+    <!-- DISTRITOS -->
+    <div class="section" id="sec-distritos">
       <div class="card">
         <h3>Ranking de distritos</h3>
-        <div class="muted">Monto (desc) y cantidad de pedidos.</div>
-        ${table(r, [
-          ["key","Distrito"],
-          ["pedidos","Pedidos"],
-          ["monto","Monto","money"]
-        ])}
+        <p class="hint">Pedidos (entregas) y monto (suma delivery cliente o monto en envíos).</p>
+        <div style="overflow:auto; max-height: 520px;">
+          <table>
+            <thead>
+              <tr><th>Distrito</th><th style="text-align:right;">Pedidos</th><th style="text-align:right;">Monto</th></tr>
+            </thead>
+            <tbody id="tb-distritos"></tbody>
+          </table>
+        </div>
       </div>
-    `;
-  }
+    </div>
 
-  function renderVendedoras(d){
-    const rows = d.tabs.vendedoras.rows;
-    const tot = d.tabs.vendedoras.totals;
-    $("vendedoras").innerHTML = `
-      <div class="card">
-        <h3>Vendedoras por día (ventas y saldo)</h3>
-        <div class="muted">Total del periodo: ${money(tot.monto)} | Pedidos: ${tot.pedidos} | Saldo: ${money(tot.saldo)}</div>
-        ${table(rows, [
-          ["fecha","Fecha"],
-          ["nombre","Vendedora"],
-          ["pedidos","Pedidos"],
-          ["monto","Monto","money"],
-          ["saldo","Saldo","money"]
-        ])}
+    <!-- VENDEDORAS -->
+    <div class="section" id="sec-vendedoras">
+      <div class="grid2">
+        <div class="card">
+          <h3>Resumen por vendedora (Top)</h3>
+          <p class="hint">Monto total y pedidos (para resumen + gráfico).</p>
+          <div class="chartBox"><canvas id="chVendedoras"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Vendedoras por día (ventas y saldo)</h3>
+          <p class="hint">Detalle por fecha y vendedora.</p>
+          <div style="overflow:auto; max-height: 520px;">
+            <table>
+              <thead>
+              <tr><th>Fecha</th><th>Vendedora</th><th style="text-align:right;">Pedidos</th><th style="text-align:right;">Monto</th><th style="text-align:right;">Saldo</th></tr>
+              </thead>
+              <tbody id="tb-vendedoras"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
-    `;
-  }
+    </div>
 
-  function renderDelivery(d){
-    $("delivery").innerHTML = `
-      <div class="grid-2">
+    <!-- DELIVERY -->
+    <div class="section" id="sec-delivery">
+      <div class="grid2">
         <div class="card">
           <h3>Delivery por día</h3>
-          <div class="muted">Cobrado, costo y cantidad de entregas.</div>
-          <div class="chartBox"><canvas id="chDel"></canvas></div>
+          <p class="hint">Cobrado vs costo.</p>
+          <div class="chartBox"><canvas id="chDeliveryDia"></canvas></div>
         </div>
         <div class="card">
           <h3>Recojo en tienda (por día)</h3>
-          <div class="muted">Cantidad de pedidos con recojo.</div>
-          <div class="chartBox"><canvas id="chRec"></canvas></div>
+          <p class="hint">Si Dirección contiene “RECOJO / TIENDA” o columna Recojo = SI.</p>
+          <div class="chartBox"><canvas id="chRecojo"></canvas></div>
         </div>
       </div>
+
       <div style="height:12px"></div>
+
+      <div class="card">
+        <h3>Ahorro delivery por día</h3>
+        <p class="hint">Delivery cliente − costo delivery (diferencia/ahorro).</p>
+        <div class="chartBox"><canvas id="chAhorro"></canvas></div>
+      </div>
+
+      <div style="height:12px"></div>
+
       <div class="card">
         <h3>Delivery por motorizado (ranking)</h3>
-        ${table(d.tabs.delivery.ranking,[
-          ["key","Motorizado"],
-          ["entregas","Entregas"],
-          ["cobrado","Cobrado","money"],
-          ["costo","Costo","money"]
-        ])}
+        <p class="hint">Incluye rango de fechas (desde/hasta), cobrado y costo.</p>
+        <div style="overflow:auto; max-height: 520px;">
+          <table>
+            <thead>
+              <tr><th>Motorizado</th><th style="text-align:right;">Entregas</th><th style="text-align:right;">Cobrado</th><th style="text-align:right;">Costo</th><th>Desde</th><th>Hasta</th></tr>
+            </thead>
+            <tbody id="tb-moto"></tbody>
+          </table>
+        </div>
       </div>
-    `;
+    </div>
 
-    const ds = state.data.charts;
-    state.charts.del = new Chart(document.getElementById("chDel"),{
-      type:"bar",
-      data:{
-        labels: ds.days,
-        datasets:[
-          { label:"Cobrado", data: ds.deliveryCobradoByDay },
-          { label:"Costo", data: ds.deliveryCostoByDay }
-        ]
-      },
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        plugins:{ legend:{ labels:{ color:"#e7eefc" } } },
-        scales:{
-          x:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } },
-          y:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } }
-        }
-      }
-    });
-
-    state.charts.rec = new Chart(document.getElementById("chRec"),{
-      type:"bar",
-      data:{ labels: ds.days, datasets:[{ label:"Recojo (cant)", data: ds.recojoCantByDay }] },
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        plugins:{ legend:{ labels:{ color:"#e7eefc" } } },
-        scales:{
-          x:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } },
-          y:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } }
-        }
-      }
-    });
-  }
-
-  function renderProductos(d){
-    $("productos").innerHTML = `
+    <!-- PRODUCTOS -->
+    <div class="section" id="sec-productos">
       <div class="card">
-        <h3>Top 20 productos</h3>
-        <div class="muted">Ordenado por monto (desc). Incluye cantidad.</div>
-        ${table(d.tabs.productos.top20,[
-          ["key","Producto"],
-          ["cant","Cantidad"],
-          ["monto","Monto","money"]
-        ])}
+        <h3>Productos / Bocaditos (agregado)</h3>
+        <p class="hint">Lista completa (producto, cantidad y monto). Puedes filtrar por periodo en la barra superior.</p>
+        <div style="overflow:auto; max-height: 620px;">
+          <table>
+            <thead>
+              <tr><th>Producto</th><th style="text-align:right;">Cantidad</th><th style="text-align:right;">Monto</th></tr>
+            </thead>
+            <tbody id="tb-productos"></tbody>
+          </table>
+        </div>
       </div>
-    `;
-  }
+    </div>
 
-  function renderClientes(d){
-    $("clientes").innerHTML = `
+    <!-- CLIENTES -->
+    <div class="section" id="sec-clientes">
       <div class="card">
         <h3>Clientes del período (hasta 200)</h3>
-        <div class="muted">Total clientes en el período: <b>${d.tabs.clientes.totalPeriodo}</b>. Ordenado por última compra.</div>
-        ${table(d.tabs.clientes.list,[
-          ["cliente","Cliente"],
-          ["celular","Celular"],
-          ["ultima","Última compra"],
-          ["pedidos","Pedidos"],
-          ["monto","Monto","money"]
-        ])}
-      </div>
-    `;
-  }
-
-  function renderGastos(d){
-    $("gastos").innerHTML = `
-      <div class="grid-2">
-        <div class="card">
-          <h3>Gastos por categoría</h3>
-          ${table(d.tabs.gastos.porCategoria,[
-            ["key","Categoría"],
-            ["cant","Cant"],
-            ["monto","Monto","money"]
-          ])}
-        </div>
-        <div class="card">
-          <h3>Gastos (total)</h3>
-          <p class="kpi-value">${money(d.tabs.gastos.total)}</p>
-          <p class="muted">En el período seleccionado.</p>
+        <p class="hint">Ordenado por monto acumulado (desc). Incluye numeración y cantidad de pedidos.</p>
+        <div style="overflow:auto; max-height: 620px;">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Cliente</th><th>Celular</th><th>Última compra</th><th style="text-align:right;">Pedidos</th><th style="text-align:right;">Monto</th></tr>
+            </thead>
+            <tbody id="tb-clientes"></tbody>
+          </table>
         </div>
       </div>
-    `;
-  }
+    </div>
 
-  function renderMediosPago(d){
-    $("mediosPago").innerHTML = `
+    <!-- GASTOS -->
+    <div class="section" id="sec-gastos">
       <div class="card">
-        <h3>Medios de pago (1er pago + 2do pago)</h3>
-        <div class="muted">Suma por cuenta destino.</div>
-        ${table(d.tabs.mediosPago.cuentas,[
-          ["cuenta","Cuenta"],
-          ["monto","Monto","money"]
-        ])}
+        <h3>Gastos por categoría</h3>
+        <p class="hint">Se lee de hoja GASTOS, columna T.SOLES (o Monto/Total si existiera).</p>
+        <div style="overflow:auto; max-height: 620px;">
+          <table>
+            <thead>
+              <tr><th>Categoría</th><th style="text-align:right;">Registros</th><th style="text-align:right;">Monto</th></tr>
+            </thead>
+            <tbody id="tb-gcat"></tbody>
+          </table>
+        </div>
       </div>
-    `;
-  }
+    </div>
 
-  function renderServicios(d){
-    $("servicios").innerHTML = `
-      <div class="grid-2">
+    <!-- MEDIOS (placeholder) -->
+    <div class="section" id="sec-medios">
+      <div class="card">
+        <h3>Medios de pago</h3>
+        <p class="hint">Si quieres, lo siguiente es agregar ranking por medio de pago (BCP/YAPE/PLIN/EFECTIVO) desde ventas y/o envíos.</p>
+        <div class="badge">Pendiente de conectar campos</div>
+      </div>
+    </div>
+
+    <!-- SERVICIOS -->
+    <div class="section" id="sec-servicios">
+      <div class="grid2">
         <div class="card">
           <h3>Servicios: Pagado vs Pendiente (por día)</h3>
-          <div class="muted">Se toma TIPO / FECHA / MONTO / ESTADO.</div>
-          <div class="chartBox"><canvas id="chServ"></canvas></div>
+          <p class="hint">Lee de hoja servicios: TIPO / FECHA / MONTO / ESTADO.</p>
+          <div class="chartBox"><canvas id="chServicios"></canvas></div>
         </div>
         <div class="card">
           <h3>Servicios (lista)</h3>
-          <div class="muted">Hasta 200 filas del período.</div>
-          ${table(d.tabs.servicios.list,[
-            ["tipo","TIPO"],
-            ["fecha","FECHA"],
-            ["monto","MONTO","money"],
-            ["estado","ESTADO"]
-          ])}
+          <p class="hint">Hasta 200 filas del período.</p>
+          <div style="overflow:auto; max-height: 520px;">
+            <table>
+              <thead><tr><th>Tipo</th><th>Fecha</th><th style="text-align:right;">Monto</th><th>Estado</th><th>Medio</th><th>Obs</th></tr></thead>
+              <tbody id="tb-serv"></tbody>
+            </table>
+          </div>
         </div>
       </div>
-      <div style="height:12px"></div>
-      <div class="card">
-        <h3>Servicios (KPI)</h3>
-        <div class="muted">
-          Total: <b>${money(d.tabs.servicios.kpi.total)}</b> |
-          Pagados: <b>${money(d.tabs.servicios.kpi.pagados)}</b> |
-          Pendientes: <b>${money(d.tabs.servicios.kpi.pendientes)}</b>
-        </div>
-      </div>
-    `;
+    </div>
 
-    const ds = state.data.charts;
-    state.charts.serv = new Chart(document.getElementById("chServ"),{
-      type:"bar",
-      data:{
-        labels: ds.days,
-        datasets:[
-          { label:"Pagado", data: ds.servPagadoByDay },
-          { label:"Pendiente", data: ds.servPendienteByDay }
-        ]
-      },
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        plugins:{ legend:{ labels:{ color:"#e7eefc" } } },
-        scales:{
-          x:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } },
-          y:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } }
+  </div>
+
+<script>
+  // ====== CONFIG ======
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXJjMaSSMq2ag4dBa1UvtTbXxlTogJsqzwATF4Ut--pqVK-vvLXdydg7rG_LdTIeRb/exec";
+
+  // ====== STATE ======
+  let charts = {};
+
+  // ====== INIT ======
+  const $ = (id)=>document.getElementById(id);
+
+  function money(n){
+    const x = Number(n||0);
+    return "S/ " + x.toLocaleString("es-PE",{minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function setErr(msg){
+    const box = $("err");
+    if(!msg){ box.style.display="none"; box.textContent=""; return; }
+    box.style.display="block";
+    box.textContent = msg;
+  }
+
+  function setModeUI(){
+    const mode = $("mode").value;
+    const isRange = mode === "range";
+    $("lblMonth").style.display = isRange ? "none" : "inline";
+    $("month").style.display = isRange ? "none" : "inline";
+    $("lblFrom").style.display = isRange ? "inline" : "none";
+    $("from").style.display = isRange ? "inline" : "none";
+    $("lblTo").style.display = isRange ? "inline" : "none";
+    $("to").style.display = isRange ? "inline" : "none";
+  }
+
+  function currentMonthValue(){
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    return `${y}-${m}`;
+  }
+
+  $("month").value = currentMonthValue();
+  setModeUI();
+  $("mode").addEventListener("change", setModeUI);
+
+  // Tabs
+  document.querySelectorAll(".tab").forEach(t=>{
+    t.addEventListener("click", ()=>{
+      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+      t.classList.add("active");
+      const key = t.dataset.tab;
+      document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+      $("sec-"+key).classList.add("active");
+    });
+  });
+
+  $("btn").addEventListener("click", loadAll);
+
+  // Auto load
+  loadAll();
+
+  async function loadAll(){
+    setErr(null);
+
+    const mode = $("mode").value;
+    const q = new URLSearchParams();
+    q.set("op","all");
+    q.set("mode", mode);
+
+    if(mode === "range"){
+      if($("from").value) q.set("from",$("from").value);
+      if($("to").value) q.set("to",$("to").value);
+    } else {
+      q.set("month", $("month").value); // YYYY-MM
+    }
+
+    const url = `${SCRIPT_URL}?${q.toString()}`;
+
+    try{
+      const res = await fetch(url, { method:"GET" });
+      const data = await res.json();
+
+      if(!data.ok){
+        setErr("Error Apps Script: " + (data.error || "desconocido"));
+        return;
+      }
+
+      render(data);
+    } catch(e){
+      setErr("No se pudo cargar data desde Apps Script: " + e.message);
+    }
+  }
+
+  function destroyChart(id){
+    if(charts[id]){ charts[id].destroy(); delete charts[id]; }
+  }
+
+  function makeLineChart(canvasId, labels, datasets){
+    destroyChart(canvasId);
+    const ctx = document.getElementById(canvasId);
+    charts[canvasId] = new Chart(ctx, {
+      type: "line",
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "index", intersect:false },
+        plugins: {
+          legend: { labels:{ color: "rgba(255,255,255,.85)" } }
+        },
+        scales: {
+          x: { ticks:{ color:"rgba(255,255,255,.70)" }, grid:{ color:"rgba(255,255,255,.06)" } },
+          y: { ticks:{ color:"rgba(255,255,255,.70)" }, grid:{ color:"rgba(255,255,255,.06)" } }
         }
       }
     });
   }
 
-  function table(rows, cols){
-    rows = rows || [];
-    const head = cols.map(c=>`<th>${c[1]}</th>`).join("");
-    const body = rows.map(r=>{
-      const tds = cols.map(c=>{
-        const key=c[0], type=c[2]||"";
-        let v = (r && r[key]!==undefined) ? r[key] : "";
-        if(type==="money") v = money(v);
-        return `<td class="${type==="money"?"right":""}">${v}</td>`;
-      }).join("");
-      return `<tr>${tds}</tr>`;
-    }).join("");
-
-    return `
-      <table>
-        <thead><tr>${head}</tr></thead>
-        <tbody>${body || `<tr><td colspan="${cols.length}" class="muted">Sin datos en el período.</td></tr>`}</tbody>
-      </table>
-    `;
+  function makeBarChart(canvasId, labels, datasets){
+    destroyChart(canvasId);
+    const ctx = document.getElementById(canvasId);
+    charts[canvasId] = new Chart(ctx, {
+      type: "bar",
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend:{ labels:{ color:"rgba(255,255,255,.85)" } } },
+        scales: {
+          x: { ticks:{ color:"rgba(255,255,255,.70)" }, grid:{ color:"rgba(255,255,255,.06)" } },
+          y: { ticks:{ color:"rgba(255,255,255,.70)" }, grid:{ color:"rgba(255,255,255,.06)" } }
+        }
+      }
+    });
   }
 
-  // Init defaults
-  (function init(){
-    // pestañas
-    setTabs("finanzas");
-    activateTab("finanzas");
+  function render(payload){
+    // KPIs
+    const k = payload.kpis;
+    $("k-ventas").textContent = money(k.ventasTotal);
+    $("k-gastos").textContent = money(k.gastosTotal);
+    $("k-utilidad").textContent = money(k.utilidad);
+    $("k-saldo").textContent = money(k.saldoPendiente);
 
-    // defaults fecha
-    const now = new Date();
-    const m = String(now.getMonth()+1).padStart(2,"0");
-    $("month").value = `${now.getFullYear()}-${m}`;
-    $("from").value = `${now.getFullYear()}-${m}-01`;
-    $("to").value = `${now.getFullYear()}-${m}-${String(now.getDate()).padStart(2,"0")}`;
+    $("k-delivery").textContent = money(k.deliveryCobrado);
+    $("k-costodel").textContent = money(k.costoDelivery);
+    $("k-margendel").textContent = money(k.margenDelivery);
+    $("k-clientes").textContent = (k.clientesTotal ?? 0).toLocaleString("es-PE");
 
-    bindMode();
-    $("btn").onclick = load;
+    $("k-prom").textContent = money(k.promedioDiario);
+    $("k-proy").textContent = money(k.proyeccionMensual);
+    $("k-docs").textContent = `${k.boletasFacturas.boletas} / ${k.boletasFacturas.facturas}`;
+    $("k-faltantes").textContent = (k.comprobantesFaltantes ?? 0).toLocaleString("es-PE");
 
-    load();
-  })();
+    // Charts - Finanzas
+    const vg = payload.charts.ventasGastos;
+    makeLineChart("chVentas", vg.labels, [
+      { label:"Ventas", data: vg.ventas, tension:.25 },
+      { label:"Gastos", data: vg.gastos, tension:.25 },
+      { label:"Saldo pendiente", data: vg.saldo, tension:.25 },
+    ]);
+
+    const ac = payload.charts.acumuladoVentas;
+    makeLineChart("chAcum", ac.labels, [
+      { label:"Acumulado", data: ac.values, tension:.25 }
+    ]);
+
+    // Alertas tablas
+    const pend = payload.tables.alertas.pendientesComprobante || [];
+    $("tb-pendcomp").innerHTML = pend.map(r=>`
+      <tr>
+        <td>${r.n}</td>
+        <td>${r.fecha||""}</td>
+        <td>${r.pedido||""}</td>
+        <td>${r.nota||""}</td>
+        <td>${r.cliente||""}</td>
+        <td>${r.comprobante||""}</td>
+        <td style="text-align:right;">${money(r.total||0)}</td>
+      </tr>
+    `).join("") || `<tr><td colspan="7" class="muted">Sin registros.</td></tr>`;
+
+    const sal = payload.tables.alertas.saldosPendientes || {rows:[], totalFinal:0};
+    $("tb-saldos").innerHTML = (sal.rows||[]).map(r=>`
+      <tr>
+        <td>${r.fecha||""}</td>
+        <td>${r.cliente||""}</td>
+        <td style="text-align:right;">${money(r.total||0)}</td>
+        <td style="text-align:right;">${money(r.por_pagar||0)}</td>
+      </tr>
+    `).join("") || `<tr><td colspan="4" class="muted">Sin registros.</td></tr>`;
+    $("tb-saldos-total").textContent = money(sal.totalFinal||0);
+
+    // Distritos
+    const dist = payload.tables.distritos || [];
+    $("tb-distritos").innerHTML = dist.map(r=>`
+      <tr>
+        <td>${r.distrito||""}</td>
+        <td style="text-align:right;">${(r.pedidos||0).toLocaleString("es-PE")}</td>
+        <td style="text-align:right;">${money(r.monto||0)}</td>
+      </tr>
+    `).join("") || `<tr><td colspan="3" class="muted">Sin registros.</td></tr>`;
+
+    // Vendedoras
+    const vendTable = payload.tables.vendedoras || [];
+    $("tb-vendedoras").innerHTML = vendTable.map(r=>`
+      <tr>
+        <td>${r.fecha||""}</td>
+        <td>${r.vendedora||""}</td>
+        <td style="text-align:right;">${(r.pedidos||0).toLocaleString("es-PE")}</td>
+        <td style="text-align:right;">${money(r.monto||0)}</td>
+        <td style="text-align:right;">${money(r.saldo||0)}</td>
+      </tr>
+    `).join("") || `<tr><td colspan="5" class="muted">Sin registros.</td></tr>`;
+
+    const vendCh = payload.charts.vendedoras || {labels:[], monto:[], pedidos:[]};
+    makeBarChart("chVendedoras", vendCh.labels, [
+      { label:"Monto", data: vendCh.monto },
+      { label:"Pedidos", data: vendCh.pedidos },
+    ]);
+
+    // Delivery charts
+    const d1 = payload.charts.deliveryPorDia || {labels:[], cobrado:[], costo:[]};
+    makeBarChart("chDeliveryDia", d1.labels, [
+      { label:"Cobrado", data: d1.cobrado },
+      { label:"Costo", data: d1.costo },
+    ]);
+
+    const r1 = payload.charts.recojoPorDia || {labels:[], cantidad:[]};
+    makeLineChart("chRecojo", r1.labels, [
+      { label:"Recojo (cant)", data: r1.cantidad, tension:.25 }
+    ]);
+
+    const a1 = payload.charts.ahorroDeliveryPorDia || {labels:[], cobrado:[], costo:[], ahorro:[]};
+    makeLineChart("chAhorro", a1.labels, [
+      { label:"Cobrado", data: a1.cobrado, tension:.25 },
+      { label:"Costo", data: a1.costo, tension:.25 },
+      { label:"Ahorro", data: a1.ahorro, tension:.25 },
+    ]);
+
+    // Ranking motorizado
+    const moto = payload.tables.deliveryMotorizado || [];
+    $("tb-moto").innerHTML = moto.map(r=>`
+      <tr>
+        <td>${r.motorizado||"-"}</td>
+        <td style="text-align:right;">${(r.entregas||0).toLocaleString("es-PE")}</td>
+        <td style="text-align:right;">${money(r.cobrado||0)}</td>
+        <td style="text-align:right;">${money(r.costo||0)}</td>
+        <td>${r.desde||""}</td>
+        <td>${r.hasta||""}</td>
+      </tr>
+    `).join("") || `<tr><td colspan="6" class="muted">Sin registros.</td></tr>`;
+
+    // Productos
+    const prod = payload.tables.productos || [];
+    $("tb-productos").innerHTML = prod.map(r=>`
+      <tr>
+        <td>${r.producto||""}</td>
+        <td style="text-align:right;">${(r.cantidad||0).toLocaleString("es-PE")}</td>
+        <td style="text-align:right;">${money(r.monto||0)}</td>
+      </tr>
+    `).join("") || `<tr><td colspan="3" class="muted">Sin registros.</td></tr>`;
+
+    // Clientes
+    const cl = payload.tables.clientes || [];
+    $("tb-clientes").innerHTML = cl.map(r=>`
+      <tr>
+        <td>${r.n}</td>
+        <td>${r.cliente||""}</td>
+        <td>${r.celular||""}</td>
+        <td>${r.ultima_compra||""}</td>
+        <td style="text-align:right;">${(r.pedidos||0).toLocaleString("es-PE")}</td>
+        <td style="text-align:right;">${money(r.monto||0)}</td>
+      </tr>
+    `).join("") || `<tr><td colspan="6" class="muted">Sin registros.</td></tr>`;
+
+    // Gastos por categoría
+    const gc = payload.tables.gastosCategoria || [];
+    $("tb-gcat").innerHTML = gc.map(r=>`
+      <tr>
+        <td>${r.categoria||""}</td>
+        <td style="text-align:right;">${(r.registros||0).toLocaleString("es-PE")}</td>
+        <td style="text-align:right;">${money(r.monto||0)}</td>
+      </tr>
+    `).join("") || `<tr><td colspan="3" class="muted">Sin registros.</td></tr>`;
+
+    // Servicios
+    const sc = payload.charts.serviciosPagadoPendiente || {labels:[], pagado:[], pendiente:[]};
+    makeBarChart("chServicios", sc.labels, [
+      { label:"Pagado", data: sc.pagado },
+      { label:"Pendiente", data: sc.pendiente },
+    ]);
+
+    const sl = payload.tables.serviciosLista || [];
+    $("tb-serv").innerHTML = sl.map(r=>`
+      <tr>
+        <td>${r.tipo||""}</td>
+        <td>${r.fecha||""}</td>
+        <td style="text-align:right;">${money(r.monto||0)}</td>
+        <td>${r.estado||""}</td>
+        <td>${r.medio_pago||""}</td>
+        <td>${r.observaciones||""}</td>
+      </tr>
+    `).join("") || `<tr><td colspan="6" class="muted">Sin registros.</td></tr>`;
+  }
 </script>
 </body>
 </html>
