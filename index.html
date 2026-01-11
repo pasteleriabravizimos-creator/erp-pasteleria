@@ -1,813 +1,203 @@
-<!DOCTYPE html>
-<html lang="es">
+<!doctype html>
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>BRAVIZIMO'S ERP v2</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>ERP Dashboard</title>
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
   <style>
-    body { background: #020617; color: #e5e7eb; }
-    .sidebar-item.active { background: #1f2937; color: #fbbf24; }
-    .card { background: #020617; border-radius: 0.75rem; border: 1px solid #1f2937; }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; margin:0; background:#fafafa;}
+    header{padding:16px 20px; background:#111; color:#fff;}
+    .wrap{padding:16px 20px; max-width:1200px; margin:0 auto;}
+    .grid{display:grid; gap:12px;}
+    .kpis{grid-template-columns:repeat(4,minmax(0,1fr));}
+    .card{background:#fff; border:1px solid #eee; border-radius:14px; padding:14px;}
+    .kpi-title{font-size:12px; color:#666; margin-bottom:6px;}
+    .kpi-value{font-size:22px; font-weight:700;}
+    .two{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .chart{height:360px;}
+    table{width:100%; border-collapse:collapse;}
+    th,td{padding:10px; border-bottom:1px solid #eee; text-align:left; font-size:14px;}
+    th{color:#666; font-weight:600;}
+    .muted{color:#777; font-size:12px;}
+    .btn{border:1px solid #ddd; background:#fff; border-radius:10px; padding:8px 10px; cursor:pointer;}
+    @media(max-width:900px){
+      .kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
+      .two{grid-template-columns:1fr;}
+    }
   </style>
 </head>
-<body class="min-h-screen flex">
 
-  <!-- Sidebar -->
-  <aside class="w-64 bg-slate-950 border-r border-slate-800 flex flex-col">
-    <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
-      <div>
-        <div class="text-xs text-slate-400 uppercase tracking-wider">BRAVIZIMO'S</div>
-        <div class="font-semibold text-slate-100 text-sm">ERP · Bocaditos</div>
-      </div>
-      <span class="text-xs text-emerald-400">v2</span>
+<body>
+<header>
+  <div style="max-width:1200px;margin:0 auto; display:flex; justify-content:space-between; gap:12px; align-items:center;">
+    <div>
+      <div style="font-weight:700;">ERP Dashboard</div>
+      <div class="muted">Sincronizado con Google Sheets</div>
     </div>
+    <button class="btn" id="btnReload">Actualizar</button>
+  </div>
+</header>
 
-    <nav class="flex-1 overflow-y-auto text-sm mt-2">
-      <div class="px-3 text-slate-500 uppercase text-[11px] mt-3 mb-1">General</div>
-      <button class="w-full text-left px-5 py-2 sidebar-item active" data-view="vista-dashboard">Dashboard</button>
+<div class="wrap">
+  <div id="status" class="muted">Cargando datos…</div>
 
-      <div class="px-3 text-slate-500 uppercase text-[11px] mt-4 mb-1">Ventas & Entregas</div>
-      <button class="w-full text-left px-5 py-2 sidebar-item" data-view="vista-ventas">Ventas</button>
-      <button class="w-full text-left px-5 py-2 sidebar-item" data-view="vista-delivery">Delivery</button>
+  <div class="grid kpis" style="margin-top:12px;">
+    <div class="card"><div class="kpi-title">Ingresos (caja)</div><div id="kpiIngresos" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Gastos</div><div id="kpiGastos" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Utilidad</div><div id="kpiUtilidad" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Pedidos</div><div id="kpiPedidos" class="kpi-value">—</div></div>
 
-      <div class="px-3 text-slate-500 uppercase text-[11px] mt-4 mb-1">Operación</div>
-      <button class="w-full text-left px-5 py-2 sidebar-item" data-view="vista-inventario">Inventario</button>
-      <button class="w-full text-left px-5 py-2 sidebar-item" data-view="vista-insumos">Insumos</button>
-      <button class="w-full text-left px-5 py-2 sidebar-item" data-view="vista-compras">Compras</button>
-      <button class="w-full text-left px-5 py-2 sidebar-item" data-view="vista-proveedores">Proveedores</button>
+    <div class="card"><div class="kpi-title">Ventas (Total pedidos)</div><div id="kpiVentasPedidos" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Clientes nuevos</div><div id="kpiNuevos" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Clientes recurrentes</div><div id="kpiRecurrentes" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Boletas / Facturas / Pend.</div><div id="kpiComp" class="kpi-value">—</div></div>
+  </div>
 
-      <div class="px-3 text-slate-500 uppercase text-[11px] mt-4 mb-1">Finanzas</div>
-      <button class="w-full text-left px-5 py-2 sidebar-item" data-view="vista-gastos">Gastos generales</button>
-      <button class="w-full text-left px-5 py-2 sidebar-item" data-view="vista-servicios">Servicios</button>
-      <button class="w-full text-left px-5 py-2 sidebar-item" data-view="vista-facturas">Facturas</button>
-
-      <div class="px-3 text-slate-500 uppercase text-[11px] mt-4 mb-1">Personas & Clientes</div>
-      <button class="w-full text-left px-5 py-2 sidebar-item" data-view="vista-clientes">Clientes</button>
-      <button class="w-full text-left px-5 py-2 sidebar-item" data-view="vista-personal">RRHH / Personal</button>
-      <button class="w-full text-left px-5 py-2 sidebar-item" data-view="vista-reclamos">Reclamos</button>
-    </nav>
-
-    <div class="px-4 py-3 border-t border-slate-800 text-[11px] text-slate-500">
-      Conectado a <span class="text-emerald-400">Google Sheets</span>
+  <div class="grid two" style="margin-top:12px;">
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:8px;">Ingresos vs Gastos por día</div>
+      <div id="chartIngresosGastos" class="chart"></div>
     </div>
-  </aside>
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:8px;">Ingresos acumulados</div>
+      <div id="chartAcumulado" class="chart"></div>
+    </div>
+  </div>
 
-  <!-- Main -->
-  <main class="flex-1 bg-slate-950">
-    <header class="flex items-center justify-between px-8 py-4 border-b border-slate-800">
-      <div>
-        <h1 class="text-lg font-semibold text-slate-100">Panel de control</h1>
-        <p class="text-xs text-slate-400">Resumen de ventas, operación, finanzas y equipo</p>
-      </div>
-      <button id="btn-sync"
-              class="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-xs font-medium text-slate-950 flex items-center gap-2">
-        <span>Sincronizar ahora</span>
-      </button>
-    </header>
+  <div class="grid two" style="margin-top:12px;">
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:8px;">Ingresos por categoría</div>
+      <div id="chartCategorias" class="chart"></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:8px;">Ingresos por distrito</div>
+      <div id="chartDistritos" class="chart"></div>
+    </div>
+  </div>
 
-    <section id="vista-dashboard" class="p-8 view">
-      <!-- Tarjetas resumen -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="card p-4">
-          <div class="text-xs text-slate-400">Total ventas (histórico)</div>
-          <div id="dash-total-ventas" class="text-xl font-semibold mt-1">S/ 0.00</div>
-          <div id="dash-ticket-prom" class="text-[11px] text-slate-500 mt-1">Ticket promedio S/ 0.00</div>
-        </div>
-        <div class="card p-4">
-          <div class="text-xs text-slate-400">Ventas hoy</div>
-          <div id="dash-total-hoy" class="text-xl font-semibold mt-1">S/ 0.00</div>
-          <div class="text-[11px] text-slate-500 mt-1">Ingresos del día</div>
-        </div>
-        <div class="card p-4">
-          <div class="text-xs text-slate-400">Clientes registrados</div>
-          <div id="dash-clientes" class="text-xl font-semibold mt-1">0</div>
-          <div class="text-[11px] text-slate-500 mt-1">Base de datos de clientes</div>
-        </div>
-        <div class="card p-4">
-          <div class="text-xs text-slate-400">Productos en inventario</div>
-          <div id="dash-productos" class="text-xl font-semibold mt-1">0</div>
-          <div class="text-[11px] text-slate-500 mt-1">Insumos + productos finales</div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="card p-4 lg:col-span-2">
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="text-sm font-semibold text-slate-100">Top productos por stock</h2>
-          </div>
-          <table class="w-full text-xs">
-            <thead class="text-slate-400 border-b border-slate-800">
-              <tr>
-                <th class="py-2 text-left">Código</th>
-                <th class="py-2 text-left">Producto</th>
-                <th class="py-2 text-left">Categoría</th>
-                <th class="py-2 text-right">Stock</th>
-                <th class="py-2 text-right">P. Venta</th>
-              </tr>
-            </thead>
-            <tbody id="tabla-top-stock"></tbody>
-          </table>
-        </div>
-
-        <div class="card p-4">
-          <h2 class="text-sm font-semibold text-slate-100 mb-3">Alertas de inventario</h2>
-          <ul id="lista-alertas" class="space-y-2 text-xs"></ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- VENTAS (solo lista simple por ahora) -->
-    <section id="vista-ventas" class="p-8 view hidden">
-      <h2 class="text-sm font-semibold text-slate-100 mb-4">Ventas</h2>
-      <table class="w-full text-xs">
-        <thead class="border-b border-slate-800 text-slate-400">
-          <tr>
-            <th class="py-2 text-left">Fecha</th>
-            <th class="py-2 text-left">Canal</th>
-            <th class="py-2 text-left">Cliente</th>
-            <th class="py-2 text-right">Total</th>
-            <th class="py-2 text-left">Estado pago</th>
-          </tr>
+  <div class="card" style="margin-top:12px;">
+    <div style="font-weight:700; margin-bottom:8px;">Reporte de vendedoras</div>
+    <div style="overflow:auto; max-height:360px;">
+      <table id="tablaVendedoras">
+        <thead>
+          <tr><th>Vendedora</th><th>Ingresos</th><th>Pedidos</th><th>Ticket prom.</th></tr>
         </thead>
-        <tbody id="tabla-ventas"></tbody>
+        <tbody></tbody>
       </table>
-    </section>
+    </div>
+  </div>
 
-    <!-- DELIVERY -->
-    <section id="vista-delivery" class="p-8 view hidden">
-      <h2 class="text-sm font-semibold text-slate-100 mb-4">Delivery programado</h2>
-      <table class="w-full text-xs">
-        <thead class="border-b border-slate-800 text-slate-400">
-          <tr>
-            <th class="py-2 text-left">Fecha</th>
-            <th class="py-2 text-left">Cliente</th>
-            <th class="py-2 text-left">Dirección</th>
-            <th class="py-2 text-left">Distrito</th>
-            <th class="py-2 text-right">Costo</th>
-            <th class="py-2 text-left">Estado</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-delivery"></tbody>
-      </table>
-    </section>
+  <div class="muted" style="margin-top:12px;" id="footerMeta"></div>
+</div>
 
-    <!-- INVENTARIO -->
-    <section id="vista-inventario" class="p-8 view hidden">
-      <h2 class="text-sm font-semibold text-slate-100 mb-4">Inventario</h2>
-      <table class="w-full text-xs">
-        <thead class="border-b border-slate-800 text-slate-400">
-          <tr>
-            <th class="py-2 text-left">Código</th>
-            <th class="py-2 text-left">Producto</th>
-            <th class="py-2 text-left">Categoría</th>
-            <th class="py-2 text-right">Stock</th>
-            <th class="py-2 text-right">Stock mín.</th>
-            <th class="py-2 text-right">P. Venta</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-inventario"></tbody>
-      </table>
-    </section>
+<script>
+  // ✅ Pega tu URL del Web App aquí
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyfPaptyVNwsVD6YSn3Qe1Jnou6u8oEOUFWRQUkpkcstvw0nWBQwM4SS2oApqe3LZPZ/exec";
 
-    <!-- INSUMOS -->
-    <section id="vista-insumos" class="p-8 view hidden">
-      <h2 class="text-sm font-semibold text-slate-100 mb-4">Insumos</h2>
-      <table class="w-full text-xs">
-        <thead class="border-b border-slate-800 text-slate-400">
-          <tr>
-            <th class="py-2 text-left">Código</th>
-            <th class="py-2 text-left">Nombre</th>
-            <th class="py-2 text-left">Categoría</th>
-            <th class="py-2 text-right">Stock</th>
-            <th class="py-2 text-right">Mínimo</th>
-            <th class="py-2 text-right">Costo Unit</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-insumos"></tbody>
-      </table>
-    </section>
+  google.charts.load('current', {packages:['corechart']});
 
-    <!-- COMPRAS -->
-    <section id="vista-compras" class="p-8 view hidden">
-      <h2 class="text-sm font-semibold text-slate-100 mb-4">Compras</h2>
-      <table class="w-full text-xs">
-        <thead class="border-b border-slate-800 text-slate-400">
-          <tr>
-            <th class="py-2 text-left">Fecha</th>
-            <th class="py-2 text-left">Proveedor</th>
-            <th class="py-2 text-right">Total</th>
-            <th class="py-2 text-left">Estado pago</th>
-            <th class="py-2 text-left">Estado compra</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-compras"></tbody>
-      </table>
-    </section>
+  const money = (n) => new Intl.NumberFormat('es-PE', {style:'currency', currency:'PEN'}).format(Number(n||0));
+  const num = (n) => new Intl.NumberFormat('es-PE').format(Number(n||0));
 
-    <!-- PROVEEDORES -->
-    <section id="vista-proveedores" class="p-8 view hidden">
-      <h2 class="text-sm font-semibold text-slate-100 mb-4">Proveedores</h2>
-      <table class="w-full text-xs">
-        <thead class="border-b border-slate-800 text-slate-400">
-          <tr>
-            <th class="py-2 text-left">Nombre</th>
-            <th class="py-2 text-left">RUC</th>
-            <th class="py-2 text-left">Teléfono</th>
-            <th class="py-2 text-left">Email</th>
-            <th class="py-2 text-left">Categoría</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-proveedores"></tbody>
-      </table>
-    </section>
+  // ✅ JSONP loader (evita CORS)
+  function loadJSONP(){
+    return new Promise((resolve, reject) => {
+      const cbName = "cb_" + Math.random().toString(36).slice(2);
 
-    <!-- GASTOS GENERALES -->
-    <section id="vista-gastos" class="p-8 view hidden">
-      <h2 class="text-sm font-semibold text-slate-100 mb-4">Gastos generales</h2>
-      <table class="w-full text-xs mb-2">
-        <thead class="border-b border-slate-800 text-slate-400">
-          <tr>
-            <th class="py-2 text-left">Fecha</th>
-            <th class="py-2 text-left">Categoría</th>
-            <th class="py-2 text-left">Descripción</th>
-            <th class="py-2 text-right">Monto</th>
-            <th class="py-2 text-left">Medio pago</th>
-            <th class="py-2 text-left">Cuenta</th>
-            <th class="py-2 text-left">Estado</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-gastos"></tbody>
-      </table>
-      <div class="text-xs text-slate-400" id="resumen-gastos"></div>
-    </section>
-
-    <!-- SERVICIOS -->
-    <section id="vista-servicios" class="p-8 view hidden">
-      <div class="flex items-center justify-between mb-4">
-        <div>
-          <h2 class="text-sm font-semibold text-slate-100">Servicios</h2>
-          <p class="text-xs text-slate-400">Luz, agua, internet, alquiler, etc. (se guardan también como Gasto categoría "Servicios")</p>
-        </div>
-      </div>
-
-      <!-- Formulario rápido -->
-      <form id="form-servicio" class="card p-4 mb-5 grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
-        <div class="md:col-span-2">
-          <label class="block mb-1 text-slate-400">Servicio</label>
-          <input id="srv-descripcion" type="text" placeholder="Ej: Luz Enel Enero"
-                 class="w-full px-2 py-1.5 rounded-md bg-slate-900 border border-slate-700 text-xs">
-        </div>
-        <div>
-          <label class="block mb-1 text-slate-400">Monto (S/)</label>
-          <input id="srv-monto" type="number" step="0.01" min="0"
-                 class="w-full px-2 py-1.5 rounded-md bg-slate-900 border border-slate-700 text-xs">
-        </div>
-        <div>
-          <label class="block mb-1 text-slate-400">Medio de pago</label>
-          <select id="srv-medio-pago"
-                  class="w-full px-2 py-1.5 rounded-md bg-slate-900 border border-slate-700 text-xs">
-            <option value="">Seleccionar</option>
-            <option>Transferencia</option>
-            <option>Débito automático</option>
-            <option>Efectivo</option>
-            <option>Yape / Plin</option>
-          </select>
-        </div>
-        <div>
-          <label class="block mb-1 text-slate-400">Cuenta</label>
-          <select id="srv-cuenta"
-                  class="w-full px-2 py-1.5 rounded-md bg-slate-900 border border-slate-700 text-xs">
-            <option value="">Seleccionar</option>
-            <option>Bcp BRAVIZIMO’S</option>
-            <option>RUS Rosa</option>
-            <option>RUS Martín</option>
-            <option>RUS Milagros</option>
-            <option>RUS Sandy</option>
-          </select>
-        </div>
-        <div>
-          <label class="block mb-1 text-slate-400">Estado</label>
-          <select id="srv-estado"
-                  class="w-full px-2 py-1.5 rounded-md bg-slate-900 border border-slate-700 text-xs">
-            <option>Pagado</option>
-            <option>Pendiente</option>
-          </select>
-        </div>
-        <div class="md:col-span-5 flex justify-end pt-1">
-          <button type="submit"
-                  class="px-4 py-1.5 rounded-md bg-indigo-500 hover:bg-indigo-400 text-xs font-medium text-slate-50">
-            Guardar servicio
-          </button>
-        </div>
-      </form>
-
-      <!-- Historial -->
-      <div class="card p-4">
-        <h3 class="text-xs font-semibold text-slate-200 mb-3">Historial de servicios (gastos)</h3>
-        <table class="w-full text-xs">
-          <thead class="border-b border-slate-800 text-slate-400">
-            <tr>
-              <th class="py-2 text-left">Fecha</th>
-              <th class="py-2 text-left">Servicio</th>
-              <th class="py-2 text-right">Monto</th>
-              <th class="py-2 text-left">Medio pago</th>
-              <th class="py-2 text-left">Cuenta</th>
-              <th class="py-2 text-left">Estado</th>
-            </tr>
-          </thead>
-          <tbody id="tabla-servicios"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- FACTURAS -->
-    <section id="vista-facturas" class="p-8 view hidden">
-      <h2 class="text-sm font-semibold text-slate-100 mb-4">Facturas y boletas</h2>
-      <table class="w-full text-xs">
-        <thead class="border-b border-slate-800 text-slate-400">
-          <tr>
-            <th class="py-2 text-left">Fecha</th>
-            <th class="py-2 text-left">Tipo</th>
-            <th class="py-2 text-left">Número</th>
-            <th class="py-2 text-left">Cliente</th>
-            <th class="py-2 text-right">Total</th>
-            <th class="py-2 text-left">Estado</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-facturas"></tbody>
-      </table>
-    </section>
-
-    <!-- CLIENTES -->
-    <section id="vista-clientes" class="p-8 view hidden">
-      <h2 class="text-sm font-semibold text-slate-100 mb-4">Clientes</h2>
-      <table class="w-full text-xs">
-        <thead class="border-b border-slate-800 text-slate-400">
-          <tr>
-            <th class="py-2 text-left">Nombre</th>
-            <th class="py-2 text-left">Documento</th>
-            <th class="py-2 text-left">Teléfono</th>
-            <th class="py-2 text-left">Email</th>
-            <th class="py-2 text-left">Segmento</th>
-            <th class="py-2 text-right">Total compras</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-clientes"></tbody>
-      </table>
-    </section>
-
-    <!-- PERSONAL -->
-    <section id="vista-personal" class="p-8 view hidden">
-      <h2 class="text-sm font-semibold text-slate-100 mb-4">RRHH / Personal</h2>
-      <table class="w-full text-xs mb-4">
-        <thead class="border-b border-slate-800 text-slate-400">
-          <tr>
-            <th class="py-2 text-left">Nombre</th>
-            <th class="py-2 text-left">DNI</th>
-            <th class="py-2 text-left">Cargo</th>
-            <th class="py-2 text-left">Teléfono</th>
-            <th class="py-2 text-right">Sueldo</th>
-            <th class="py-2 text-left">Estado</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-personal"></tbody>
-      </table>
-    </section>
-
-    <!-- RECLAMOS -->
-    <section id="vista-reclamos" class="p-8 view hidden">
-      <h2 class="text-sm font-semibold text-slate-100 mb-4">Reclamos</h2>
-      <table class="w-full text-xs">
-        <thead class="border-b border-slate-800 text-slate-400">
-          <tr>
-            <th class="py-2 text-left">Fecha</th>
-            <th class="py-2 text-left">Cliente</th>
-            <th class="py-2 text-left">Tipo</th>
-            <th class="py-2 text-left">Descripción</th>
-            <th class="py-2 text-left">Prioridad</th>
-            <th class="py-2 text-left">Estado</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-reclamos"></tbody>
-      </table>
-    </section>
-
-  </main>
-
-  <!-- ================== JS ================== -->
-  <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbx-Y51fuMKIirWSwadTPWj4m_bdKjIriOIB8DBG2rTQQhk3X-r1iqdW5EDhX6bgiVX_5w/exec';
-    let globalData = {};
-
-    // Cambiar de vista
-    function activarVista(viewId) {
-      document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-      const v = document.getElementById(viewId);
-      if (v) v.classList.remove('hidden');
-
-      document.querySelectorAll('.sidebar-item').forEach(btn => btn.classList.remove('active'));
-      const btn = document.querySelector('.sidebar-item[data-view="' + viewId + '"]');
-      if (btn) btn.classList.add('active');
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.sidebar-item').forEach(btn => {
-        btn.addEventListener('click', () => activarVista(btn.dataset.view));
-      });
-
-      const btnSync = document.getElementById('btn-sync');
-      btnSync.addEventListener('click', async () => {
-        btnSync.disabled = true;
-        btnSync.innerText = 'Sincronizando...';
-        try {
-          await fetch(API_URL + '?action=sync');
-          await cargarDatosDesdeAPI();
-        } catch (err) {
-          console.error(err);
-          alert('Error al sincronizar con Google Sheets');
-        } finally {
-          btnSync.disabled = false;
-          btnSync.innerText = 'Sincronizar ahora';
-        }
-      });
-
-      const formServicio = document.getElementById('form-servicio');
-      formServicio.addEventListener('submit', guardarServicio);
-
-      cargarDatosDesdeAPI();
-    });
-
-    async function cargarDatosDesdeAPI() {
-      try {
-        const res = await fetch(API_URL + '?action=getAll');
-        const data = await res.json();
-        globalData = data;
-
-        renderDashboard(data);
-        renderVentas(data.ventas || []);
-        renderDelivery(data.delivery || []);
-        renderInventario(data.inventario || []);
-        renderInsumos(data.insumos || []);
-        renderCompras(data.compras || []);
-        renderProveedores(data.proveedores || []);
-        renderGastos(data.gastos || []);
-        renderServicios(data.servicios || []);
-        renderFacturas(data.facturas || []);
-        renderClientes(data.clientes || []);
-        renderPersonal(data.personal || []);
-        renderReclamos(data.reclamos || []);
-
-      } catch (err) {
-        console.error(err);
-        alert('No se pudo conectar con el backend (Apps Script). Revisa la URL de la API.');
-      }
-    }
-
-    // ====== RENDERIZADOS ======
-
-    function formatMoney(v) {
-      const n = Number(v || 0);
-      return 'S/ ' + n.toFixed(2);
-    }
-
-    function renderDashboard(data) {
-      const est = data.estadisticas || {};
-      const dash = data.dashboard || {};
-
-      document.getElementById('dash-total-ventas').innerText = formatMoney(est.totalVentas || dash.totalHistorico || 0);
-      document.getElementById('dash-ticket-prom').innerText = 'Ticket promedio ' + formatMoney(est.ticketPromedio || dash.ticketProm || 0);
-      document.getElementById('dash-clientes').innerText = est.totalClientes || dash.totalClientes || 0;
-      document.getElementById('dash-productos').innerText = est.totalProductos || dash.totalProductos || 0;
-      document.getElementById('dash-total-hoy').innerText = formatMoney(dash.totalHoy || 0);
-
-      const top = (dash.topStock || data.inventario || []).slice(0, 5);
-      const tbody = document.getElementById('tabla-top-stock');
-      tbody.innerHTML = '';
-      top.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="py-1.5">${p.codigo || ''}</td>
-          <td class="py-1.5">${p.nombreproducto || ''}</td>
-          <td class="py-1.5">${p.categoria || ''}</td>
-          <td class="py-1.5 text-right">${p.stockactual || 0}</td>
-          <td class="py-1.5 text-right">${formatMoney(p.precioventa || p.pventa)}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      const alertas = dash.alertasInventario || data.alertasInventario || [];
-      const ul = document.getElementById('lista-alertas');
-      ul.innerHTML = '';
-      if (!alertas.length) {
-        ul.innerHTML = '<li class="text-slate-500 text-xs">Sin alertas por ahora 🧁</li>';
-      } else {
-        alertas.forEach(a => {
-          const li = document.createElement('li');
-          li.innerHTML = `<span class="${a.tipo === 'error' ? 'text-rose-400' : 'text-amber-300'}">•</span> ${a.mensaje}`;
-          ul.appendChild(li);
-        });
-      }
-    }
-
-    function renderVentas(ventas) {
-      const tbody = document.getElementById('tabla-ventas');
-      tbody.innerHTML = '';
-      if (!ventas.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="py-3 text-center text-slate-500">Sin ventas registradas.</td></tr>';
-        return;
-      }
-      ventas.forEach(v => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="py-1.5">${v.fecharegistro || ''}</td>
-          <td class="py-1.5">${v.canal || ''}</td>
-          <td class="py-1.5">${v.cliente || ''}</td>
-          <td class="py-1.5 text-right">${formatMoney(v.total)}</td>
-          <td class="py-1.5">${v.estadopago || ''}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderDelivery(delivery) {
-      const tbody = document.getElementById('tabla-delivery');
-      tbody.innerHTML = '';
-      if (!delivery.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="py-3 text-center text-slate-500">Sin entregas programadas.</td></tr>';
-        return;
-      }
-      delivery.forEach(d => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="py-1.5">${d.fecha || ''}</td>
-          <td class="py-1.5">${d.cliente || ''}</td>
-          <td class="py-1.5">${d.direccion || ''}</td>
-          <td class="py-1.5">${d.distrito || ''}</td>
-          <td class="py-1.5 text-right">${formatMoney(d.costo)}</td>
-          <td class="py-1.5">${d.estado || ''}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderInventario(inv) {
-      const tbody = document.getElementById('tabla-inventario');
-      tbody.innerHTML = '';
-      if (!inv.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="py-3 text-center text-slate-500">Sin productos en inventario.</td></tr>';
-        return;
-      }
-      inv.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="py-1.5">${p.codigo || ''}</td>
-          <td class="py-1.5">${p.nombreproducto || ''}</td>
-          <td class="py-1.5">${p.categoria || ''}</td>
-          <td class="py-1.5 text-right">${p.stockactual || 0}</td>
-          <td class="py-1.5 text-right">${p.stockminimo || 0}</td>
-          <td class="py-1.5 text-right">${formatMoney(p.precioventa || p.pventa)}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderInsumos(ins) {
-      const tbody = document.getElementById('tabla-insumos');
-      tbody.innerHTML = '';
-      if (!ins.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="py-3 text-center text-slate-500">Sin insumos registrados.</td></tr>';
-        return;
-      }
-      ins.forEach(i => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="py-1.5">${i.codigo || ''}</td>
-          <td class="py-1.5">${i.nombre || ''}</td>
-          <td class="py-1.5">${i.categoria || ''}</td>
-          <td class="py-1.5 text-right">${i.stock || 0}</td>
-          <td class="py-1.5 text-right">${i.minimo || i.minim || 0}</td>
-          <td class="py-1.5 text-right">${formatMoney(i.costounit || i.costo)}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderCompras(compras) {
-      const tbody = document.getElementById('tabla-compras');
-      tbody.innerHTML = '';
-      if (!compras.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="py-3 text-center text-slate-500">Sin compras registradas.</td></tr>';
-        return;
-      }
-      compras.forEach(c => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="py-1.5">${c.fecha || ''}</td>
-          <td class="py-1.5">${c.proveedor || ''}</td>
-          <td class="py-1.5 text-right">${formatMoney(c.total)}</td>
-          <td class="py-1.5">${c.estadopago || ''}</td>
-          <td class="py-1.5">${c.estadocompra || ''}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderProveedores(prov) {
-      const tbody = document.getElementById('tabla-proveedores');
-      tbody.innerHTML = '';
-      if (!prov.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="py-3 text-center text-slate-500">Sin proveedores registrados.</td></tr>';
-        return;
-      }
-      prov.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="py-1.5">${p.nombre || ''}</td>
-          <td class="py-1.5">${p.ruc || ''}</td>
-          <td class="py-1.5">${p.telefono || ''}</td>
-          <td class="py-1.5">${p.email || ''}</td>
-          <td class="py-1.5">${p.categoria || ''}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderGastos(gastos) {
-      const tbody = document.getElementById('tabla-gastos');
-      tbody.innerHTML = '';
-      if (!gastos.length) {
-        tbody.innerHTML = '<tr><td colspan="7" class="py-3 text-center text-slate-500">Sin gastos registrados.</td></tr>';
-        document.getElementById('resumen-gastos').innerText = '';
-        return;
-      }
-      let total = 0;
-      gastos.forEach(g => {
-        const m = Number(g.monto || 0);
-        total += m;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="py-1.5">${g.fecha || ''}</td>
-          <td class="py-1.5">${g.categoria || ''}</td>
-          <td class="py-1.5">${g.descripcion || ''}</td>
-          <td class="py-1.5 text-right">${formatMoney(m)}</td>
-          <td class="py-1.5">${g.mediopago || ''}</td>
-          <td class="py-1.5">${g.cuenta || ''}</td>
-          <td class="py-1.5">${g.estado || ''}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-      document.getElementById('resumen-gastos').innerText = 'Total de gastos registrados: ' + formatMoney(total);
-    }
-
-    function renderServicios(servicios) {
-      const tbody = document.getElementById('tabla-servicios');
-      tbody.innerHTML = '';
-      if (!servicios.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="py-3 text-center text-slate-500">Sin servicios registrados.</td></tr>';
-        return;
-      }
-      servicios.forEach(s => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="py-1.5">${s.fecha || ''}</td>
-          <td class="py-1.5">${s.servicio || ''}</td>
-          <td class="py-1.5 text-right">${formatMoney(s.monto)}</td>
-          <td class="py-1.5">${s.mediopago || ''}</td>
-          <td class="py-1.5">${s.cuenta || ''}</td>
-          <td class="py-1.5">${s.estado || ''}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderFacturas(facts) {
-      const tbody = document.getElementById('tabla-facturas');
-      tbody.innerHTML = '';
-      if (!facts.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="py-3 text-center text-slate-500">Sin facturas registradas.</td></tr>';
-        return;
-      }
-      facts.forEach(f => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="py-1.5">${f.fecha || ''}</td>
-          <td class="py-1.5">${f.tipo || ''}</td>
-          <td class="py-1.5">${f.numero || ''}</td>
-          <td class="py-1.5">${f.cliente || ''}</td>
-          <td class="py-1.5 text-right">${formatMoney(f.total)}</td>
-          <td class="py-1.5">${f.estado || ''}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderClientes(cli) {
-      const tbody = document.getElementById('tabla-clientes');
-      tbody.innerHTML = '';
-      if (!cli.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="py-3 text-center text-slate-500">Sin clientes registrados.</td></tr>';
-        return;
-      }
-      cli.forEach(c => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="py-1.5">${c.nombre || ''}</td>
-          <td class="py-1.5">${c.documento || ''}</td>
-          <td class="py-1.5">${c.telefono || ''}</td>
-          <td class="py-1.5">${c.email || ''}</td>
-          <td class="py-1.5">${c.segmento || ''}</td>
-          <td class="py-1.5 text-right">${formatMoney(c.totalcompras || 0)}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderPersonal(per) {
-      const tbody = document.getElementById('tabla-personal');
-      tbody.innerHTML = '';
-      if (!per.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="py-3 text-center text-slate-500">Sin personal registrado.</td></tr>';
-        return;
-      }
-      per.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="py-1.5">${p.nombre || ''}</td>
-          <td class="py-1.5">${p.dni || ''}</td>
-          <td class="py-1.5">${p.cargo || ''}</td>
-          <td class="py-1.5">${p.telefono || ''}</td>
-          <td class="py-1.5 text-right">${formatMoney(p.sueldo || 0)}</td>
-          <td class="py-1.5">${p.estado || ''}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderReclamos(rec) {
-      const tbody = document.getElementById('tabla-reclamos');
-      tbody.innerHTML = '';
-      if (!rec.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="py-3 text-center text-slate-500">Sin reclamos registrados.</td></tr>';
-        return;
-      }
-      rec.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="py-1.5">${r.fecha || ''}</td>
-          <td class="py-1.5">${r.cliente || ''}</td>
-          <td class="py-1.5">${r.tipo || ''}</td>
-          <td class="py-1.5">${r.descripcion || ''}</td>
-          <td class="py-1.5">${r.prioridad || ''}</td>
-          <td class="py-1.5">${r.estado || ''}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    // ====== GUARDAR SERVICIO ======
-
-    async function guardarServicio(e) {
-      e.preventDefault();
-      const descripcion = document.getElementById('srv-descripcion').value.trim();
-      const monto = parseFloat(document.getElementById('srv-monto').value || '0');
-      const medioPago = document.getElementById('srv-medio-pago').value;
-      const cuenta = document.getElementById('srv-cuenta').value;
-      const estado = document.getElementById('srv-estado').value;
-
-      if (!descripcion || !monto) {
-        alert('Coloca al menos el nombre del servicio y el monto.');
-        return;
-      }
-
-      const payload = {
-        action: 'crear_servicio',
-        servicio: descripcion,
-        monto,
-        medioPago,
-        cuenta,
-        estado
+      window[cbName] = (data) => {
+        delete window[cbName];
+        script.remove();
+        resolve(data);
       };
 
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (!data.success) {
-          throw new Error(data.mensaje || 'Error al guardar servicio');
-        }
-        // recargar datos
-        await cargarDatosDesdeAPI();
-        e.target.reset();
-      } catch (err) {
-        console.error(err);
-        alert('No se pudo guardar el servicio.');
-      }
-    }
+      const script = document.createElement("script");
+      script.src = `${APPS_SCRIPT_URL}?action=data&callback=${cbName}&_=${Date.now()}`;
+      script.onerror = () => {
+        delete window[cbName];
+        script.remove();
+        reject(new Error("No se pudo cargar data desde Apps Script"));
+      };
 
-  </script>
+      document.body.appendChild(script);
+    });
+  }
+
+  function draw(data){
+    document.getElementById('kpiIngresos').textContent = money(data.kpis.ingresos);
+    document.getElementById('kpiGastos').textContent = money(data.kpis.gastos);
+    document.getElementById('kpiUtilidad').textContent = money(data.kpis.utilidad);
+    document.getElementById('kpiPedidos').textContent = num(data.kpis.pedidos);
+    document.getElementById('kpiVentasPedidos').textContent = money(data.kpis.ventasPedidos);
+    document.getElementById('kpiNuevos').textContent = num(data.kpis.clientesNuevos);
+    document.getElementById('kpiRecurrentes').textContent = num(data.kpis.clientesRecurrentes);
+
+    const bo = data.kpis.comprobantes?.boletas ?? 0;
+    const fa = data.kpis.comprobantes?.facturas ?? 0;
+    const pe = data.kpis.comprobantes?.pendientes ?? 0;
+    document.getElementById('kpiComp').textContent = `${num(bo)} / ${num(fa)} / ${num(pe)}`;
+
+    const ig = new google.visualization.DataTable();
+    ig.addColumn('string','Día');
+    ig.addColumn('number','Ingresos');
+    ig.addColumn('number','Gastos');
+    data.series.ingresosGastosDia.forEach(r => ig.addRow([r.date, Number(r.ingresos), Number(r.gastos)]));
+    new google.visualization.LineChart(document.getElementById('chartIngresosGastos'))
+      .draw(ig, {legend:{position:'bottom'}, height:360});
+
+    const ac = new google.visualization.DataTable();
+    ac.addColumn('string','Día');
+    ac.addColumn('number','Acumulado');
+    data.series.acumulado.forEach(r => ac.addRow([r.date, Number(r.acumulado)]));
+    new google.visualization.LineChart(document.getElementById('chartAcumulado'))
+      .draw(ac, {legend:{position:'bottom'}, height:360});
+
+    const cat = new google.visualization.DataTable();
+    cat.addColumn('string','Categoría');
+    cat.addColumn('number','Ingresos');
+    (data.breakdowns.categorias || []).slice(0,12).forEach(r => cat.addRow([r.name, Number(r.value)]));
+    new google.visualization.PieChart(document.getElementById('chartCategorias'))
+      .draw(cat, {legend:{position:'right'}, height:360});
+
+    const dist = new google.visualization.DataTable();
+    dist.addColumn('string','Distrito');
+    dist.addColumn('number','Ingresos');
+    (data.breakdowns.distritos || []).slice(0,12).forEach(r => dist.addRow([r.name, Number(r.value)]));
+    new google.visualization.BarChart(document.getElementById('chartDistritos'))
+      .draw(dist, {legend:{position:'none'}, height:360});
+
+    const tbody = document.querySelector('#tablaVendedoras tbody');
+    tbody.innerHTML = '';
+    (data.breakdowns.vendedoras || []).forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${r.name}</td>
+        <td>${money(r.ingresos)}</td>
+        <td>${num(r.pedidos)}</td>
+        <td>${money(r.ticketProm)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('footerMeta').textContent = `Actualizado: ${data.meta.generatedAt}`;
+  }
+
+  async function loadAndRender(){
+    document.getElementById('status').textContent = 'Cargando datos…';
+    try{
+      const data = await loadJSONP();
+      document.getElementById('status').textContent = '';
+      draw(data);
+      window.onresize = () => draw(data);
+    }catch(err){
+      document.getElementById('status').textContent = 'Error: ' + err.message;
+      console.error(err);
+    }
+  }
+
+  document.getElementById('btnReload').addEventListener('click', loadAndRender);
+  google.charts.setOnLoadCallback(loadAndRender);
+</script>
+
 </body>
 </html>
