@@ -1,461 +1,684 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>BRAVIZIMO'S | Dashboard Financiero</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
   <style>
     :root{
-      --bg:#0b1020;
-      --panel:#0f1730;
-      --card:#ffffff;
-      --muted:#96a0b5;
-      --text:#0d1220;
-      --line:#e8edf7;
-      --shadow:0 18px 40px rgba(2,10,30,.10);
-      --radius:16px;
+      --bg:#0b1220;
+      --bg2:#0f1a33;
+      --card:#0f172a;
+      --panel:#111c37;
+      --text:#e7eefc;
+      --muted:#a9b6d6;
+      --line:rgba(255,255,255,.08);
+      --accent:#ffffff;
+      --chip:#0b1220;
+      --ok:#2ecc71;
+      --bad:#ff5c7a;
+      --warn:#ffcc00;
     }
     *{box-sizing:border-box}
     body{
-      margin:0;
-      font-family:Inter,system-ui,Segoe UI,Arial;
-      background:linear-gradient(180deg,var(--bg) 0%, #111a33 36%, #f3f6fb 36%, #f3f6fb 100%);
-      color:#111;
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial;
+      background: radial-gradient(1200px 600px at 30% 0%, #1b2a5a 0%, var(--bg) 40%, #070b15 100%);
+      color:var(--text);
     }
-    .topbar{
-      position:sticky; top:0;
-      background:linear-gradient(180deg, rgba(11,16,32,.95), rgba(15,23,48,.80));
-      backdrop-filter: blur(10px);
-      padding:18px 20px;
-      z-index:10;
-      border-bottom:1px solid rgba(255,255,255,.06);
+    header{
+      padding:26px 20px 16px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,0) 100%);
+      border-bottom:1px solid var(--line);
     }
-    .topbar-inner{
-      max-width:1200px;
-      margin:0 auto;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:14px;
+    .top{
+      max-width:1200px; margin:0 auto;
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
     }
-    .brand{color:#fff}
-    .brand .title{font-weight:800; letter-spacing:.3px}
-    .brand .sub{font-size:12px; color:rgba(255,255,255,.75); margin-top:4px}
-
+    .brand h1{margin:0; font-size:18px; letter-spacing:.2px}
+    .brand p{margin:2px 0 0; color:var(--muted); font-size:12px}
     .controls{
-      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;
     }
-    select,input,button{
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background:rgba(255,255,255,.08);
-      color:#fff;
+    select, input, button{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.06);
+      color:var(--text);
       padding:10px 12px;
+      border-radius:12px;
       outline:none;
+      font-size:13px;
+    }
+    input[type="month"]{padding:9px 12px}
+    input[type="date"]{padding:9px 12px}
+    button{
+      background:rgba(255,255,255,.9);
+      color:#0b1220;
+      font-weight:700;
+      cursor:pointer;
+    }
+    button:hover{filter:brightness(.95)}
+
+    .wrap{max-width:1200px;margin:0 auto;padding:18px 20px 28px}
+    .error{
+      display:none;
+      margin:14px 0;
+      padding:12px 14px;
+      border-radius:14px;
+      background: rgba(255, 92, 122, .12);
+      border:1px solid rgba(255, 92, 122, .35);
+      color:#ffd6de;
       font-weight:600;
     }
-    input[type="month"], input[type="date"]{ color:#fff; }
-    button{
-      background:#fff; color:#0b1020;
-      border:1px solid rgba(255,255,255,.18);
-      cursor:pointer;
-      padding:10px 14px;
-    }
-    button:hover{opacity:.94}
 
-    .wrap{max-width:1200px; margin:0 auto; padding:18px 20px 60px;}
-    .error{
-      margin-top:14px;
-      border-radius:14px;
-      padding:12px 14px;
-      background:#ffe7e7;
-      color:#7a1313;
-      border:1px solid #ffc6c6;
-      display:none;
-      font-weight:700;
-    }
     .tabs{
-      margin-top:16px;
-      display:flex; gap:10px; flex-wrap:wrap;
+      display:flex; gap:8px; flex-wrap:wrap;
+      margin:12px 0 14px;
     }
     .tab{
-      border:1px solid rgba(255,255,255,.18);
-      background:#fff;
-      padding:9px 12px;
-      border-radius:999px;
+      padding:9px 12px; border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      font-weight:700;
+      font-size:13px;
       cursor:pointer;
-      font-weight:800;
-      color:#0b1020;
-      box-shadow: 0 8px 20px rgba(0,0,0,.04);
     }
     .tab.active{
-      background:#0b1020;
-      color:#fff;
-      border-color:#0b1020;
+      background:rgba(255,255,255,.92);
+      color:#0b1220;
+      border-color:rgba(255,255,255,.6);
     }
 
-    .kpis{
-      margin-top:18px;
+    .grid-kpi{
       display:grid;
-      grid-template-columns:repeat(4, minmax(0,1fr));
-      gap:14px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap:10px;
     }
-    @media (max-width: 980px){ .kpis{grid-template-columns:repeat(2,1fr);} }
-    @media (max-width: 520px){ .kpis{grid-template-columns:1fr;} }
-
-    .kpi{
-      background:#fff;
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:14px 14px;
-      border:1px solid var(--line);
-    }
-    .kpi .label{font-size:12px; color:#6c7892; font-weight:700}
-    .kpi .value{font-size:22px; font-weight:900; margin-top:8px}
-
-    .grid2{
-      margin-top:14px;
-      display:grid;
-      grid-template-columns: 1.25fr 1fr;
-      gap:14px;
-    }
-    @media (max-width: 980px){ .grid2{grid-template-columns:1fr;} }
+    @media(max-width:1000px){ .grid-kpi{grid-template-columns:repeat(2,minmax(0,1fr));} }
+    @media(max-width:520px){ .grid-kpi{grid-template-columns:1fr;} }
 
     .card{
-      background:#fff;
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:14px 14px;
+      background:rgba(255,255,255,.05);
       border:1px solid var(--line);
-      min-height: 320px;
+      border-radius:18px;
+      padding:14px 14px;
+      box-shadow: 0 10px 26px rgba(0,0,0,.18);
     }
-    .card h3{margin:0 0 10px; font-size:16px}
-    .muted{color:#6c7892; font-size:12px; font-weight:700}
+    .kpi-title{color:var(--muted); font-size:12px; margin:0 0 6px}
+    .kpi-value{font-size:20px; margin:0; font-weight:900; letter-spacing:.2px}
+    .kpi-sub{margin:4px 0 0; color:var(--muted); font-size:12px}
 
-    .section{display:none; margin-top:14px;}
-    .section.active{display:block;}
+    .grid-2{
+      display:grid; grid-template-columns: 1fr 1fr; gap:12px;
+      margin-top:12px;
+    }
+    @media(max-width:900px){ .grid-2{grid-template-columns:1fr;} }
 
-    table{width:100%; border-collapse:collapse; font-size:13px;}
-    th,td{padding:10px 8px; border-bottom:1px solid #eef2fb; text-align:left;}
-    th{color:#6c7892; font-size:12px; text-transform:uppercase; letter-spacing:.4px;}
-    .right{text-align:right;}
+    .card h3{margin:0 0 6px;font-size:14px}
+    .muted{color:var(--muted); font-size:12px}
+    .chartBox{
+      height:280px; /* <- fijo para que NO se haga gigante */
+      margin-top:10px;
+    }
+    canvas{width:100% !important; height:100% !important;}
+
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+    }
+    th, td{
+      padding:10px 10px;
+      border-bottom:1px solid var(--line);
+      font-size:13px;
+      text-align:left;
+    }
+    th{color:var(--muted); font-weight:800; font-size:12px; background:rgba(255,255,255,.04)}
+    tr:last-child td{border-bottom:none}
+    .right{text-align:right}
+    .pill{
+      display:inline-block; padding:4px 9px; border-radius:999px; font-weight:800; font-size:11px;
+      background:rgba(255,255,255,.08); border:1px solid var(--line);
+    }
+    .pill.ok{background:rgba(46,204,113,.12); border-color:rgba(46,204,113,.35); color:#cfffdf}
+    .pill.bad{background:rgba(255,92,122,.12); border-color:rgba(255,92,122,.35); color:#ffd6de}
   </style>
 </head>
-
 <body>
-  <div class="topbar">
-    <div class="topbar-inner">
-      <div class="brand">
-        <div class="title">BRAVIZIMO'S | Dashboard Financiero</div>
-        <div class="sub">Sincronizado con Google Sheets (Apps Script)</div>
+<header>
+  <div class="top">
+    <div class="brand">
+      <h1>BRAVIZIMO'S | Dashboard Financiero</h1>
+      <p>Sincronizado con Google Sheets (Apps Script)</p>
+    </div>
+
+    <div class="controls">
+      <select id="mode">
+        <option value="month">Mes</option>
+        <option value="range">Rango</option>
+      </select>
+
+      <input id="month" type="month"/>
+      <input id="from" type="date" style="display:none"/>
+      <input id="to" type="date" style="display:none"/>
+
+      <button id="btn">Actualizar</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div id="err" class="error"></div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div id="finanzas">
+    <div class="grid-kpi" id="kpis"></div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Ventas vs Gastos (por día) + Saldo</h3>
+        <div class="muted">Basado en fecha de emisión (ventas) y fecha de gasto (GASTOS).</div>
+        <div class="chartBox"><canvas id="chVG"></canvas></div>
       </div>
-
-      <div class="controls">
-        <select id="mode">
-          <option value="month">Mes</option>
-          <option value="range">Rango</option>
-        </select>
-
-        <input id="month" type="month" />
-        <input id="from" type="date" style="display:none" />
-        <input id="to" type="date" style="display:none" />
-
-        <button id="btn">Actualizar</button>
+      <div class="card">
+        <h3>Acumulado de ventas</h3>
+        <div class="muted">Suma progresiva por día.</div>
+        <div class="chartBox"><canvas id="chAcc"></canvas></div>
       </div>
     </div>
   </div>
 
-  <div class="wrap">
-    <div id="err" class="error"></div>
+  <div id="alertas" style="display:none"></div>
+  <div id="distritos" style="display:none"></div>
+  <div id="vendedoras" style="display:none"></div>
+  <div id="delivery" style="display:none"></div>
+  <div id="productos" style="display:none"></div>
+  <div id="clientes" style="display:none"></div>
+  <div id="gastos" style="display:none"></div>
+  <div id="mediosPago" style="display:none"></div>
+  <div id="servicios" style="display:none"></div>
+</div>
 
-    <div class="tabs">
-      <div class="tab active" data-tab="finanzas">Finanzas</div>
-      <div class="tab" data-tab="servicios">Servicios</div>
-    </div>
-
-    <div class="kpis" id="kpis"></div>
-
-    <!-- FINANZAS -->
-    <div class="section active" id="sec-finanzas">
-      <div class="grid2">
-        <div class="card">
-          <h3>Ventas vs Gastos (por día) + Saldo</h3>
-          <div class="muted">Basado en fecha de emisión (ventas) y fecha de pago (gastos).</div>
-          <canvas id="ch1" height="140"></canvas>
-        </div>
-        <div class="card">
-          <h3>Acumulado de ventas</h3>
-          <div class="muted">Suma progresiva por día.</div>
-          <canvas id="ch2" height="140"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- SERVICIOS -->
-    <div class="section" id="sec-servicios">
-      <div class="grid2">
-        <div class="card">
-          <h3>Servicios: Pagado vs Pendiente (por día)</h3>
-          <div class="muted">Se toma TIPO / FECHA / MONTO / ESTADO.</div>
-          <canvas id="chServ" height="140"></canvas>
-        </div>
-        <div class="card">
-          <h3>Servicios (lista)</h3>
-          <div class="muted">Hasta 200 filas del periodo.</div>
-          <div style="max-height:260px; overflow:auto; margin-top:10px;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Tipo</th>
-                  <th>Fecha</th>
-                  <th class="right">Monto</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody id="tbServ"></tbody>
-            </table>
-          </div>
-          <div class="muted" id="servErr" style="margin-top:10px;"></div>
-        </div>
-      </div>
-    </div>
- 
-  </div>
-  
 <script>
-  // ✅ TU WEB APP
-  const API_URL = "https://script.google.com/macros/s/AKfycbx3SbJaQ-QcYi5Vo71zE2leTGk7d_tvnIfezhQ63ZhurXecVV4H04hUG4zvSm048lMi/exec";
+  // === TU API
+  const API_URL = "https://script.google.com/macros/s/AKfycbzxZ-2pTE5ltSDXXVn9Wjd9USG1FomaTScLuM-wDQMuKiu92mzwGQhnkL0mZYZF9AtI/exec";
 
-  const $ = (id) => document.getElementById(id);
-  const fmt = (n) => new Intl.NumberFormat("es-PE", { style:"currency", currency:"PEN" }).format(Number(n||0));
-  const fmtN = (n) => new Intl.NumberFormat("es-PE").format(Number(n||0));
+  const state = { data:null, charts:{} };
 
-  let ch1, ch2, chServ;
+  const tabList = [
+    { id:"finanzas", label:"Finanzas" },
+    { id:"alertas", label:"Alertas" },
+    { id:"distritos", label:"Distritos" },
+    { id:"vendedoras", label:"Vendedoras" },
+    { id:"delivery", label:"Delivery" },
+    { id:"productos", label:"Productos" },
+    { id:"clientes", label:"Clientes" },
+    { id:"gastos", label:"Gastos" },
+    { id:"mediosPago", label:"Medios de pago" },
+    { id:"servicios", label:"Servicios" }
+  ];
 
-  function setError(msg){
+  const $ = (id)=>document.getElementById(id);
+
+  function money(n){
+    n = Number(n||0);
+    return "S/ " + n.toLocaleString("es-PE",{minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function showError(msg){
     const el = $("err");
     if(!msg){ el.style.display="none"; el.textContent=""; return; }
     el.style.display="block";
     el.textContent = msg;
   }
 
-  function setModeUI(){
-    const mode = $("mode").value;
-    $("month").style.display = mode === "month" ? "inline-flex" : "none";
-    $("from").style.display = mode === "range" ? "inline-flex" : "none";
-    $("to").style.display = mode === "range" ? "inline-flex" : "none";
-  }
-
-  function buildParams(){
-    const mode = $("mode").value;
-    const p = new URLSearchParams();
-    p.set("mode", mode);
-
-    if(mode === "month"){
-      // input month devuelve YYYY-MM
-      const m = $("month").value;
-      if(m) p.set("month", m);
-    }else{
-      const from = $("from").value;
-      const to = $("to").value;
-      if(from) p.set("from", from);
-      if(to) p.set("to", to);
-    }
-    return p;
-  }
-
-  // ✅ JSONP loader (evita CORS + evita error HTML)
-  function fetchJSONP(url){
-    return new Promise((resolve, reject) => {
-      const cbName = "cb_" + Math.random().toString(36).slice(2);
-      const script = document.createElement("script");
-
-      window[cbName] = (data) => {
-        cleanup();
-        resolve(data);
-      };
-
-      function cleanup(){
-        if(script && script.parentNode) script.parentNode.removeChild(script);
-        try { delete window[cbName]; } catch(e){ window[cbName] = undefined; }
-      }
-
-      script.onerror = () => {
-        cleanup();
-        reject(new Error("No se pudo cargar Apps Script (script error / permisos / URL)."));
-      };
-
-      const sep = url.includes("?") ? "&" : "?";
-      script.src = url + sep + "callback=" + cbName;
-      document.body.appendChild(script);
+  function setTabs(activeId){
+    const t = $("tabs");
+    t.innerHTML = "";
+    tabList.forEach(x=>{
+      const b=document.createElement("button");
+      b.className="tab"+(x.id===activeId?" active":"");
+      b.textContent=x.label;
+      b.onclick=()=>activateTab(x.id);
+      t.appendChild(b);
     });
   }
 
-  function renderKPIs(data){
-    const k = data.kpis || {};
-    const cards = [
-      ["Ventas totales", fmt(k.ventasTotales)],
-      ["Gastos totales", fmt(k.gastosTotales)],
-      ["Utilidad", fmt(k.utilidad)],
-      ["Saldo pendiente", fmt(k.saldoPendiente)],
-      ["Delivery cobrado", fmt(k.deliveryCobrado)],
-      ["Costo delivery", fmt(k.costoDelivery)],
-      ["Margen delivery", fmt(k.margenDelivery)],
-      ["Clientes (total)", fmtN(k.clientesTotal)],
-      ["Promedio diario (hasta hoy)", fmt(k.promedioDiario)],
-      ["Proyección mensual (prom * 30)", fmt(k.proyeccionMensual)],
-      ["Boletas / Facturas", `${fmtN(k.boletasFacturas?.boletas||0)} / ${fmtN(k.boletasFacturas?.facturas||0)}`],
-      ["Comprobantes faltantes", fmtN(k.boletasFacturas?.sinComprobante||0)],
+  function activateTab(id){
+    tabList.forEach(x=>{
+      const el=$(x.id);
+      el.style.display = (x.id===id) ? "" : "none";
+    });
+    setTabs(id);
+  }
+
+  function bindMode(){
+    const mode = $("mode").value;
+    const month = $("month");
+    const from = $("from");
+    const to = $("to");
+
+    if(mode==="month"){
+      month.style.display="";
+      from.style.display="none";
+      to.style.display="none";
+    }else{
+      month.style.display="none";
+      from.style.display="";
+      to.style.display="";
+    }
+  }
+
+  $("mode").addEventListener("change", bindMode);
+
+  function buildUrl(){
+    const mode = $("mode").value;
+    const qs = new URLSearchParams({ action:"data", mode });
+    if(mode==="month"){
+      const m = $("month").value; // yyyy-mm
+      qs.set("month", m);
+    }else{
+      qs.set("from", $("from").value);
+      qs.set("to", $("to").value);
+    }
+    return API_URL + "?" + qs.toString();
+  }
+
+  async function load(){
+    showError("");
+    const url = buildUrl();
+
+    let json;
+    try{
+      const res = await fetch(url, { cache:"no-store" });
+      const text = await res.text();
+
+      // si devuelve HTML (por mala URL o despliegue), te avisamos claro
+      if(text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html")){
+        throw new Error("El endpoint está devolviendo HTML (no JSON). Revisa que el Apps Script esté desplegado como Web App y uses /exec.");
+      }
+      json = JSON.parse(text);
+    }catch(err){
+      showError("No se pudo cargar data desde Apps Script: " + (err.message || err));
+      return;
+    }
+
+    if(!json.ok){
+      showError("Error Apps Script: " + (json.error || "desconocido"));
+      return;
+    }
+
+    state.data = json;
+    renderAll();
+  }
+
+  function renderAll(){
+    const d = state.data;
+
+    // KPIs
+    const kpis = [
+      ["Ventas totales", money(d.kpis.ventasTotales)],
+      ["Gastos totales", money(d.kpis.gastosTotales)],
+      ["Utilidad", money(d.kpis.utilidad)],
+      ["Saldo pendiente", money(d.kpis.saldoPendiente)],
+
+      ["Delivery cobrado", money(d.kpis.deliveryCobrado)],
+      ["Costo delivery", money(d.kpis.costoDelivery)],
+      ["Margen delivery", money(d.kpis.margenDelivery)],
+      ["Clientes (total)", String(d.kpis.clientesTotal || 0)],
+
+      ["Promedio diario (hasta hoy)", money(d.kpis.promedioDiario)],
+      ["Proyección mensual (prom * 30)", money(d.kpis.proyeccionMensual)],
+      ["Boletas / Facturas", `${d.kpis.boletas || 0} / ${d.kpis.facturas || 0}`],
+      ["Comprobantes faltantes", String(d.kpis.comprobantesFaltantes || 0)]
     ];
 
-    $("kpis").innerHTML = cards.map(([label,value]) => `
-      <div class="kpi">
-        <div class="label">${label}</div>
-        <div class="value">${value}</div>
+    $("kpis").innerHTML = kpis.map(([t,v])=>`
+      <div class="card">
+        <p class="kpi-title">${t}</p>
+        <p class="kpi-value">${v}</p>
       </div>
     `).join("");
-  }
 
-  function renderCharts(data){
-    const rows = data.series?.daily || [];
-    const labels = rows.map(r => r.date);
-    const ventas = rows.map(r => r.ventas);
-    const gastos = rows.map(r => r.gastos);
-    const saldo  = rows.map(r => r.saldo);
-    const acumulado = rows.map(r => r.acumulado);
+    // Charts (limpiamos si existían)
+    Object.values(state.charts).forEach(ch=>{ try{ ch.destroy(); }catch(e){} });
+    state.charts = {};
 
-    if(ch1) ch1.destroy();
-    if(ch2) ch2.destroy();
-
-    ch1 = new Chart($("ch1"),{
+    // Ventas vs gastos + saldo
+    state.charts.vg = new Chart($("chVG"),{
       type:"line",
       data:{
-        labels,
+        labels: d.charts.days,
         datasets:[
-          { label:"Ventas", data:ventas, tension:.25 },
-          { label:"Gastos", data:gastos, tension:.25 },
-          { label:"Saldo pendiente", data:saldo, tension:.25 }
+          { label:"Ventas", data:d.charts.ventasByDay, tension:.25 },
+          { label:"Gastos", data:d.charts.gastosByDay, tension:.25 },
+          { label:"Saldo pendiente", data:d.charts.saldoByDay, tension:.25 }
         ]
       },
       options:{
         responsive:true,
         maintainAspectRatio:false,
-        plugins:{ legend:{ position:"bottom" } },
-        scales:{ x:{ ticks:{ maxRotation:50, minRotation:50 } } }
+        plugins:{ legend:{ labels:{ color:"#e7eefc" } } },
+        scales:{
+          x:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } },
+          y:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } }
+        }
       }
     });
 
-    ch2 = new Chart($("ch2"),{
+    // acumulado ventas
+    state.charts.acc = new Chart($("chAcc"),{
       type:"line",
       data:{
-        labels,
+        labels: d.charts.days,
         datasets:[
-          { label:"Acumulado", data:acumulado, tension:.25 }
+          { label:"Acumulado", data:d.charts.acumuladoVentas, tension:.25 }
         ]
       },
       options:{
         responsive:true,
         maintainAspectRatio:false,
-        plugins:{ legend:{ position:"bottom" } },
-        scales:{ x:{ ticks:{ maxRotation:50, minRotation:50 } } }
+        plugins:{ legend:{ labels:{ color:"#e7eefc" } } },
+        scales:{
+          x:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } },
+          y:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } }
+        }
       }
     });
+
+    renderAlertas(d);
+    renderDistritos(d);
+    renderVendedoras(d);
+    renderDelivery(d);
+    renderProductos(d);
+    renderClientes(d);
+    renderGastos(d);
+    renderMediosPago(d);
+    renderServicios(d);
   }
 
-  function renderServicios(data){
-    const sec = data.sections?.servicios || {};
-    const err = sec.error || "";
-    $("servErr").textContent = err ? ("Aviso servicios: " + err) : "";
+  function renderAlertas(d){
+    const a = d.tabs.alertas;
+    $("alertas").innerHTML = `
+      <div class="card">
+        <h3>Pendientes de comprobante (hasta 200)</h3>
+        <div class="muted">Si un comprobante está vacío o 0, aparece aquí.</div>
+        ${table(a.pendientesComprobante, [
+          ["fecha","Fecha"],
+          ["pedido","Pedido"],
+          ["nota","Nota"],
+          ["cliente","Cliente"],
+          ["total","Total", "money"]
+        ])}
+      </div>
+      <div style="height:12px"></div>
+      <div class="card">
+        <h3>Saldos pendientes (hasta 200)</h3>
+        ${table(a.saldosPendientes, [
+          ["fecha","Fecha"],
+          ["cliente","Cliente"],
+          ["total","Total","money"],
+          ["porPagar","Por pagar","money"]
+        ])}
+      </div>
+    `;
+  }
 
-    // tabla
-    const list = sec.lista || [];
-    $("tbServ").innerHTML = list.map(r => `
-      <tr>
-        <td>${(r.servicio||"")}</td>
-        <td>${(r.fecha||"")}</td>
-        <td class="right">${fmt(r.monto||0)}</td>
-        <td>${(r.estado||"")}</td>
-      </tr>
-    `).join("");
+  function renderDistritos(d){
+    const r = d.tabs.distritos.ranking;
+    $("distritos").innerHTML = `
+      <div class="card">
+        <h3>Ranking de distritos</h3>
+        <div class="muted">Monto (desc) y cantidad de pedidos.</div>
+        ${table(r, [
+          ["key","Distrito"],
+          ["pedidos","Pedidos"],
+          ["monto","Monto","money"]
+        ])}
+      </div>
+    `;
+  }
 
-    // grafico
-    const daily = sec.daily || [];
-    const labels = daily.map(d => d.date);
-    const pagado = daily.map(d => d.pagado);
-    const pendiente = daily.map(d => d.pendiente);
+  function renderVendedoras(d){
+    const rows = d.tabs.vendedoras.rows;
+    const tot = d.tabs.vendedoras.totals;
+    $("vendedoras").innerHTML = `
+      <div class="card">
+        <h3>Vendedoras por día (ventas y saldo)</h3>
+        <div class="muted">Total del periodo: ${money(tot.monto)} | Pedidos: ${tot.pedidos} | Saldo: ${money(tot.saldo)}</div>
+        ${table(rows, [
+          ["fecha","Fecha"],
+          ["nombre","Vendedora"],
+          ["pedidos","Pedidos"],
+          ["monto","Monto","money"],
+          ["saldo","Saldo","money"]
+        ])}
+      </div>
+    `;
+  }
 
-    if(chServ) chServ.destroy();
-    chServ = new Chart($("chServ"),{
+  function renderDelivery(d){
+    $("delivery").innerHTML = `
+      <div class="grid-2">
+        <div class="card">
+          <h3>Delivery por día</h3>
+          <div class="muted">Cobrado, costo y cantidad de entregas.</div>
+          <div class="chartBox"><canvas id="chDel"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Recojo en tienda (por día)</h3>
+          <div class="muted">Cantidad de pedidos con recojo.</div>
+          <div class="chartBox"><canvas id="chRec"></canvas></div>
+        </div>
+      </div>
+      <div style="height:12px"></div>
+      <div class="card">
+        <h3>Delivery por motorizado (ranking)</h3>
+        ${table(d.tabs.delivery.ranking,[
+          ["key","Motorizado"],
+          ["entregas","Entregas"],
+          ["cobrado","Cobrado","money"],
+          ["costo","Costo","money"]
+        ])}
+      </div>
+    `;
+
+    const ds = state.data.charts;
+    state.charts.del = new Chart(document.getElementById("chDel"),{
       type:"bar",
       data:{
-        labels,
+        labels: ds.days,
         datasets:[
-          { label:"Pagado", data: pagado },
-          { label:"Pendiente", data: pendiente }
+          { label:"Cobrado", data: ds.deliveryCobradoByDay },
+          { label:"Costo", data: ds.deliveryCostoByDay }
         ]
       },
       options:{
         responsive:true,
         maintainAspectRatio:false,
-        plugins:{ legend:{ position:"bottom" } },
+        plugins:{ legend:{ labels:{ color:"#e7eefc" } } },
         scales:{
-          x:{ stacked:true, ticks:{ maxRotation:50, minRotation:50 } },
-          y:{ stacked:true }
+          x:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } },
+          y:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } }
+        }
+      }
+    });
+
+    state.charts.rec = new Chart(document.getElementById("chRec"),{
+      type:"bar",
+      data:{ labels: ds.days, datasets:[{ label:"Recojo (cant)", data: ds.recojoCantByDay }] },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{ legend:{ labels:{ color:"#e7eefc" } } },
+        scales:{
+          x:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } },
+          y:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } }
         }
       }
     });
   }
 
-  function setTab(tab){
-    document.querySelectorAll(".tab").forEach(t=>{
-      t.classList.toggle("active", t.dataset.tab === tab);
-    });
-    document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-    $("sec-"+tab).classList.add("active");
+  function renderProductos(d){
+    $("productos").innerHTML = `
+      <div class="card">
+        <h3>Top 20 productos</h3>
+        <div class="muted">Ordenado por monto (desc). Incluye cantidad.</div>
+        ${table(d.tabs.productos.top20,[
+          ["key","Producto"],
+          ["cant","Cantidad"],
+          ["monto","Monto","money"]
+        ])}
+      </div>
+    `;
   }
 
-  async function load(){
-    setError("");
-    const params = buildParams();
-    const url = API_URL + "?" + params.toString();
+  function renderClientes(d){
+    $("clientes").innerHTML = `
+      <div class="card">
+        <h3>Clientes del período (hasta 200)</h3>
+        <div class="muted">Total clientes en el período: <b>${d.tabs.clientes.totalPeriodo}</b>. Ordenado por última compra.</div>
+        ${table(d.tabs.clientes.list,[
+          ["cliente","Cliente"],
+          ["celular","Celular"],
+          ["ultima","Última compra"],
+          ["pedidos","Pedidos"],
+          ["monto","Monto","money"]
+        ])}
+      </div>
+    `;
+  }
 
-    try{
-      const data = await fetchJSONP(url);
-      if(!data || data.ok !== true){
-        setError("Error Apps Script: " + (data?.error || "Respuesta inválida"));
-        return;
+  function renderGastos(d){
+    $("gastos").innerHTML = `
+      <div class="grid-2">
+        <div class="card">
+          <h3>Gastos por categoría</h3>
+          ${table(d.tabs.gastos.porCategoria,[
+            ["key","Categoría"],
+            ["cant","Cant"],
+            ["monto","Monto","money"]
+          ])}
+        </div>
+        <div class="card">
+          <h3>Gastos (total)</h3>
+          <p class="kpi-value">${money(d.tabs.gastos.total)}</p>
+          <p class="muted">En el período seleccionado.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderMediosPago(d){
+    $("mediosPago").innerHTML = `
+      <div class="card">
+        <h3>Medios de pago (1er pago + 2do pago)</h3>
+        <div class="muted">Suma por cuenta destino.</div>
+        ${table(d.tabs.mediosPago.cuentas,[
+          ["cuenta","Cuenta"],
+          ["monto","Monto","money"]
+        ])}
+      </div>
+    `;
+  }
+
+  function renderServicios(d){
+    $("servicios").innerHTML = `
+      <div class="grid-2">
+        <div class="card">
+          <h3>Servicios: Pagado vs Pendiente (por día)</h3>
+          <div class="muted">Se toma TIPO / FECHA / MONTO / ESTADO.</div>
+          <div class="chartBox"><canvas id="chServ"></canvas></div>
+        </div>
+        <div class="card">
+          <h3>Servicios (lista)</h3>
+          <div class="muted">Hasta 200 filas del período.</div>
+          ${table(d.tabs.servicios.list,[
+            ["tipo","TIPO"],
+            ["fecha","FECHA"],
+            ["monto","MONTO","money"],
+            ["estado","ESTADO"]
+          ])}
+        </div>
+      </div>
+      <div style="height:12px"></div>
+      <div class="card">
+        <h3>Servicios (KPI)</h3>
+        <div class="muted">
+          Total: <b>${money(d.tabs.servicios.kpi.total)}</b> |
+          Pagados: <b>${money(d.tabs.servicios.kpi.pagados)}</b> |
+          Pendientes: <b>${money(d.tabs.servicios.kpi.pendientes)}</b>
+        </div>
+      </div>
+    `;
+
+    const ds = state.data.charts;
+    state.charts.serv = new Chart(document.getElementById("chServ"),{
+      type:"bar",
+      data:{
+        labels: ds.days,
+        datasets:[
+          { label:"Pagado", data: ds.servPagadoByDay },
+          { label:"Pendiente", data: ds.servPendienteByDay }
+        ]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        plugins:{ legend:{ labels:{ color:"#e7eefc" } } },
+        scales:{
+          x:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } },
+          y:{ ticks:{ color:"#a9b6d6" }, grid:{ color:"rgba(255,255,255,.06)" } }
+        }
       }
-      renderKPIs(data);
-      renderCharts(data);
-      renderServicios(data);
-
-    }catch(err){
-      setError("No se pudo sincronizar: " + (err?.message || String(err)));
-    }
+    });
   }
 
-  // init
-  const now = new Date();
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth()+1).padStart(2,"0");
-  $("month").value = `${yyyy}-${mm}`;
+  function table(rows, cols){
+    rows = rows || [];
+    const head = cols.map(c=>`<th>${c[1]}</th>`).join("");
+    const body = rows.map(r=>{
+      const tds = cols.map(c=>{
+        const key=c[0], type=c[2]||"";
+        let v = (r && r[key]!==undefined) ? r[key] : "";
+        if(type==="money") v = money(v);
+        return `<td class="${type==="money"?"right":""}">${v}</td>`;
+      }).join("");
+      return `<tr>${tds}</tr>`;
+    }).join("");
 
-  $("mode").addEventListener("change", () => { setModeUI(); });
-  $("btn").addEventListener("click", load);
+    return `
+      <table>
+        <thead><tr>${head}</tr></thead>
+        <tbody>${body || `<tr><td colspan="${cols.length}" class="muted">Sin datos en el período.</td></tr>`}</tbody>
+      </table>
+    `;
+  }
 
-  document.querySelectorAll(".tab").forEach(t=>{
-    t.addEventListener("click", ()=> setTab(t.dataset.tab));
-  });
+  // Init defaults
+  (function init(){
+    // pestañas
+    setTabs("finanzas");
+    activateTab("finanzas");
 
-  setModeUI();
-  load();
+    // defaults fecha
+    const now = new Date();
+    const m = String(now.getMonth()+1).padStart(2,"0");
+    $("month").value = `${now.getFullYear()}-${m}`;
+    $("from").value = `${now.getFullYear()}-${m}-01`;
+    $("to").value = `${now.getFullYear()}-${m}-${String(now.getDate()).padStart(2,"0")}`;
+
+    bindMode();
+    $("btn").onclick = load;
+
+    load();
+  })();
 </script>
 </body>
 </html>
