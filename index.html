@@ -4,7 +4,6 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>BRAVIZIMO'S | Dashboard Financiero</title>
-
   <script src="https://www.gstatic.com/charts/loader.js"></script>
 
   <style>
@@ -19,29 +18,30 @@
     body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background:#f6f7fb; color:#0b0f17; }
     header{
       background:linear-gradient(135deg,#0b0f17,#111827);
-      color:#fff;
-      padding:22px 20px;
+      color:#fff; padding:18px 18px;
       position:sticky; top:0; z-index:10;
       box-shadow:0 8px 20px rgba(0,0,0,.2);
     }
     .wrap{ max-width:1200px; margin:0 auto; }
     .topbar{ display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
-    .title{ font-size:18px; font-weight:800; letter-spacing:.2px; }
+    .title{ font-size:18px; font-weight:900; letter-spacing:.2px; }
     .subtitle{ font-size:12px; color:#cbd5e1; margin-top:2px; }
 
     .controls{ display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
     select, input, button{
       border-radius:12px; border:1px solid rgba(255,255,255,.2);
       padding:10px 12px; background:rgba(255,255,255,.06); color:#fff;
-      outline:none;
+      outline:none; font-size:12px;
     }
-    button{ background:#fff; color:#0b0f17; font-weight:700; cursor:pointer; border:none; }
+    input[type="date"]{ color:#fff; }
+    button{ background:#fff; color:#0b0f17; font-weight:900; cursor:pointer; border:none; }
     button:hover{ opacity:.92; }
 
     main{ padding:18px 18px 40px; }
     .grid{ display:grid; grid-template-columns: repeat(4,1fr); gap:14px; }
     @media(max-width:1100px){ .grid{ grid-template-columns: repeat(2,1fr);} }
     @media(max-width:600px){ .grid{ grid-template-columns: 1fr;} }
+
     .card{
       background:var(--card);
       border-radius:var(--radius);
@@ -49,6 +49,7 @@
       padding:14px;
       border:1px solid #f0f2f5;
     }
+    h3{ margin:6px 0 12px; font-size:14px; }
     .kpi-title{ font-size:12px; color:var(--muted); }
     .kpi-value{ font-size:22px; font-weight:900; margin-top:6px; }
     .kpi-sub{ font-size:12px; color:var(--muted); margin-top:4px; }
@@ -56,7 +57,7 @@
     .tabs{ display:flex; gap:8px; flex-wrap:wrap; margin:14px 0; }
     .tab{
       padding:8px 12px; border-radius:999px; border:1px solid var(--line);
-      background:#fff; cursor:pointer; font-weight:700; font-size:12px;
+      background:#fff; cursor:pointer; font-weight:900; font-size:12px;
     }
     .tab.active{ background:#0b0f17; color:#fff; border-color:#0b0f17; }
 
@@ -67,12 +68,22 @@
     .chart-sm{ height:320px; }
 
     table{ width:100%; border-collapse:collapse; font-size:12px; }
-    th, td{ padding:10px 8px; border-bottom:1px solid #eef0f3; text-align:left; }
+    th, td{ padding:10px 8px; border-bottom:1px solid #eef0f3; text-align:left; vertical-align:top; }
     th{ color:#111827; background:#fafafa; position:sticky; top:0; z-index:1; }
     .scroll{ max-height:360px; overflow:auto; border:1px solid #eef0f3; border-radius:14px; }
     .status{ font-size:12px; color:#6b7280; margin-top:10px; }
     .pill{ display:inline-block; padding:4px 10px; border-radius:999px; background:#f1f5f9; font-size:12px; }
-    .danger{ background:#fee2e2; color:#991b1b; font-weight:800; }
+    .danger{ background:#fee2e2; color:#991b1b; font-weight:900; }
+    .ok{ background:#dcfce7; color:#166534; font-weight:900; }
+
+    .filterRow{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      margin-top:10px;
+    }
+    .filterRow .mini{
+      background:#fff; color:#111827; border:1px solid #e5e7eb;
+      border-radius:12px; padding:8px 10px; font-size:12px;
+    }
   </style>
 </head>
 
@@ -90,6 +101,9 @@
 
         <select id="monthSelect" title="Selecciona mes"></select>
 
+        <input id="fromDate" type="date" title="Desde (opcional)"/>
+        <input id="toDate" type="date" title="Hasta (opcional)"/>
+
         <button id="btnRefresh">Actualizar</button>
       </div>
     </div>
@@ -105,6 +119,7 @@
   <!-- Tabs -->
   <div class="tabs">
     <div class="tab active" data-view="finanzas">Finanzas</div>
+    <div class="tab" data-view="alertas">Alertas</div>
     <div class="tab" data-view="distritos">Distritos</div>
     <div class="tab" data-view="vendedoras">Vendedoras</div>
     <div class="tab" data-view="delivery">Delivery</div>
@@ -112,6 +127,7 @@
     <div class="tab" data-view="clientes">Clientes</div>
     <div class="tab" data-view="gastos">Gastos</div>
     <div class="tab" data-view="pagos">Medios de pago</div>
+    <div class="tab" data-view="servicios">Servicios</div>
   </div>
 
   <!-- FINANZAS -->
@@ -128,18 +144,53 @@
     </div>
   </section>
 
-  <!-- DISTRITOS -->
-  <section id="view-distritos" style="display:none;">
+  <!-- ALERTAS -->
+  <section id="view-alertas" style="display:none;">
     <div class="two">
       <div class="card">
-        <h3>Ranking distritos (monto)</h3>
+        <h3>⚠️ Faltan comprobantes (top por monto)</h3>
+        <div class="scroll" style="max-height:420px;">
+          <table>
+            <thead><tr><th>Fecha</th><th>Vendedor</th><th>Cliente</th><th>Nota</th><th>Pedido</th><th>Total</th><th>Saldo</th></tr></thead>
+            <tbody id="tblFaltanComp"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h3>⚠️ Pendientes de pago (top por saldo)</h3>
+        <div class="scroll" style="max-height:420px;">
+          <table>
+            <thead><tr><th>Fecha</th><th>Vendedor</th><th>Cliente</th><th>Nota</th><th>Pedido</th><th>Total</th><th>Saldo</th></tr></thead>
+            <tbody id="tblPendPago"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DISTRITOS -->
+  <section id="view-distritos" style="display:none;">
+    <div class="card">
+      <h3>Ranking distritos</h3>
+      <div class="filterRow">
+        <select class="mini" id="distOrder">
+          <option value="monto">Ordenar por Monto</option>
+          <option value="cantidad">Ordenar por Cantidad</option>
+          <option value="ticket">Ordenar por Ticket Prom</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="two">
+      <div class="card">
+        <h3>Top 10 distritos (según orden)</h3>
         <div class="chart-sm" id="chartDistritos"></div>
       </div>
       <div class="card">
-        <h3>Detalle distritos (cantidad + monto)</h3>
+        <h3>Detalle distritos</h3>
         <div class="scroll">
           <table>
-            <thead><tr><th>Distrito</th><th>Cantidad</th><th>Monto</th></tr></thead>
+            <thead><tr><th>Distrito</th><th>Cantidad</th><th>Monto</th><th>Ticket prom</th></tr></thead>
             <tbody id="tblDistritos"></tbody>
           </table>
         </div>
@@ -149,14 +200,25 @@
 
   <!-- VENDEDORAS -->
   <section id="view-vendedoras" style="display:none;">
-    <div class="card">
-      <h3>Vendedoras por día (ventas, saldo y pedidos) + Total del periodo</h3>
-      <div class="status" id="vendTotal"></div>
-      <div class="scroll" style="max-height:420px;">
-        <table>
-          <thead><tr><th>Fecha</th><th>Vendedora</th><th>Ventas</th><th>Saldo</th><th>Pedidos</th></tr></thead>
-          <tbody id="tblVendedoras"></tbody>
-        </table>
+    <div class="two">
+      <div class="card">
+        <h3>Resumen por vendedora (periodo)</h3>
+        <div class="scroll">
+          <table>
+            <thead><tr><th>Vendedora</th><th>Ventas</th><th>Saldo</th><th>Pedidos</th></tr></thead>
+            <tbody id="tblVendResumen"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Vendedoras por día</h3>
+        <div class="status" id="vendTotal"></div>
+        <div class="scroll" style="max-height:420px;">
+          <table>
+            <thead><tr><th>Fecha</th><th>Vendedora</th><th>Ventas</th><th>Saldo</th><th>Pedidos</th></tr></thead>
+            <tbody id="tblVendedoras"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </section>
@@ -170,13 +232,23 @@
         <div class="status" id="recojoInfo"></div>
       </div>
       <div class="card">
-        <h3>Personal delivery (por día) — “Lo que se le debe” (costo)</h3>
+        <h3>Personal delivery (RESUMEN del periodo)</h3>
         <div class="scroll">
           <table>
-            <thead><tr><th>Fecha</th><th>Nombre</th><th>Entregas</th><th>Costo</th></tr></thead>
-            <tbody id="tblDeliveryPersonal"></tbody>
+            <thead><tr><th>Nombre</th><th>Entregas</th><th>Costo (se le debe)</th></tr></thead>
+            <tbody id="tblDeliveryResumen"></tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+      <h3>Personal delivery (por día)</h3>
+      <div class="scroll" style="max-height:420px;">
+        <table>
+          <thead><tr><th>Fecha</th><th>Nombre</th><th>Entregas</th><th>Costo</th></tr></thead>
+          <tbody id="tblDeliveryPersonal"></tbody>
+        </table>
       </div>
     </div>
   </section>
@@ -194,13 +266,19 @@
       </div>
     </div>
 
-    <div class="card" style="margin-top:14px;">
-      <h3>Lista Top 20 (cantidad y monto)</h3>
-      <div class="scroll" style="max-height:420px;">
-        <table>
-          <thead><tr><th>Producto</th><th>Cantidad</th><th>Monto</th></tr></thead>
-          <tbody id="tblProductos"></tbody>
-        </table>
+    <div class="two" style="margin-top:14px;">
+      <div class="card">
+        <h3>Top 20 productos por frecuencia (veces)</h3>
+        <div class="chart-sm" id="chartProdFreq"></div>
+      </div>
+      <div class="card">
+        <h3>Lista Top 20 (monto/cantidad/frecuencia)</h3>
+        <div class="scroll" style="max-height:360px;">
+          <table>
+            <thead><tr><th>Producto</th><th>Cantidad</th><th>Monto</th><th>Frecuencia</th></tr></thead>
+            <tbody id="tblProductos"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </section>
@@ -208,14 +286,20 @@
   <!-- CLIENTES -->
   <section id="view-clientes" style="display:none;">
     <div class="card">
-      <h3>Clientes (nombre, celular, última compra)</h3>
-      <div class="status" id="clientesCount"></div>
-      <div class="scroll" style="max-height:420px;">
+      <h3>Clientes (búsqueda + última compra)</h3>
+      <div class="filterRow">
+        <input class="mini" id="clientSearch" placeholder="Buscar por nombre o celular..." style="min-width:260px;">
+        <button class="mini" id="btnFilterClients" style="cursor:pointer;">Filtrar</button>
+        <span class="pill" id="clientesCount">—</span>
+      </div>
+
+      <div class="scroll" style="max-height:420px; margin-top:12px;">
         <table>
           <thead><tr><th>Cliente</th><th>Celular</th><th>Última compra</th></tr></thead>
           <tbody id="tblClientes"></tbody>
         </table>
       </div>
+      <div class="status" id="clientesHelp"></div>
     </div>
   </section>
 
@@ -242,7 +326,7 @@
   <section id="view-pagos" style="display:none;">
     <div class="two">
       <div class="card">
-        <h3>Resumen por cuenta (1er pago + 2do pago)</h3>
+        <h3>Resumen por cuenta (1er + 2do pago)</h3>
         <div class="chart-sm" id="chartCuentas"></div>
       </div>
       <div class="card">
@@ -257,12 +341,31 @@
     </div>
   </section>
 
+  <!-- SERVICIOS -->
+  <section id="view-servicios" style="display:none;">
+    <div class="two">
+      <div class="card">
+        <h3>Servicios por estado (avance)</h3>
+        <div class="chart-sm" id="chartServEstado"></div>
+      </div>
+      <div class="card">
+        <h3>Servicios pendientes (detalle)</h3>
+        <div class="scroll" style="max-height:420px;">
+          <table>
+            <thead><tr><th>Fecha</th><th>Servicio</th><th>Monto</th><th>Medio</th><th>Obs</th></tr></thead>
+            <tbody id="tblServPend"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <div class="status" id="updated"></div>
 </main>
 
 <script>
   // ✅ Pega aquí tu URL /exec
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbykGV3yTg5v1cKf9w50WAcr64ogSAyXkYGErBwAMvLsXlwXvPyqvcY3qFZZg59uuxsa/exec";
+  const APPS_SCRIPT_URL = "TU_URL_EXEC";
 
   google.charts.load("current", { packages: ["corechart"] });
 
@@ -289,14 +392,29 @@
     });
   }
 
+  function buildUrl(){
+    const month = $("monthSelect").value || "";
+    const from = $("fromDate").value || "";
+    const to = $("toDate").value || "";
+
+    let qs = `action=data`;
+
+    // si rango está lleno (al menos uno), manda from/to y anula month
+    if (from || to){
+      qs += `&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
+    } else {
+      qs += `&month=${encodeURIComponent(month)}`;
+    }
+    return `${APPS_SCRIPT_URL}?${qs}`;
+  }
+
   async function load(){
     $("err").textContent = "";
-    const month = $("monthSelect").value || "";
-    const url = `${APPS_SCRIPT_URL}?action=data&month=${encodeURIComponent(month)}`;
-
+    const url = buildUrl();
     const res = await jsonp(url);
+
     if(!res.ok){
-      $("err").innerHTML = `<span class="pill danger">Error Apps Script:</span> ${res.error}`;
+      $("err").innerHTML = `<span class="pill danger">Error Apps Script</span> ${res.error}`;
       return;
     }
     state.payload = res.payload;
@@ -307,34 +425,41 @@
     const p = state.payload;
     if(!p) return;
 
-    // header
     $("periodPill").textContent = `Periodo: ${p.meta.selectedPeriod.from} → ${p.meta.selectedPeriod.to}`;
     $("sub").textContent = `Sincronizado con Google Sheets (hoy: ${p.meta.today})`;
 
-    // months
     fillMonths(p.meta.availableMonths, p.meta.selectedPeriod.month);
 
-    // KPIs (incluye alerta comprobantes)
     renderKpis(p.kpis);
 
-    // Charts
     google.charts.setOnLoadCallback(()=>{
       drawFinanzas(p.series);
-      drawDistritos(p.tables.distritosRank);
+      drawDistritos();
       drawDelivery(p.series.deliveryDia);
-      drawProductos(p.tables.top20ProdMonto, p.tables.top20ProdCant);
+      drawProductos(p.tables);
       drawGastos(p.tables.gastosPorCategoria);
       drawCuentas(p.tables.pagosPorCuenta);
+      drawServicios(p.tables.serviciosPorEstado);
     });
 
-    // Tables
-    renderVendedoras(p.tables.vendedorasPorDia);
-    renderDeliveryPersonal(p.tables.deliveryPersonalDia);
-    renderProductosTable(p.tables.top20ProdMonto);
-    renderDistritosTable(p.tables.distritosRank);
-    renderClientes(p.tables.clientesList, p.kpis.clientesTotalNotaVenta);
-    renderGastosCatTable(p.tables.gastosPorCategoria);
-    renderCuentasTable(p.tables.pagosPorCuenta);
+    // tables
+    renderFaltanComp(p.tables.faltanComprobante || []);
+    renderPendPago(p.tables.pendientesPago || []);
+
+    renderVendedoras(p.tables.vendedorasPorDia || []);
+    renderVendedorasResumen(p.tables.vendedorasResumen || []);
+
+    renderDeliveryPersonalDia(p.tables.deliveryPersonalDia || []);
+    renderDeliveryResumen(p.tables.deliveryPersonalResumen || []);
+
+    renderDistritosTable();
+    renderProductosTable();
+    renderGastosCatTable(p.tables.gastosPorCategoria || []);
+    renderCuentasTable(p.tables.pagosPorCuenta || []);
+    renderServiciosPend(p.tables.serviciosPendientes || []);
+
+    // clients initial
+    renderClientesFiltered();
 
     $("recojoInfo").textContent = `Recojo en tienda (sin delivery cobrado): ${int(p.kpis.recojoTienda)} entregas`;
     $("updated").textContent = `Actualizado: ${p.meta.generatedAt}`;
@@ -369,12 +494,13 @@
       ["Delivery cobrado", money(k.deliveryCobrado)],
       ["Costo delivery", money(k.deliveryCosto)],
       ["Margen delivery", money(k.deliveryMargen)],
-      ["Clientes (nota venta)", int(k.clientesTotalNotaVenta)],
+      ["Clientes únicos (nota venta)", int(k.clientesTotalNotaVenta)],
       ["Promedio diario", money(k.promedioDiario)],
       ["Proyección mensual", money(k.proyeccionMensual)],
       ["Boletas / Facturas", `${int(k.comprobantes.boletas)} / ${int(k.comprobantes.facturas)}`],
       ["⚠️ Comprobantes faltantes", int(k.alertaComprobantesFaltan)],
     ];
+
     const box = $("kpis");
     box.innerHTML = "";
     for(const [t,v] of items){
@@ -382,6 +508,12 @@
       d.className="card";
       d.innerHTML = `<div class="kpi-title">${t}</div><div class="kpi-value">${v}</div>`;
       box.appendChild(d);
+    }
+
+    if(k.alertaComprobantesFaltan>0){
+      $("err").innerHTML = `<span class="pill danger">Alerta</span> Faltan ${int(k.alertaComprobantesFaltan)} comprobantes en este periodo.`;
+    } else {
+      $("err").innerHTML = `<span class="pill ok">OK</span> Sin comprobantes faltantes en este periodo.`;
     }
   }
 
@@ -393,7 +525,6 @@
     dt.addColumn("number","Ventas");
     dt.addColumn("number","Gastos");
     dt.addColumn("number","Saldo");
-
     vgs.forEach(x=> dt.addRow([x.date, Number(x.ventas||0), Number(x.gastos||0), Number(x.saldo||0)]));
 
     new google.visualization.LineChart($("chartVGS"))
@@ -409,22 +540,60 @@
       .draw(dt2, { legend:{position:"bottom"}, chartArea:{left:50, top:20, width:"85%", height:"70%"} });
   }
 
+  // ALERTAS
+  function renderFaltanComp(rows){
+    const tb = $("tblFaltanComp"); tb.innerHTML="";
+    rows.forEach(r=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${r.date}</td><td>${r.vendedor}</td><td>${r.cliente||""}</td><td>${r.notaVenta||""}</td><td>${r.pedido||""}</td><td>${money(r.total)}</td><td>${money(r.porPagar)}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+  function renderPendPago(rows){
+    const tb = $("tblPendPago"); tb.innerHTML="";
+    rows.forEach(r=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${r.date}</td><td>${r.vendedor}</td><td>${r.cliente||""}</td><td>${r.notaVenta||""}</td><td>${r.pedido||""}</td><td>${money(r.total)}</td><td>${money(r.porPagar)}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+
   // DISTRITOS
-  function drawDistritos(rows){
-    const top = (rows||[]).slice(0,10);
+  function getDistritosSorted(){
+    const rows = (state.payload?.tables?.distritosRank || []).slice();
+    const mode = $("distOrder").value;
+    if(mode==="cantidad") rows.sort((a,b)=> (b.cantidad||0)-(a.cantidad||0));
+    else if(mode==="ticket") rows.sort((a,b)=> (b.ticketProm||0)-(a.ticketProm||0));
+    else rows.sort((a,b)=> (b.monto||0)-(a.monto||0));
+    return rows;
+  }
+
+  function drawDistritos(){
+    const rows = getDistritosSorted();
+    const top = rows.slice(0,10);
+
+    const mode = $("distOrder").value;
+    const label = mode==="cantidad" ? "Cantidad" : (mode==="ticket" ? "Ticket prom" : "Monto");
+
     const dt = new google.visualization.DataTable();
     dt.addColumn("string","Distrito");
-    dt.addColumn("number","Monto");
-    top.forEach(r=> dt.addRow([r.distrito, Number(r.monto||0)]));
+    dt.addColumn("number", label);
+
+    top.forEach(r=>{
+      const val = mode==="cantidad" ? Number(r.cantidad||0) : (mode==="ticket" ? Number(r.ticketProm||0) : Number(r.monto||0));
+      dt.addRow([r.distrito, val]);
+    });
 
     new google.visualization.BarChart($("chartDistritos"))
-      .draw(dt, { legend:"none", chartArea:{left:140, top:20, width:"70%", height:"75%"} });
+      .draw(dt, { legend:"none", chartArea:{left:150, top:20, width:"65%", height:"75%"} });
   }
-  function renderDistritosTable(rows){
+
+  function renderDistritosTable(){
+    const rows = getDistritosSorted();
     const tb = $("tblDistritos"); tb.innerHTML="";
-    (rows||[]).forEach(r=>{
+    rows.forEach(r=>{
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${r.distrito}</td><td>${int(r.cantidad)}</td><td>${money(r.monto)}</td>`;
+      tr.innerHTML = `<td>${r.distrito}</td><td>${int(r.cantidad)}</td><td>${money(r.monto)}</td><td>${money(r.ticketProm)}</td>`;
       tb.appendChild(tr);
     });
   }
@@ -433,7 +602,7 @@
   function renderVendedoras(rows){
     const tb = $("tblVendedoras"); tb.innerHTML="";
     let totV=0, totS=0, totP=0;
-    (rows||[]).forEach(r=>{
+    rows.forEach(r=>{
       totV += Number(r.ventas||0);
       totS += Number(r.saldo||0);
       totP += Number(r.pedidos||0);
@@ -443,6 +612,14 @@
     });
     $("vendTotal").textContent = `Total periodo → Ventas: ${money(totV)} | Saldo: ${money(totS)} | Pedidos: ${int(totP)}`;
   }
+  function renderVendedorasResumen(rows){
+    const tb = $("tblVendResumen"); tb.innerHTML="";
+    rows.forEach(r=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${r.vendedor}</td><td>${money(r.ventas)}</td><td>${money(r.saldo)}</td><td>${int(r.pedidos)}</td>`;
+      tb.appendChild(tr);
+    });
+  }
 
   // DELIVERY
   function drawDelivery(series){
@@ -451,7 +628,6 @@
     dt.addColumn("number","Delivery cobrado");
     dt.addColumn("number","Costo delivery");
     dt.addColumn("number","Entregas");
-
     (series||[]).forEach(x=>{
       dt.addRow([x.date, Number(x.delivery||0), Number(x.costo||0), Number(x.entregas||0)]);
     });
@@ -460,47 +636,89 @@
       .draw(dt, { legend:{position:"bottom"}, chartArea:{left:50, top:20, width:"85%", height:"70%"} });
   }
 
-  function renderDeliveryPersonal(rows){
+  function renderDeliveryPersonalDia(rows){
     const tb = $("tblDeliveryPersonal"); tb.innerHTML="";
-    (rows||[]).forEach(r=>{
+    rows.forEach(r=>{
       const tr = document.createElement("tr");
       tr.innerHTML = `<td>${r.date}</td><td>${r.nombre}</td><td>${int(r.entregas)}</td><td>${money(r.costo)}</td>`;
       tb.appendChild(tr);
     });
   }
-
-  // PRODUCTOS
-  function drawProductos(topMonto, topCant){
-    const dt1 = new google.visualization.DataTable();
-    dt1.addColumn("string","Producto");
-    dt1.addColumn("number","Monto");
-    (topMonto||[]).forEach(r=> dt1.addRow([r.producto, Number(r.monto||0)]));
-    new google.visualization.BarChart($("chartProdMonto"))
-      .draw(dt1, { legend:"none", chartArea:{left:180, top:20, width:"65%", height:"75%"} });
-
-    const dt2 = new google.visualization.DataTable();
-    dt2.addColumn("string","Producto");
-    dt2.addColumn("number","Cantidad");
-    (topCant||[]).forEach(r=> dt2.addRow([r.producto, Number(r.cantidad||0)]));
-    new google.visualization.BarChart($("chartProdCant"))
-      .draw(dt2, { legend:"none", chartArea:{left:180, top:20, width:"65%", height:"75%"} });
-  }
-
-  function renderProductosTable(topMonto){
-    const tb = $("tblProductos"); tb.innerHTML="";
-    (topMonto||[]).forEach(r=>{
+  function renderDeliveryResumen(rows){
+    const tb = $("tblDeliveryResumen"); tb.innerHTML="";
+    rows.forEach(r=>{
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${r.producto}</td><td>${int(r.cantidad)}</td><td>${money(r.monto)}</td>`;
+      tr.innerHTML = `<td>${r.nombre}</td><td>${int(r.entregas)}</td><td>${money(r.costo)}</td>`;
       tb.appendChild(tr);
     });
   }
 
-  // CLIENTES
-  function renderClientes(list, totalNotaVenta){
+  // PRODUCTOS
+  function drawProductos(t){
+    // monto
+    const dt1 = new google.visualization.DataTable();
+    dt1.addColumn("string","Producto");
+    dt1.addColumn("number","Monto");
+    (t.top20ProdMonto||[]).forEach(r=> dt1.addRow([r.producto, Number(r.monto||0)]));
+    new google.visualization.BarChart($("chartProdMonto"))
+      .draw(dt1, { legend:"none", chartArea:{left:200, top:20, width:"60%", height:"75%"} });
+
+    // cantidad
+    const dt2 = new google.visualization.DataTable();
+    dt2.addColumn("string","Producto");
+    dt2.addColumn("number","Cantidad");
+    (t.top20ProdCant||[]).forEach(r=> dt2.addRow([r.producto, Number(r.cantidad||0)]));
+    new google.visualization.BarChart($("chartProdCant"))
+      .draw(dt2, { legend:"none", chartArea:{left:200, top:20, width:"60%", height:"75%"} });
+
+    // frecuencia
+    const dt3 = new google.visualization.DataTable();
+    dt3.addColumn("string","Producto");
+    dt3.addColumn("number","Frecuencia");
+    (t.top20ProdFreq||[]).forEach(r=> dt3.addRow([r.producto, Number(r.frecuencia||0)]));
+    new google.visualization.BarChart($("chartProdFreq"))
+      .draw(dt3, { legend:"none", chartArea:{left:200, top:20, width:"60%", height:"75%"} });
+  }
+
+  function renderProductosTable(){
+    const t = state.payload?.tables || {};
+    const list = (t.top20ProdMonto||[]);
+    const tb = $("tblProductos"); tb.innerHTML="";
+    list.forEach(r=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${r.producto}</td><td>${int(r.cantidad)}</td><td>${money(r.monto)}</td><td>${int(r.frecuencia||0)}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+
+  // CLIENTES (filtra por búsqueda + última compra dentro del periodo seleccionado)
+  function renderClientesFiltered(){
+    const p = state.payload;
+    if(!p) return;
+
+    const list = p.tables.clientesList || [];
+    const q = ($("clientSearch").value || "").trim().toLowerCase();
+
+    const from = p.meta.selectedPeriod.from;
+    const to = p.meta.selectedPeriod.to;
+
+    const filtered = list.filter(c=>{
+      const name = (c.cliente||"").toLowerCase();
+      const cel = (c.celular||"").toLowerCase();
+      const okSearch = !q || name.includes(q) || cel.includes(q);
+
+      // última compra dentro del periodo (si existe)
+      const u = c.ultimaCompra || "";
+      const okUltima = !u ? true : (u >= from && u <= to);
+
+      return okSearch && okUltima;
+    }).slice(0,2000);
+
+    $("clientesCount").textContent = `Clientes mostrados: ${int(filtered.length)} | Clientes únicos (nota venta): ${int(p.kpis.clientesTotalNotaVenta)}`;
+    $("clientesHelp").textContent = `Nota: se filtra por “última compra” dentro del periodo y por búsqueda.`;
+
     const tb = $("tblClientes"); tb.innerHTML="";
-    const rows = (list||[]).slice(0,2000);
-    $("clientesCount").textContent = `Clientes en hoja clientes (mostrando ${rows.length}). Clientes únicos según Nota de ventas en este periodo: ${int(totalNotaVenta)}.`;
-    rows.forEach(r=>{
+    filtered.forEach(r=>{
       const tr = document.createElement("tr");
       tr.innerHTML = `<td>${r.cliente}</td><td>${r.celular||""}</td><td>${r.ultimaCompra||""}</td>`;
       tb.appendChild(tr);
@@ -517,10 +735,9 @@
     new google.visualization.PieChart($("chartGastosCat"))
       .draw(dt, { legend:{position:"right"}, chartArea:{left:20, top:10, width:"80%", height:"80%"} });
   }
-
   function renderGastosCatTable(rows){
     const tb = $("tblGastosCat"); tb.innerHTML="";
-    (rows||[]).forEach(r=>{
+    rows.forEach(r=>{
       const tr = document.createElement("tr");
       tr.innerHTML = `<td>${r.categoria}</td><td>${int(r.cantidad)}</td><td>${money(r.monto)}</td>`;
       tb.appendChild(tr);
@@ -535,13 +752,31 @@
     dt.addColumn("number","Monto");
     top.forEach(r=> dt.addRow([r.cuenta, Number(r.monto||0)]));
     new google.visualization.BarChart($("chartCuentas"))
-      .draw(dt, { legend:"none", chartArea:{left:180, top:20, width:"65%", height:"75%"} });
+      .draw(dt, { legend:"none", chartArea:{left:200, top:20, width:"60%", height:"75%"} });
   }
   function renderCuentasTable(rows){
     const tb = $("tblCuentas"); tb.innerHTML="";
-    (rows||[]).forEach(r=>{
+    rows.forEach(r=>{
       const tr = document.createElement("tr");
       tr.innerHTML = `<td>${r.cuenta}</td><td>${money(r.monto)}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+
+  // SERVICIOS
+  function drawServicios(rows){
+    const dt = new google.visualization.DataTable();
+    dt.addColumn("string","Estado");
+    dt.addColumn("number","Monto");
+    (rows||[]).forEach(r=> dt.addRow([r.estado, Number(r.monto||0)]));
+    new google.visualization.ColumnChart($("chartServEstado"))
+      .draw(dt, { legend:"none", chartArea:{left:60, top:20, width:"80%", height:"70%"} });
+  }
+  function renderServiciosPend(rows){
+    const tb = $("tblServPend"); tb.innerHTML="";
+    rows.forEach(r=>{
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${r.fecha}</td><td>${r.servicio}</td><td>${money(r.monto)}</td><td>${r.medio||""}</td><td>${r.observ||""}</td>`;
       tb.appendChild(tr);
     });
   }
@@ -554,16 +789,31 @@
       const view = t.dataset.view;
       document.querySelectorAll("section[id^='view-']").forEach(s=>s.style.display="none");
       $("view-"+view).style.display = "block";
+
+      if(view==="distritos"){
+        drawDistritos(); renderDistritosTable();
+      }
     });
   });
 
+  // eventos
   $("btnRefresh").addEventListener("click", load);
-  $("monthSelect").addEventListener("change", load);
+  $("monthSelect").addEventListener("change", ()=>{
+    // si cambias mes, limpio rango para evitar confusión
+    $("fromDate").value = "";
+    $("toDate").value = "";
+    load();
+  });
+  $("distOrder").addEventListener("change", ()=>{
+    drawDistritos();
+    renderDistritosTable();
+  });
+
+  $("btnFilterClients").addEventListener("click", renderClientesFiltered);
 
   // init
   (async function init(){
     try{
-      // carga inicial sin month para que el script devuelva availableMonths, luego load() usará el select
       const res = await jsonp(`${APPS_SCRIPT_URL}?action=data`);
       if(!res.ok){ $("err").textContent = res.error; return; }
       state.payload = res.payload;
