@@ -1,930 +1,590 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BRAVIZIMO'S | Dashboard Financiero</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root{
-      --bg1:#060b17;
+      --bg1:#050b16;
       --bg2:#0b1630;
-      --card:rgba(255,255,255,.06);
-      --card2:rgba(255,255,255,.08);
-      --stroke:rgba(255,255,255,.10);
-      --text:#e8edf7;
-      --muted:rgba(232,237,247,.70);
-      --accent:#8ab4ff;
-      --accent2:#a78bfa;
-      --good:#34d399;
-      --bad:#fb7185;
-      --warn:#fbbf24;
-      --radius:18px;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.08);
+      --border: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.70);
+      --muted2: rgba(255,255,255,.55);
+      --pill: rgba(255,255,255,.10);
+      --pillActive: rgba(255,255,255,.18);
     }
-
-    *{box-sizing:border-box}
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;}
     body{
       margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
-      background: radial-gradient(1000px 600px at 20% 10%, rgba(138,180,255,.20), transparent 60%),
-                  radial-gradient(900px 700px at 80% 20%, rgba(167,139,250,.18), transparent 55%),
-                  linear-gradient(180deg, var(--bg1), var(--bg2));
+      background: radial-gradient(1200px 600px at 20% 20%, rgba(71,98,255,.20), transparent 60%),
+                  radial-gradient(1000px 500px at 80% 30%, rgba(255,81,164,.12), transparent 55%),
+                  linear-gradient(180deg,var(--bg1),var(--bg2));
       min-height:100vh;
     }
-
-    .wrap{max-width:1200px;margin:0 auto;padding:22px 18px 50px;}
-    header{
-      display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
-      padding:8px 2px 16px;
-      border-bottom:1px solid var(--stroke);
-    }
-    .title h1{font-size:18px;margin:0 0 4px;font-weight:700;letter-spacing:.3px}
-    .title p{margin:0;color:var(--muted);font-size:12px}
-
-    .controls{
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;
-      background:rgba(255,255,255,.03);
-      padding:10px;border:1px solid var(--stroke);border-radius:14px;
-    }
-    .controls label{font-size:12px;color:var(--muted)}
-    select, input, button{
-      background:rgba(255,255,255,.06);
-      border:1px solid var(--stroke);
+    .wrap{max-width:1180px;margin:0 auto;padding:28px 18px 60px;}
+    .topbar{display:flex;gap:14px;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .brand h1{font-size:18px;margin:0 0 2px;}
+    .brand p{margin:0;color:var(--muted2);font-size:12px;}
+    .controls{display:flex;gap:10px;align-items:center;}
+    select, button{
+      background:rgba(255,255,255,.08);
       color:var(--text);
+      border:1px solid var(--border);
+      padding:8px 10px;
       border-radius:12px;
-      padding:9px 10px;
-      font-size:12px;
       outline:none;
     }
-    button{
-      cursor:pointer;
-      background:rgba(255,255,255,.12);
-      font-weight:650;
-      padding:9px 14px;
-    }
-    button:hover{filter:brightness(1.08)}
-    .tabs{
-      display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 12px;
-    }
+    button{cursor:pointer;background:rgba(255,255,255,.10);}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 16px;}
     .tab{
-      border:1px solid var(--stroke);
-      background:rgba(255,255,255,.04);
-      color:var(--text);
-      padding:8px 12px;
-      border-radius:999px;
-      font-size:12px;
-      cursor:pointer;
+      padding:8px 12px;border-radius:999px;border:1px solid var(--border);
+      background:var(--pill);color:var(--text);cursor:pointer;font-size:12px;
       user-select:none;
     }
-    .tab.active{
-      background:rgba(255,255,255,.14);
-      border-color:rgba(255,255,255,.18);
-    }
-
-    .grid-kpi{
-      display:grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap:12px;
-      margin-top:10px;
-    }
-    @media (max-width:1020px){ .grid-kpi{grid-template-columns: repeat(2, minmax(0, 1fr));} }
-    @media (max-width:520px){ .grid-kpi{grid-template-columns: 1fr;} }
-
+    .tab.active{background:var(--pillActive);}
+    .grid{display:grid;gap:14px;}
+    .kpis{grid-template-columns:repeat(4,minmax(0,1fr));}
     .card{
-      background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
-      border:1px solid var(--stroke);
-      border-radius:var(--radius);
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
       padding:14px;
-      box-shadow:0 14px 30px rgba(0,0,0,.22);
       backdrop-filter: blur(10px);
     }
-    .kpi-label{font-size:12px;color:var(--muted);margin-bottom:6px}
-    .kpi-value{font-size:22px;font-weight:800;letter-spacing:.2px}
-    .kpi-sub{margin-top:6px;color:var(--muted);font-size:11px}
-
-    .section{display:none;margin-top:12px;}
-    .section.active{display:block;}
-
-    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
-    @media (max-width:980px){ .grid-2{grid-template-columns:1fr;} }
-
-    .chart-card{height:340px;}
-    .chart-wrap{position:relative;height:280px;margin-top:10px;}
-    canvas{width:100% !important;height:100% !important;}
-
-    .table-card{padding:0;overflow:hidden}
-    .table-head{padding:14px;border-bottom:1px solid var(--stroke)}
-    .table-head h3{margin:0;font-size:14px}
-    .table-head p{margin:6px 0 0;color:var(--muted);font-size:12px}
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size:12px;
-    }
-    th,td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:top}
-    th{color:var(--muted);font-weight:650}
-    tbody tr:hover{background:rgba(255,255,255,.03)}
-    .scroll{max-height:360px;overflow:auto}
-    .right{text-align:right}
-    .muted{color:var(--muted)}
-    .pill{display:inline-block;padding:2px 8px;border:1px solid var(--stroke);border-radius:999px;font-size:11px;color:var(--muted)}
-    .total-row td{font-weight:800;border-top:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.03)}
+    .card h3{margin:0 0 6px;font-size:12px;color:var(--muted);}
+    .big{font-size:22px;font-weight:800;margin:0;}
+    .sub{margin:4px 0 0;color:var(--muted2);font-size:11px;}
+    .two{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .one{grid-template-columns:1fr;}
+    .hidden{display:none!important;}
+    table{width:100%;border-collapse:collapse;font-size:12px;}
+    th,td{border-bottom:1px solid rgba(255,255,255,.08);padding:10px 8px;text-align:left;vertical-align:top;}
+    th{color:var(--muted);font-weight:700;}
+    .scroll{max-height:360px;overflow:auto;}
+    .row-total td{font-weight:800;color:var(--text);}
+    .muted{color:var(--muted2);}
+    .notice{padding:10px 12px;border-radius:14px;background:rgba(255,122,0,.10);border:1px solid rgba(255,122,0,.25);color:rgba(255,255,255,.85);font-size:12px;}
+    @media (max-width:980px){.kpis{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}
   </style>
 </head>
-
 <body>
   <div class="wrap">
-    <header>
-      <div class="title">
+    <div class="topbar">
+      <div class="brand">
         <h1>BRAVIZIMO'S | Dashboard Financiero</h1>
         <p>Sincronizado con Google Sheets (Apps Script)</p>
       </div>
 
       <div class="controls">
-        <label>Modo</label>
+        <label class="muted">Modo</label>
         <select id="mode">
-          <option value="mes" selected>Mes</option>
-          <option value="rango">Rango</option>
+          <option value="Mes" selected>Mes</option>
         </select>
 
-        <label>Mes</label>
-        <select id="mesSelect"></select>
+        <label class="muted">Mes</label>
+        <select id="month">
+          <option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option>
+          <option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option>
+          <option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option>
+        </select>
 
-        <label class="rangoOnly" style="display:none;">Desde</label>
-        <input class="rangoOnly" style="display:none;" id="desde" type="date"/>
-
-        <label class="rangoOnly" style="display:none;">Hasta</label>
-        <input class="rangoOnly" style="display:none;" id="hasta" type="date"/>
+        <label class="muted">Año</label>
+        <select id="year">
+          <option>2025</option>
+          <option selected>2026</option>
+          <option>2027</option>
+        </select>
 
         <button id="btnRefresh">Actualizar</button>
       </div>
-    </header>
+    </div>
 
-    <div class="tabs" id="tabs"></div>
+    <div class="tabs">
+      <div class="tab active" data-tab="finanzas">Finanzas</div>
+      <div class="tab" data-tab="alertas">Alertas</div>
+      <div class="tab" data-tab="distritos">Distritos</div>
+      <div class="tab" data-tab="vendedoras">Vendedoras</div>
+      <div class="tab" data-tab="delivery">Delivery</div>
+      <div class="tab" data-tab="productos">Productos</div>
+      <div class="tab" data-tab="clientes">Clientes</div>
+      <div class="tab" data-tab="gastos">Gastos</div>
+      <div class="tab" data-tab="medios">Medios de pago</div>
+      <div class="tab" data-tab="servicios">Servicios</div>
+    </div>
+
+    <div id="msg" class="notice hidden"></div>
 
     <!-- FINANZAS -->
-    <section class="section active" id="sec-finanzas">
-      <div class="grid-kpi" id="kpis"></div>
+    <section id="finanzas" class="tabpane">
+      <div class="grid kpis">
+        <div class="card"><h3>Ventas totales</h3><p class="big" id="k_ventas">S/ 0.00</p></div>
+        <div class="card"><h3>Gastos totales</h3><p class="big" id="k_gastos">S/ 0.00</p></div>
+        <div class="card"><h3>Utilidad</h3><p class="big" id="k_utilidad">S/ 0.00</p><p class="sub" id="k_utilidad_flag"></p></div>
+        <div class="card"><h3>Saldo pendiente</h3><p class="big" id="k_saldo">S/ 0.00</p></div>
 
-      <div class="grid-2">
-        <div class="card chart-card">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
-            <div>
-              <div style="font-weight:800">Ventas vs Gastos (por día) + Saldo</div>
-              <div class="muted" style="font-size:12px;margin-top:4px">Ventas (nota de ventas), Gastos (GASTOS), Saldo pendiente (por pagar).</div>
-            </div>
-            <span class="pill" id="periodLabel"></span>
-          </div>
-          <div class="chart-wrap"><canvas id="chVentasGastos"></canvas></div>
+        <div class="card"><h3>Delivery cobrado</h3><p class="big" id="k_del_cob">S/ 0.00</p><p class="sub">(ENVIOS → Delivery CLIENTE)</p></div>
+        <div class="card"><h3>Costo delivery</h3><p class="big" id="k_del_cost">S/ 0.00</p><p class="sub">(ENVIOS → Costo Delivery)</p></div>
+        <div class="card"><h3>Margen delivery</h3><p class="big" id="k_del_marg">S/ 0.00</p></div>
+        <div class="card"><h3>Clientes (total)</h3><p class="big" id="k_clientes">0</p></div>
+
+        <div class="card"><h3>Promedio diario (hasta hoy)</h3><p class="big" id="k_prom">S/ 0.00</p></div>
+        <div class="card"><h3>Proyección mensual (prom × 30)</h3><p class="big" id="k_proy">S/ 0.00</p></div>
+        <div class="card"><h3>Boletas / Facturas</h3><p class="big" id="k_comp">0 / 0</p></div>
+        <div class="card"><h3>Comprobantes faltantes</h3><p class="big" id="k_comp_falt">0</p></div>
+      </div>
+
+      <div class="grid two" style="margin-top:14px;">
+        <div class="card">
+          <h3>Ventas vs Gastos (por día) + Saldo</h3>
+          <canvas id="chart_fin1" height="140"></canvas>
         </div>
-
-        <div class="card chart-card">
-          <div style="font-weight:800">Acumulado de ventas</div>
-          <div class="muted" style="font-size:12px;margin-top:4px">Suma progresiva por día.</div>
-          <div class="chart-wrap"><canvas id="chAcumulado"></canvas></div>
+        <div class="card">
+          <h3>Acumulado de ventas</h3>
+          <canvas id="chart_fin2" height="140"></canvas>
         </div>
       </div>
     </section>
 
     <!-- ALERTAS -->
-    <section class="section" id="sec-alertas">
-      <div class="grid-2">
-        <div class="card table-card">
-          <div class="table-head">
-            <h3>Pendientes de comprobante (hasta 200)</h3>
-            <p>Incluye numeración y columna <b>Comprobante</b>.</p>
-          </div>
+    <section id="alertas" class="tabpane hidden">
+      <div class="grid one">
+        <div class="card">
+          <h3>Pendientes de comprobante (hasta 200)</h3>
           <div class="scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>#</th><th>Fecha</th><th>Pedido</th><th>Nota</th><th>Cliente</th><th>Comprobante</th><th class="right">Total</th>
-                </tr>
-              </thead>
-              <tbody id="tbPendComp"></tbody>
-            </table>
+            <table id="tbl_pend_comp"></table>
           </div>
         </div>
-
-        <div class="card table-card">
-          <div class="table-head">
-            <h3>Saldos pendientes (hasta 200)</h3>
-            <p>Incluye <b>TOTAL FINAL</b> (resultado monto final).</p>
-          </div>
+        <div class="card">
+          <h3>Saldos pendientes (hasta 200)</h3>
           <div class="scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Fecha</th><th>Cliente</th><th class="right">Total</th><th class="right">Por pagar</th>
-                </tr>
-              </thead>
-              <tbody id="tbSaldosPend"></tbody>
-            </table>
+            <table id="tbl_saldos"></table>
           </div>
         </div>
       </div>
     </section>
 
     <!-- DISTRITOS -->
-    <section class="section" id="sec-distritos">
-      <div class="card table-card">
-        <div class="table-head">
-          <h3>Ranking de distritos</h3>
-          <p>Pedidos (entregas) y monto (suma delivery cliente).</p>
-        </div>
+    <section id="distritos" class="tabpane hidden">
+      <div class="card">
+        <h3>Ranking de distritos</h3>
+        <p class="sub">Pedidos (entregas) y monto (suma delivery cliente o monto en envíos).</p>
         <div class="scroll">
-          <table>
-            <thead>
-              <tr><th>Distrito</th><th class="right">Pedidos</th><th class="right">Monto</th></tr>
-            </thead>
-            <tbody id="tbDistritos"></tbody>
-          </table>
+          <table id="tbl_distritos"></table>
         </div>
       </div>
     </section>
 
     <!-- VENDEDORAS -->
-    <section class="section" id="sec-vendedoras">
-      <div class="grid-2">
-        <div class="card chart-card">
-          <div style="font-weight:800">Resumen por vendedora (Top)</div>
-          <div class="muted" style="font-size:12px;margin-top:4px">Monto y pedidos (nota de ventas).</div>
-          <div class="chart-wrap"><canvas id="chVendedoras"></canvas></div>
+    <section id="vendedoras" class="tabpane hidden">
+      <div class="grid two">
+        <div class="card">
+          <h3>Resumen por vendedora (Top)</h3>
+          <canvas id="chart_vend" height="160"></canvas>
         </div>
-
-        <div class="card table-card">
-          <div class="table-head">
-            <h3>Vendedoras por día (ventas y saldo)</h3>
-            <p>Detalle por fecha y vendedora.</p>
-          </div>
+        <div class="card">
+          <h3>Vendedoras por día (ventas y saldo)</h3>
           <div class="scroll">
-            <table>
-              <thead>
-                <tr><th>Fecha</th><th>Vendedora</th><th class="right">Pedidos</th><th class="right">Monto</th><th class="right">Saldo</th></tr>
-              </thead>
-              <tbody id="tbVendedorasDia"></tbody>
-            </table>
+            <table id="tbl_vendedoras_dia"></table>
           </div>
         </div>
       </div>
     </section>
 
     <!-- DELIVERY -->
-    <section class="section" id="sec-delivery">
-      <div class="grid-2">
-        <div class="card chart-card">
-          <div style="font-weight:800">Delivery por día</div>
-          <div class="muted" style="font-size:12px;margin-top:4px">Delivery cobrado vs costo de delivery.</div>
-          <div class="chart-wrap"><canvas id="chDeliveryDia"></canvas></div>
+    <section id="delivery" class="tabpane hidden">
+      <div class="grid two">
+        <div class="card">
+          <h3>Delivery por día</h3>
+          <p class="sub">Delivery cobrado vs costo de delivery + diferencia.</p>
+          <canvas id="chart_del" height="160"></canvas>
         </div>
-
-        <div class="card chart-card">
-          <div style="font-weight:800">Recojo en tienda (por día)</div>
-          <div class="muted" style="font-size:12px;margin-top:4px">Si Dirección contiene “RECOJO/TIENDA” o columna Recojo = SI.</div>
-          <div class="chart-wrap"><canvas id="chRecojo"></canvas></div>
+        <div class="card">
+          <h3>Recojo en tienda (por día)</h3>
+          <p class="sub">Si Dirección contiene “RECOJO/TIENDA” o columna Recojo = SI.</p>
+          <canvas id="chart_recojo" height="160"></canvas>
         </div>
       </div>
-
-      <div class="card chart-card" style="margin-top:12px">
-        <div style="font-weight:800">Ahorro delivery por día</div>
-        <div class="muted" style="font-size:12px;margin-top:4px">Ahorro = Delivery cliente - Costo delivery.</div>
-        <div class="chart-wrap"><canvas id="chAhorro"></canvas></div>
-      </div>
-
-      <div class="card table-card" style="margin-top:12px">
-        <div class="table-head">
-          <h3>Delivery por motorizado (ranking)</h3>
-          <p>Entregas, cobrado y costo (periodo seleccionado).</p>
-        </div>
+      <div class="card" style="margin-top:14px;">
+        <h3>Detalle delivery por día</h3>
         <div class="scroll">
-          <table>
-            <thead>
-              <tr><th>Motorizado</th><th class="right">Entregas</th><th class="right">Cobrado</th><th class="right">Costo</th></tr>
-            </thead>
-            <tbody id="tbMotorizado"></tbody>
-          </table>
+          <table id="tbl_delivery_dia"></table>
         </div>
       </div>
     </section>
 
     <!-- PRODUCTOS -->
-    <section class="section" id="sec-productos">
-      <div class="card table-card">
-        <div class="table-head">
-          <h3>Top productos (ordenado por cantidad acumulada)</h3>
-          <p>Incluye cantidad y monto (hoja <b>productos</b>).</p>
+    <section id="productos" class="tabpane hidden">
+      <div class="grid one">
+        <div class="card">
+          <h3>Top productos (por cantidad acumulada)</h3>
+          <p class="sub">Incluye cantidad y monto (ordenado por cantidad).</p>
+          <div class="scroll">
+            <table id="tbl_prod_top"></table>
+          </div>
         </div>
-        <div class="scroll">
-          <table>
-            <thead>
-              <tr><th>Producto</th><th class="right">Cantidad</th><th class="right">Monto</th></tr>
-            </thead>
-            <tbody id="tbTopProd"></tbody>
-          </table>
-        </div>
-      </div>
 
-      <div class="card table-card" style="margin-top:12px">
-        <div class="table-head">
+        <div class="card">
           <h3>Productos por día (para saber qué preparar)</h3>
-          <p>Agrupado por fecha entrega y producto (mes/rango seleccionado).</p>
-        </div>
-        <div class="scroll">
-          <table>
-            <thead>
-              <tr><th>Fecha</th><th>Producto</th><th class="right">Cantidad</th></tr>
-            </thead>
-            <tbody id="tbProdDia"></tbody>
-          </table>
+          <p class="sub">Agrupado por fecha y producto (hoja productos).</p>
+          <div class="scroll">
+            <table id="tbl_prod_dia"></table>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- CLIENTES -->
-    <section class="section" id="sec-clientes">
-      <div class="card table-card">
-        <div class="table-head">
-          <h3>Clientes del período (hasta 200)</h3>
-          <p>Ordenado por monto acumulado (desc). Incluye numeración, celular y cantidad de pedidos.</p>
-        </div>
+    <section id="clientes" class="tabpane hidden">
+      <div class="card">
+        <h3>Clientes del período (hasta 200)</h3>
+        <p class="sub">Ordenado por monto acumulado (desc). Incluye numeración y cantidad de pedidos.</p>
         <div class="scroll">
-          <table>
-            <thead>
-              <tr><th>#</th><th>Cliente</th><th>Celular</th><th>Última compra</th><th class="right">Pedidos</th><th class="right">Monto</th></tr>
-            </thead>
-            <tbody id="tbClientes"></tbody>
-          </table>
+          <table id="tbl_clientes"></table>
         </div>
       </div>
     </section>
 
     <!-- GASTOS -->
-    <section class="section" id="sec-gastos">
-      <div class="card table-card">
-        <div class="table-head">
-          <h3>Gastos por categoría</h3>
-          <p>Lee de hoja <b>GASTOS</b>, columna <b>T.SOLES</b> (o Monto/Total).</p>
-        </div>
+    <section id="gastos" class="tabpane hidden">
+      <div class="card">
+        <h3>Gastos por categoría</h3>
+        <p class="sub">Se lee de hoja GASTOS (columna T.SOLES / Monto / Total).</p>
         <div class="scroll">
-          <table>
-            <thead>
-              <tr><th>Categoría</th><th class="right">Registros</th><th class="right">Monto</th></tr>
-            </thead>
-            <tbody id="tbGastosCat"></tbody>
-          </table>
+          <table id="tbl_gastos_cat"></table>
         </div>
       </div>
     </section>
 
-    <!-- MEDIOS DE PAGO -->
-    <section class="section" id="sec-medios">
-      <div class="card table-card">
-        <div class="table-head">
-          <h3>Medios de pago</h3>
-          <p><b>Solo ingresos</b>: suma de <b>Pagado</b> agrupado por Cuenta destino / Medio (nota de ventas).</p>
-        </div>
+    <!-- MEDIOS -->
+    <section id="medios" class="tabpane hidden">
+      <div class="card">
+        <h3>Medios de pago (INGRESOS)</h3>
+        <p class="sub">Ranking por monto de ingresos (Pagado; si no hay pagado, usa Total solo si Por pagar = 0).</p>
         <div class="scroll">
-          <table>
-            <thead>
-              <tr><th>Medio</th><th class="right">Registros</th><th class="right">Monto</th></tr>
-            </thead>
-            <tbody id="tbMedios"></tbody>
-          </table>
+          <table id="tbl_medios"></table>
         </div>
       </div>
     </section>
 
     <!-- SERVICIOS -->
-    <section class="section" id="sec-servicios">
-      <div class="grid-2">
-        <div class="card chart-card">
-          <div style="font-weight:800">Servicios: Pagado vs Pendiente (por día)</div>
-          <div class="muted" style="font-size:12px;margin-top:4px">Lee hoja servicios: TIPO / FECHA / MONTO / ESTADO.</div>
-          <div class="chart-wrap"><canvas id="chServicios"></canvas></div>
+    <section id="servicios" class="tabpane hidden">
+      <div class="grid two">
+        <div class="card">
+          <h3>Servicios: Pagado vs Pendiente (por día)</h3>
+          <canvas id="chart_serv" height="160"></canvas>
         </div>
-
-        <div class="card table-card">
-          <div class="table-head">
-            <h3>Servicios (lista)</h3>
-            <p>Tipo, Fecha, Monto, Estado, Medio y Obs (hasta 200 filas).</p>
-          </div>
+        <div class="card">
+          <h3>Servicios (lista)</h3>
+          <p class="sub">Tipo / Fecha / Monto / Estado / Medio / Obs</p>
           <div class="scroll">
-            <table>
-              <thead>
-                <tr><th>Tipo</th><th>Fecha</th><th class="right">Monto</th><th>Estado</th><th>Medio</th><th>Obs</th></tr>
-              </thead>
-              <tbody id="tbServicios"></tbody>
-            </table>
+            <table id="tbl_servicios"></table>
           </div>
         </div>
       </div>
     </section>
-
   </div>
 
 <script>
-/** =====================
- * CONFIG
- * ===================== */
-// 1) pega tu URL de Apps Script (web app /exec)
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxirCsjaLlY_fNJE6jeZB3Da_XnOA6zmeNMCifukzDJd6nucQzeMDihLkZJ17muDPGe/exec"; // ej: https://script.google.com/macros/s/XXXX/exec
-// 2) pega tu Spreadsheet ID (el largo del link)
-const SPREADSHEET_ID = "AKfycbxirCsjaLlY_fNJE6jeZB3Da_XnOA6zmeNMCifukzDJd6nucQzeMDihLkZJ17muDPGe";
+/************ CONFIG ************/
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxirCsjaLlY_fNJE6jeZB3Da_XnOA6zmeNMCifukzDJd6nucQzeMDihLkZJ17muDPGe/exec"; // <- IMPORTANTE
 
-/** =====================
- * UI / STATE
- * ===================== */
-const TABS = [
-  { id:"finanzas", label:"Finanzas" },
-  { id:"alertas", label:"Alertas" },
-  { id:"distritos", label:"Distritos" },
-  { id:"vendedoras", label:"Vendedoras" },
-  { id:"delivery", label:"Delivery" },
-  { id:"productos", label:"Productos" },
-  { id:"clientes", label:"Clientes" },
-  { id:"gastos", label:"Gastos" },
-  { id:"medios", label:"Medios de pago" },
-  { id:"servicios", label:"Servicios" },
-];
-
+/************ STATE ************/
 let charts = {};
-let lastPayload = null;
 
 function money(n){
-  const x = Number(n || 0);
-  return "S/ " + x.toLocaleString("es-PE",{minimumFractionDigits:2, maximumFractionDigits:2});
+  const x = Number(n||0);
+  return "S/ " + x.toLocaleString("es-PE", {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function setMsg(text, show=true){
+  const el = document.getElementById("msg");
+  if(!show){ el.classList.add("hidden"); el.textContent=""; return; }
+  el.classList.remove("hidden"); el.textContent = text;
 }
 
-function buildMesOptions(){
-  const sel = document.getElementById("mesSelect");
-  sel.innerHTML = "";
-  // 18 meses alrededor (12 atrás + 6 adelante)
-  const now = new Date();
-  for(let i=12;i>=-6;i--){
-    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
-    const ym = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
-    const name = d.toLocaleString("es-PE",{month:"long", year:"numeric"});
-    const op = document.createElement("option");
-    op.value = ym;
-    op.textContent = name.charAt(0).toUpperCase()+name.slice(1);
-    if(i===0) op.selected = true;
-    sel.appendChild(op);
-  }
-}
-
-function mountTabs(){
-  const host = document.getElementById("tabs");
-  host.innerHTML = "";
-  TABS.forEach((t, idx)=>{
-    const b = document.createElement("div");
-    b.className = "tab" + (idx===0 ? " active":"");
-    b.textContent = t.label;
-    b.dataset.tab = t.id;
-    b.onclick = ()=> activateTab(t.id);
-    host.appendChild(b);
-  });
-}
-
-function activateTab(id){
-  document.querySelectorAll(".tab").forEach(x=>{
-    x.classList.toggle("active", x.dataset.tab === id);
-  });
-  document.querySelectorAll(".section").forEach(s=> s.classList.remove("active"));
-  document.getElementById(`sec-${id}`).classList.add("active");
-}
-
-function setModeUI(){
+async function fetchData(){
   const mode = document.getElementById("mode").value;
-  document.querySelectorAll(".rangoOnly").forEach(el=>{
-    el.style.display = (mode==="rango") ? "" : "none";
-  });
-  document.getElementById("mesSelect").style.display = (mode==="mes") ? "" : "none";
+  const month = document.getElementById("month").value;
+  const year = document.getElementById("year").value;
+
+  const url = `${APPS_SCRIPT_URL}?action=data&mode=${encodeURIComponent(mode)}&month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}&_=${Date.now()}`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error("No se pudo cargar data");
+  return await res.json();
 }
 
-/** =====================
- * FETCH
- * ===================== */
-async function loadData(){
-  const mode = document.getElementById("mode").value;
-  const mes = document.getElementById("mesSelect").value;
-  const desde = document.getElementById("desde").value;
-  const hasta = document.getElementById("hasta").value;
+/************ RENDER ************/
+function renderKPIs(d){
+  const k = d.kpis;
 
-  const url = new URL(SCRIPT_URL);
-  url.searchParams.set("ssId", SPREADSHEET_ID);
-  url.searchParams.set("mode", mode);
-  if(mode==="mes"){
-    url.searchParams.set("mes", mes);
-  } else {
-    url.searchParams.set("desde", desde);
-    url.searchParams.set("hasta", hasta);
+  document.getElementById("k_ventas").textContent = money(k.ventasTotales);
+  document.getElementById("k_gastos").textContent = money(k.gastosTotales);
+  document.getElementById("k_utilidad").textContent = money(k.utilidad);
+  document.getElementById("k_saldo").textContent = money(k.saldoPendiente);
+
+  document.getElementById("k_del_cob").textContent = money(k.deliveryCobrado);
+  document.getElementById("k_del_cost").textContent = money(k.deliveryCosto);
+  document.getElementById("k_del_marg").textContent = money(k.deliveryMargen);
+
+  document.getElementById("k_clientes").textContent = String(k.clientesTotal || 0);
+  document.getElementById("k_prom").textContent = money(k.promedioDiario);
+  document.getElementById("k_proy").textContent = money(k.proyeccionMensual);
+
+  document.getElementById("k_comp").textContent = `${k.comprobantes?.con||0} / ${k.comprobantes?.sin||0}`;
+  document.getElementById("k_comp_falt").textContent = String(k.comprobantes?.sin||0);
+
+  const flag = document.getElementById("k_utilidad_flag");
+  flag.textContent = (k.utilidad >= 0 ? "OK" : "EN ROJO");
+}
+
+function table(elId, headers, rows, footerRow=null){
+  const el = document.getElementById(elId);
+  if(!rows || rows.length===0){
+    el.innerHTML = `<thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody><tr><td class="muted" colspan="${headers.length}">Sin registros.</td></tr></tbody>`;
+    return;
   }
-
-  const res = await fetch(url.toString());
-  const json = await res.json();
-  if(!json.ok) throw new Error(json.error || "Error desconocido");
-  lastPayload = json;
-  renderAll(json);
+  const thead = `<thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead>`;
+  const tbody = rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("");
+  const tfoot = footerRow ? `<tfoot><tr class="row-total">${footerRow.map(c=>`<td>${c}</td>`).join("")}</tr></tfoot>` : "";
+  el.innerHTML = thead + `<tbody>${tbody}</tbody>` + tfoot;
 }
 
-/** =====================
- * RENDER
- * ===================== */
-function renderAll(p){
-  document.getElementById("periodLabel").textContent = `${p.meta.mes} (${p.meta.desde} a ${p.meta.hasta})`;
+function renderAlertas(d){
+  table("tbl_pend_comp",
+    ["#", "Fecha", "Pedido", "Nota", "Cliente", "Total"],
+    (d.alertas?.pendientesComprobante || []).map(x => [
+      x.n, x.fecha, x.pedido, x.nota, x.cliente, money(x.total)
+    ])
+  );
 
-  renderKpis(p.kpis);
-
-  renderFinanzas(p.finanzas);
-  renderAlertas(p.alertas);
-  renderDistritos(p.distritos);
-  renderVendedoras(p.vendedoras);
-  renderDelivery(p.delivery);
-  renderProductos(p.productos);
-  renderClientes(p.clientes);
-  renderGastos(p.gastos);
-  renderMedios(p.mediosPago);
-  renderServicios(p.servicios);
-}
-
-function renderKpis(k){
-  const host = document.getElementById("kpis");
-  host.innerHTML = "";
-
-  const items = [
-    { label:"Ventas totales", value: money(k.ventasTotales) },
-    { label:"Gastos totales", value: money(k.gastosTotales) },
-    { label:"Utilidad", value: money(k.utilidad), sub: k.utilidad>=0 ? "OK" : "En negativo" },
-    { label:"Saldo pendiente", value: money(k.saldoPendiente) },
-
-    { label:"Delivery cobrado", value: money(k.deliveryCobrado), sub:"(ENVÍOS → Delivery CLIENTE)" },
-    { label:"Costo delivery", value: money(k.costoDelivery), sub:"(ENVÍOS → Costo Delivery)" },
-    { label:"Margen delivery", value: money(k.margenDelivery) },
-    { label:"Clientes (total)", value: String(k.clientesTotal) },
-
-    { label:"Promedio diario (hasta hoy)", value: money(k.promedioDiario) },
-    { label:"Proyección mensual (prom × 30)", value: money(k.proyeccionMensual) },
-    { label:"Boletas / Facturas", value: `${k.boletas} / ${k.facturas}` },
-    { label:"Comprobantes faltantes", value: String(k.comprobantesFaltantes) },
-  ];
-
-  items.forEach(it=>{
-    const c = document.createElement("div");
-    c.className = "card";
-    c.innerHTML = `
-      <div class="kpi-label">${it.label}</div>
-      <div class="kpi-value">${it.value}</div>
-      ${it.sub ? `<div class="kpi-sub">${it.sub}</div>` : ``}
-    `;
-    host.appendChild(c);
-  });
-}
-
-function renderFinanzas(f){
-  // Ventas vs Gastos
-  const s1 = f.ventasVsGastos || [];
-  const labels = s1.map(x=>x.fecha);
-  const ventas = s1.map(x=>x.ventas);
-  const gastos = s1.map(x=>x.gastos);
-  const saldo = s1.map(x=>x.saldoPendiente);
-
-  makeChart("chVentasGastos","line", labels, [
-    { label:"Ventas", data: ventas, tension:.35 },
-    { label:"Gastos", data: gastos, tension:.35 },
-    { label:"Saldo pendiente", data: saldo, tension:.35 },
-  ]);
-
-  // Acumulado
-  const s2 = f.acumuladoVentas || [];
-  makeChart("chAcumulado","line", s2.map(x=>x.fecha), [
-    { label:"Acumulado", data: s2.map(x=>x.acumulado), tension:.35 }
-  ]);
-}
-
-function renderAlertas(a){
-  // Pendientes comprobante
-  const tb1 = document.getElementById("tbPendComp");
-  tb1.innerHTML = "";
-  (a.pendientesComprobante || []).forEach(r=>{
-    tb1.insertAdjacentHTML("beforeend", `
-      <tr>
-        <td>${r.n}</td>
-        <td>${r.fecha}</td>
-        <td>${r.pedido || ""}</td>
-        <td>${r.nota || ""}</td>
-        <td>${r.cliente || ""}</td>
-        <td>${r.comprobante || ""}</td>
-        <td class="right">${money(r.total)}</td>
-      </tr>
-    `);
-  });
-  if(!a.pendientesComprobante || a.pendientesComprobante.length===0){
-    tb1.innerHTML = `<tr><td colspan="7" class="muted">Sin registros.</td></tr>`;
-  }
-
-  // Saldos pendientes
-  const tb2 = document.getElementById("tbSaldosPend");
-  tb2.innerHTML = "";
-  (a.saldosPendientes || []).forEach(r=>{
-    tb2.insertAdjacentHTML("beforeend", `
-      <tr>
-        <td>${r.fecha}</td>
-        <td>${r.cliente || ""}</td>
-        <td class="right">${money(r.total)}</td>
-        <td class="right">${money(r.porPagar)}</td>
-      </tr>
-    `);
-  });
-  const totalFinal = a.totalPendienteFinal || 0;
-  tb2.insertAdjacentHTML("beforeend", `
-    <tr class="total-row">
-      <td colspan="3">TOTAL FINAL</td>
-      <td class="right">${money(totalFinal)}</td>
-    </tr>
-  `);
-  if(!a.saldosPendientes || a.saldosPendientes.length===0){
-    tb2.innerHTML = `<tr><td colspan="4" class="muted">Sin registros.</td></tr>` + tb2.innerHTML;
-  }
+  table("tbl_saldos",
+    ["Fecha", "Cliente", "Total", "Por pagar"],
+    (d.alertas?.saldosPendientes || []).map(x => [
+      x.fecha, x.cliente, money(x.total), money(x.porPagar)
+    ]),
+    ["TOTAL", "", "", money(d.alertas?.totalSaldoPendiente || 0)]
+  );
 }
 
 function renderDistritos(d){
-  const tb = document.getElementById("tbDistritos");
-  tb.innerHTML = "";
-  (d.ranking || []).forEach(r=>{
-    tb.insertAdjacentHTML("beforeend", `
-      <tr>
-        <td>${r.distrito}</td>
-        <td class="right">${r.pedidos}</td>
-        <td class="right">${money(r.monto)}</td>
-      </tr>
-    `);
-  });
-
-  tb.insertAdjacentHTML("beforeend", `
-    <tr class="total-row">
-      <td>TOTAL</td>
-      <td class="right">${d.totalPedidos || 0}</td>
-      <td class="right">${money(d.totalMonto || 0)}</td>
-    </tr>
-  `);
-
-  if(!d.ranking || d.ranking.length===0){
-    tb.innerHTML = `<tr><td colspan="3" class="muted">Sin registros.</td></tr>` + tb.innerHTML;
-  }
+  const list = d.distritos?.ranking || [];
+  table("tbl_distritos",
+    ["Distrito", "Pedidos", "Monto"],
+    list.map(x => [x.distrito, x.pedidos, money(x.monto)]),
+    ["TOTAL", "", money(d.distritos?.totalMonto || 0)]
+  );
 }
 
-function renderVendedoras(v){
-  const top = v.resumenTop || [];
-  const labels = top.slice(0,12).map(x=>x.vendedora);
-  const monto = top.slice(0,12).map(x=>x.monto);
-  const pedidos = top.slice(0,12).map(x=>x.pedidos);
+function destroyChart(id){
+  if(charts[id]){ charts[id].destroy(); delete charts[id]; }
+}
 
-  makeChart("chVendedoras","bar", labels, [
-    { label:"Monto", data:monto },
-    { label:"Pedidos", data:pedidos }
-  ]);
-
-  const tb = document.getElementById("tbVendedorasDia");
-  tb.innerHTML = "";
-  (v.detalle || []).forEach(r=>{
-    tb.insertAdjacentHTML("beforeend", `
-      <tr>
-        <td>${r.fecha}</td>
-        <td>${r.vendedora}</td>
-        <td class="right">${r.pedidos}</td>
-        <td class="right">${money(r.monto)}</td>
-        <td class="right">${money(r.saldo)}</td>
-      </tr>
-    `);
+function renderVendedoras(d){
+  const top = d.vendedoras?.top || [];
+  destroyChart("chart_vend");
+  const ctx = document.getElementById("chart_vend");
+  charts["chart_vend"] = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: top.map(x=>x.vendedora),
+      datasets: [
+        { label:"Monto", data: top.map(x=>x.monto) },
+        { label:"Pedidos", data: top.map(x=>x.pedidos) },
+      ]
+    },
+    options: { responsive:true, plugins:{legend:{labels:{color:"rgba(255,255,255,.8)"}}}, scales:{x:{ticks:{color:"rgba(255,255,255,.6)"}}, y:{ticks:{color:"rgba(255,255,255,.6)"}}}}
   });
-  if(!v.detalle || v.detalle.length===0){
-    tb.innerHTML = `<tr><td colspan="5" class="muted">Sin registros.</td></tr>`;
-  }
+
+  table("tbl_vendedoras_dia",
+    ["Fecha", "Vendedora", "Pedidos", "Monto", "Saldo"],
+    (d.vendedoras?.porDia || []).map(x => [x.fecha, x.vendedora, x.pedidos, money(x.monto), money(x.saldo)])
+  );
 }
 
 function renderDelivery(d){
-  const porDia = d.porDia || [];
-  makeChart("chDeliveryDia","bar", porDia.map(x=>x.fecha), [
-    { label:"Cobrado", data: porDia.map(x=>x.cobrado) },
-    { label:"Costo", data: porDia.map(x=>x.costo) },
-  ]);
+  const list = d.delivery?.porDia || [];
 
-  const recojo = d.recojoPorDia || [];
-  makeChart("chRecojo","line", recojo.map(x=>x.fecha), [
-    { label:"Recojo (cant)", data: recojo.map(x=>x.recojo), tension:.35 }
-  ]);
-
-  const ahorro = d.ahorroPorDia || [];
-  makeChart("chAhorro","line", ahorro.map(x=>x.fecha), [
-    { label:"Cobrado", data: ahorro.map(x=>x.cobrado), tension:.35 },
-    { label:"Costo", data: ahorro.map(x=>x.costo), tension:.35 },
-    { label:"Ahorro", data: ahorro.map(x=>x.ahorro), tension:.35 },
-  ]);
-
-  const tb = document.getElementById("tbMotorizado");
-  tb.innerHTML = "";
-  (d.motorizado || []).forEach(r=>{
-    tb.insertAdjacentHTML("beforeend", `
-      <tr>
-        <td>${r.motorizado}</td>
-        <td class="right">${r.entregas}</td>
-        <td class="right">${money(r.cobrado)}</td>
-        <td class="right">${money(r.costo)}</td>
-      </tr>
-    `);
+  // chart cobrado vs costo
+  destroyChart("chart_del");
+  const c1 = document.getElementById("chart_del");
+  charts["chart_del"] = new Chart(c1, {
+    type:"bar",
+    data:{
+      labels:list.map(x=>x.fecha),
+      datasets:[
+        { label:"Cobrado", data:list.map(x=>x.cobrado||0) },
+        { label:"Costo", data:list.map(x=>x.costo||0) },
+        { label:"Diferencia", data:list.map(x=>x.diferencia||0) },
+      ]
+    },
+    options:{ responsive:true, plugins:{legend:{labels:{color:"rgba(255,255,255,.8)"}}}, scales:{x:{ticks:{color:"rgba(255,255,255,.6)"}}, y:{ticks:{color:"rgba(255,255,255,.6)"}}}}
   });
-  if(!d.motorizado || d.motorizado.length===0){
-    tb.innerHTML = `<tr><td colspan="4" class="muted">Sin registros.</td></tr>`;
-  }
+
+  // recojo
+  destroyChart("chart_recojo");
+  const recojoCount = {};
+  list.forEach(x=>{
+    const v = Number(x.recojo||0);
+    recojoCount[x.fecha] = (recojoCount[x.fecha]||0) + v;
+  });
+  const fechas = Object.keys(recojoCount).sort();
+  const c2 = document.getElementById("chart_recojo");
+  charts["chart_recojo"] = new Chart(c2, {
+    type:"line",
+    data:{ labels:fechas, datasets:[{ label:"Recojo (cant)", data:fechas.map(f=>recojoCount[f]||0) }] },
+    options:{ responsive:true, plugins:{legend:{labels:{color:"rgba(255,255,255,.8)"}}}, scales:{x:{ticks:{color:"rgba(255,255,255,.6)"}}, y:{ticks:{color:"rgba(255,255,255,.6)"}}}}
+  });
+
+  table("tbl_delivery_dia",
+    ["Fecha","Cobrado","Costo","Diferencia"],
+    list.map(x=>[x.fecha, money(x.cobrado||0), money(x.costo||0), money(x.diferencia||0)])
+  );
 }
 
-function renderProductos(p){
-  const tb1 = document.getElementById("tbTopProd");
-  tb1.innerHTML = "";
-  (p.top || []).forEach(r=>{
-    tb1.insertAdjacentHTML("beforeend", `
-      <tr>
-        <td>${r.producto}</td>
-        <td class="right">${Number(r.cantidad||0).toLocaleString("es-PE")}</td>
-        <td class="right">${money(r.monto)}</td>
-      </tr>
-    `);
-  });
-  if(!p.top || p.top.length===0){
-    tb1.innerHTML = `<tr><td colspan="3" class="muted">Sin registros.</td></tr>`;
-  }
-
-  const tb2 = document.getElementById("tbProdDia");
-  tb2.innerHTML = "";
-  (p.porDia || []).forEach(r=>{
-    tb2.insertAdjacentHTML("beforeend", `
-      <tr>
-        <td>${r.fecha}</td>
-        <td>${r.producto}</td>
-        <td class="right">${Number(r.cantidad||0).toLocaleString("es-PE")}</td>
-      </tr>
-    `);
-  });
-  if(!p.porDia || p.porDia.length===0){
-    tb2.innerHTML = `<tr><td colspan="3" class="muted">Sin registros.</td></tr>`;
-  }
+function renderClientes(d){
+  table("tbl_clientes",
+    ["#", "Cliente", "Celular", "Última compra", "Pedidos", "Monto"],
+    (d.clientes?.periodo || []).map(x => [
+      x.n, x.cliente, x.celular || "", x.ultimaCompra, x.pedidos, money(x.monto)
+    ])
+  );
 }
 
-function renderClientes(c){
-  const tb = document.getElementById("tbClientes");
-  tb.innerHTML = "";
-  (c.list || []).forEach(r=>{
-    tb.insertAdjacentHTML("beforeend", `
-      <tr>
-        <td>${r.n}</td>
-        <td>${r.cliente}</td>
-        <td>${r.celular || ""}</td>
-        <td>${r.ultimaCompra || ""}</td>
-        <td class="right">${r.pedidos}</td>
-        <td class="right">${money(r.monto)}</td>
-      </tr>
-    `);
-  });
-  if(!c.list || c.list.length===0){
-    tb.innerHTML = `<tr><td colspan="6" class="muted">Sin registros.</td></tr>`;
-  }
+function renderGastos(d){
+  const list = d.gastos?.porCategoria || [];
+  table("tbl_gastos_cat",
+    ["Categoría","Registros","Monto"],
+    list.map(x=>[x.categoria, x.registros, money(x.monto)]),
+    ["TOTAL","", money(d.gastos?.totalMonto || 0)]
+  );
 }
 
-function renderGastos(g){
-  const tb = document.getElementById("tbGastosCat");
-  tb.innerHTML = "";
-  (g.byCategoria || []).forEach(r=>{
-    tb.insertAdjacentHTML("beforeend", `
-      <tr>
-        <td>${r.categoria}</td>
-        <td class="right">${r.registros}</td>
-        <td class="right">${money(r.monto)}</td>
-      </tr>
-    `);
-  });
-
-  tb.insertAdjacentHTML("beforeend", `
-    <tr class="total-row">
-      <td colspan="2">TOTAL</td>
-      <td class="right">${money(g.total || 0)}</td>
-    </tr>
-  `);
-
-  if(!g.byCategoria || g.byCategoria.length===0){
-    tb.innerHTML = `<tr><td colspan="3" class="muted">Sin registros.</td></tr>` + tb.innerHTML;
-  }
+function renderMedios(d){
+  const list = d.mediosPago?.ingresos || [];
+  table("tbl_medios",
+    ["Medio","Registros","Monto (ingresos)"],
+    list.map(x=>[x.medio, x.registros, money(x.monto)])
+  );
 }
 
-function renderMedios(m){
-  const tb = document.getElementById("tbMedios");
-  tb.innerHTML = "";
-  const list = (m.ranking || []).filter(x=>x.monto>0);
-  list.forEach(r=>{
-    tb.insertAdjacentHTML("beforeend", `
-      <tr>
-        <td>${r.medio}</td>
-        <td class="right">${r.registros}</td>
-        <td class="right">${money(r.monto)}</td>
-      </tr>
-    `);
+function renderServicios(d){
+  const list = d.servicios?.lista || [];
+  table("tbl_servicios",
+    ["Tipo","Fecha","Monto","Estado","Medio","Obs"],
+    list.map(x=>[x.tipo, x.fecha, money(x.monto), x.estado, x.medio, x.obs || ""])
+  );
+
+  const byDay = d.servicios?.porDia || [];
+  destroyChart("chart_serv");
+  const c = document.getElementById("chart_serv");
+  charts["chart_serv"] = new Chart(c,{
+    type:"bar",
+    data:{
+      labels:byDay.map(x=>x.fecha),
+      datasets:[
+        {label:"Pagado", data:byDay.map(x=>x.pagado||0)},
+        {label:"Pendiente", data:byDay.map(x=>x.pendiente||0)},
+      ]
+    },
+    options:{ responsive:true, plugins:{legend:{labels:{color:"rgba(255,255,255,.8)"}}}, scales:{x:{ticks:{color:"rgba(255,255,255,.6)"}}, y:{ticks:{color:"rgba(255,255,255,.6)"}}}}
   });
-  if(list.length===0){
-    tb.innerHTML = `<tr><td colspan="3" class="muted">Sin registros.</td></tr>`;
-  }
 }
 
-function renderServicios(s){
-  const porDia = s.porDia || [];
-  makeChart("chServicios","bar", porDia.map(x=>x.fecha), [
-    { label:"Pagado", data: porDia.map(x=>x.pagado) },
-    { label:"Pendiente", data: porDia.map(x=>x.pendiente) },
-  ]);
+function renderProductos(d){
+  const top = d.productos?.top || [];
+  table("tbl_prod_top",
+    ["Producto","Cantidad","Monto"],
+    top.map(x=>[x.producto, x.cantidad, money(x.monto)])
+  );
 
-  const tb = document.getElementById("tbServicios");
-  tb.innerHTML = "";
-  (s.list || []).forEach(r=>{
-    tb.insertAdjacentHTML("beforeend", `
-      <tr>
-        <td>${r.tipo||""}</td>
-        <td>${r.fecha||""}</td>
-        <td class="right">${money(r.monto)}</td>
-        <td>${r.estado||""}</td>
-        <td>${r.medio||""}</td>
-        <td>${r.obs||""}</td>
-      </tr>
-    `);
-  });
-  if(!s.list || s.list.length===0){
-    tb.innerHTML = `<tr><td colspan="6" class="muted">Sin registros.</td></tr>`;
-  }
+  const dia = d.productos?.porDia || [];
+  table("tbl_prod_dia",
+    ["Fecha","Producto","Cantidad"],
+    dia.map(x=>[x.fecha, x.producto, x.cantidad])
+  );
 }
 
-/** =====================
- * CHART HELPER
- * ===================== */
-function makeChart(id, type, labels, datasets){
-  const el = document.getElementById(id);
-  if(!el) return;
+function renderFinCharts(d){
+  // Chart fin1 y fin2: por ahora, usa delivery/servicios/ventas si quieres, pero aquí lo dejo simple
+  // (Se puede enriquecer si luego agregamos series por día desde Apps Script)
+  destroyChart("chart_fin1");
+  destroyChart("chart_fin2");
 
-  // Destruir si existe
-  if(charts[id]) charts[id].destroy();
+  const ctx1 = document.getElementById("chart_fin1");
+  charts["chart_fin1"] = new Chart(ctx1, {
+    type:"line",
+    data:{ labels:[], datasets:[] },
+    options:{ responsive:true, plugins:{legend:{labels:{color:"rgba(255,255,255,.8)"}}}}
+  });
 
-  // Compactar labels si son demasiadas
-  const maxLabels = 18;
-  const step = labels.length > maxLabels ? Math.ceil(labels.length / maxLabels) : 1;
-  const labels2 = labels.map((x, i)=> i%step===0 ? x : "");
+  const ctx2 = document.getElementById("chart_fin2");
+  charts["chart_fin2"] = new Chart(ctx2, {
+    type:"line",
+    data:{ labels:[], datasets:[] },
+    options:{ responsive:true, plugins:{legend:{labels:{color:"rgba(255,255,255,.8)"}}}}
+  });
+}
 
-  charts[id] = new Chart(el, {
-    type,
-    data: { labels: labels2, datasets: datasets.map(ds=>({ ...ds })) },
-    options: {
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{
-        legend:{ labels:{ color:"rgba(232,237,247,.85)" } },
-        tooltip:{ callbacks:{
-          label: (ctx)=>{
-            const v = ctx.raw;
-            if(typeof v === "number") return `${ctx.dataset.label}: ${money(v)}`;
-            return `${ctx.dataset.label}: ${v}`;
-          }
-        }}
-      },
-      scales:{
-        x:{ ticks:{ color:"rgba(232,237,247,.65)", maxRotation:45, minRotation:45 }, grid:{ color:"rgba(255,255,255,.06)" } },
-        y:{ ticks:{ color:"rgba(232,237,247,.65)" }, grid:{ color:"rgba(255,255,255,.06)" } }
-      }
+function renderAll(d){
+  renderKPIs(d);
+  renderAlertas(d);
+  renderDistritos(d);
+  renderVendedoras(d);
+  renderDelivery(d);
+  renderClientes(d);
+  renderGastos(d);
+  renderMedios(d);
+  renderServicios(d);
+  renderProductos(d);
+  renderFinCharts(d);
+}
+
+/************ UI ************/
+function setTab(tab){
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelector(`.tab[data-tab="${tab}"]`).classList.add("active");
+  document.querySelectorAll(".tabpane").forEach(x=>x.classList.add("hidden"));
+  document.getElementById(tab).classList.remove("hidden");
+}
+
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click", ()=> setTab(t.dataset.tab));
+});
+
+document.getElementById("btnRefresh").addEventListener("click", async ()=>{
+  try{
+    setMsg("Actualizando…", true);
+    const d = await fetchData();
+
+    // Validación básica para evitar números inflados por errores
+    if(d?.kpis?.saldoPendiente > 1000000){
+      setMsg("⚠️ El saldo pendiente vino demasiado alto. Revisa columnas 'Por pagar' y formatos numéricos. (Este index ya parsea bien; si sigue alto, está en la fuente).", true);
+    } else {
+      setMsg("", false);
     }
-  });
-}
 
-/** =====================
- * INIT
- * ===================== */
-(function init(){
-  buildMesOptions();
-  mountTabs();
+    renderAll(d);
+  }catch(err){
+    setMsg("Error: " + (err.message || err), true);
+    console.error(err);
+  }
+});
 
-  document.getElementById("mode").addEventListener("change", ()=>{
-    setModeUI();
-  });
-
-  document.getElementById("btnRefresh").addEventListener("click", async ()=>{
-    try{
-      await loadData();
-    }catch(err){
-      alert("Error: " + err.message);
-      console.error(err);
-    }
-  });
-
-  setModeUI();
-
-  // primera carga
-  document.getElementById("btnRefresh").click();
+// carga inicial
+(async ()=>{
+  try{
+    setMsg("Cargando…", true);
+    const d = await fetchData();
+    setMsg("", false);
+    renderAll(d);
+  }catch(err){
+    setMsg("Error: " + (err.message || err), true);
+  }
 })();
 </script>
 </body>
