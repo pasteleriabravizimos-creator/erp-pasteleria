@@ -4,36 +4,29 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>BRAVIZIMO'S | Dashboard Financiero</title>
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
     :root{
-      --bg:#070a18;
-      --card:rgba(255,255,255,.06);
-      --card2:rgba(255,255,255,.08);
-      --stroke:rgba(255,255,255,.12);
-      --txt:#eaf0ff;
-      --muted:rgba(234,240,255,.75);
-      --accent:#6ee7ff;
-      --warn:#ffd36e;
-      --bad:#ff6e6e;
-      --ok:#7CFFB2;
+      --bg:#070a18; --card:rgba(255,255,255,.06); --card2:rgba(255,255,255,.08);
+      --stroke:rgba(255,255,255,.12); --txt:#eaf0ff; --muted:rgba(234,240,255,.75);
+      --accent:#6ee7ff; --warn:#ffd36e; --bad:#ff6e6e; --ok:#7CFFB2;
     }
     *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
-    body{margin:0;background:radial-gradient(1200px 700px at 30% 10%, #18205a 0%, rgba(24,32,90,0) 55%), radial-gradient(1000px 600px at 70% 0%, #2b145f 0%, rgba(43,20,95,0) 55%), var(--bg); color:var(--txt);}
+    body{margin:0;background:radial-gradient(1200px 700px at 30% 10%, #18205a 0%, rgba(24,32,90,0) 55%),
+         radial-gradient(1000px 600px at 70% 0%, #2b145f 0%, rgba(43,20,95,0) 55%), var(--bg); color:var(--txt);}
     .wrap{max-width:1200px;margin:0 auto;padding:28px 16px 40px}
     h1{margin:0 0 4px;font-size:18px;font-weight:800;letter-spacing:.3px}
     .sub{margin:0 0 16px;color:var(--muted);font-size:12px}
-
-    .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--card);border:1px solid var(--stroke);padding:10px 12px;border-radius:14px}
-    select,button,input{background:rgba(0,0,0,.25);border:1px solid var(--stroke);color:var(--txt);border-radius:10px;padding:8px 10px;font-size:12px;outline:none}
+    .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--card);
+         border:1px solid var(--stroke);padding:10px 12px;border-radius:14px}
+    select,button,input{background:rgba(0,0,0,.25);border:1px solid var(--stroke);color:var(--txt);
+         border-radius:10px;padding:8px 10px;font-size:12px;outline:none}
     button{cursor:pointer;background:linear-gradient(90deg, rgba(110,231,255,.18), rgba(124,255,178,.14));}
     button:hover{border-color:rgba(255,255,255,.22)}
     .pill{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 14px}
     .pill button{background:rgba(255,255,255,.06)}
     .pill button.active{border-color:rgba(110,231,255,.55); box-shadow:0 0 0 4px rgba(110,231,255,.08) inset;}
-
     .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
     .card{background:var(--card);border:1px solid var(--stroke);border-radius:16px;padding:12px}
     .k{font-size:11px;color:var(--muted)}
@@ -41,23 +34,15 @@
     .row2{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;margin-top:12px}
     .big{min-height:320px}
     .small{min-height:320px}
-    .tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-top:8px}
-    .dot{width:8px;height:8px;border-radius:999px;background:var(--accent)}
-    .dot.warn{background:var(--warn)}
-    .dot.bad{background:var(--bad)}
-    .dot.ok{background:var(--ok)}
-
     .list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
-    .item{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:12px;background:var(--card2);border:1px solid var(--stroke)}
+    .item{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:12px;
+          background:var(--card2);border:1px solid var(--stroke)}
     .item b{font-size:12px}
     .item span{font-size:12px;color:var(--muted)}
-
-    .status{margin:10px 0 0;padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);background:rgba(110,231,255,.07);color:var(--muted)}
+    .status{margin:10px 0 0;padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);
+            background:rgba(110,231,255,.07);color:var(--muted);white-space:pre-wrap}
     .status.err{background:rgba(255,110,110,.08);color:#ffd2d2;border-color:rgba(255,110,110,.25)}
-    @media (max-width: 980px){
-      .grid{grid-template-columns:repeat(2,1fr)}
-      .row2{grid-template-columns:1fr}
-    }
+    @media (max-width: 980px){ .grid{grid-template-columns:repeat(2,1fr)} .row2{grid-template-columns:1fr} }
   </style>
 </head>
 
@@ -66,7 +51,7 @@
     <h1>BRAVIZIMO'S | Dashboard Financiero</h1>
     <p class="sub">Sincronizado con Google Sheets (Apps Script)</p>
 
-    <div id="status" class="status">Cargando...</div>
+    <div id="status" class="status">Listo para cargar…</div>
 
     <div class="bar">
       <label style="font-size:12px;color:var(--muted)">Modo</label>
@@ -90,17 +75,17 @@
       <input id="end" type="date" style="display:none" />
 
       <button id="btn">Actualizar</button>
+      <button id="btnPing">Probar API</button>
     </div>
 
     <div class="pill">
-      <button class="active" data-tab="fin">Finanzas</button>
-      <button data-tab="del">Delivery</button>
-      <button data-tab="cli">Clientes</button>
-      <button data-tab="gas">Gastos</button>
-      <button data-tab="ser">Servicios</button>
+      <button class="active">Finanzas</button>
+      <button>Delivery</button>
+      <button>Clientes</button>
+      <button>Gastos</button>
+      <button>Servicios</button>
     </div>
 
-    <!-- KPIs -->
     <div class="grid" id="kpis"></div>
 
     <div class="row2">
@@ -124,13 +109,11 @@
         <div id="servAlert"></div>
       </div>
     </div>
-
   </div>
 
 <script>
   // ✅ TU WEB APP:
-  const API_URL = "https://script.google.com/macros/s/AKfycbz6RxdZASsm62ebunrJiwHocOZCPAxgYNDUWQHkG6kCWaat_l9iuZvRMc_hfBW4MQ/exec
-";
+  const API_URL = "https://script.google.com/macros/s/AKfycbyEKNgSTSul8LcjrWTP1uzvwdmmYdZxwiiAIqKpTvUJM-sugUfGRQTcE4t50GycaB-z/exec";
 
   let chart1, chart2;
 
@@ -145,20 +128,21 @@
     el.className = "status" + (isErr ? " err" : "");
   }
 
-  // JSONP para evitar CORS (Netlify)
+  // ✅ JSONP robusto: timeout + cache-bust + error claro
   function jsonp(url){
     return new Promise((resolve, reject) => {
       const cb = "cb_" + Math.random().toString(36).slice(2);
       const script = document.createElement("script");
-      const timeout = setTimeout(() => {
+
+      const timer = setTimeout(() => {
         cleanup();
-        reject(new Error("Timeout JSONP"));
-      }, 20000);
+        reject(new Error("Timeout: el WebApp no respondió. (Permisos, URL /exec o error interno)"));
+      }, 25000);
 
       function cleanup(){
-        clearTimeout(timeout);
+        clearTimeout(timer);
         script.remove();
-        delete window[cb];
+        try { delete window[cb]; } catch(e) { window[cb] = undefined; }
       }
 
       window[cb] = (data) => {
@@ -168,15 +152,15 @@
 
       script.onerror = () => {
         cleanup();
-        reject(new Error("Error cargando JSONP"));
+        reject(new Error("No se pudo cargar JSONP. Revisa que el WebApp sea 'Cualquiera con el enlace' y que responda callback()."));
       };
 
-      script.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb;
+      script.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb + "&_ts=" + Date.now();
       document.body.appendChild(script);
     });
   }
 
-  function buildUrl(){
+  function buildUrl(action="dashboard"){
     const mode = document.getElementById("mode").value;
     const year = document.getElementById("year").value;
     const month = document.getElementById("month").value;
@@ -184,7 +168,7 @@
     const end = document.getElementById("end").value;
 
     const u = new URL(API_URL);
-    u.searchParams.set("action", "dashboard");
+    u.searchParams.set("action", action);
     u.searchParams.set("mode", mode);
 
     if(mode === "range"){
@@ -224,6 +208,11 @@
   }
 
   function renderCharts(ch){
+    if(!ch?.ventasVsGastos?.labels?.length){
+      setStatus("No hay datos para graficar en el periodo elegido.", true);
+      return;
+    }
+
     const labels = ch.ventasVsGastos.labels;
     const ventas = ch.ventasVsGastos.ventas;
     const gastos = ch.ventasVsGastos.gastos;
@@ -233,35 +222,31 @@
 
     chart1 = new Chart(document.getElementById("chart1"), {
       type: "line",
-      data: {
-        labels,
-        datasets: [
-          { label: "Ventas", data: ventas, tension: 0.25 },
-          { label: "Gastos", data: gastos, tension: 0.25 },
-        ]
-      },
+      data: { labels, datasets: [
+        { label: "Ventas", data: ventas, tension: 0.25 },
+        { label: "Gastos", data: gastos, tension: 0.25 },
+      ]},
       options: {
-        responsive: true,
-        plugins: { legend: { labels: { color: "#eaf0ff" } } },
-        scales: {
-          x: { ticks: { color: "rgba(234,240,255,.7)" }, grid: { color:"rgba(255,255,255,.06)" } },
-          y: { ticks: { color: "rgba(234,240,255,.7)" }, grid: { color:"rgba(255,255,255,.06)" } }
+        responsive:true,
+        plugins:{ legend:{ labels:{ color:"#eaf0ff" } } },
+        scales:{
+          x:{ ticks:{ color:"rgba(234,240,255,.7)" }, grid:{ color:"rgba(255,255,255,.06)" } },
+          y:{ ticks:{ color:"rgba(234,240,255,.7)" }, grid:{ color:"rgba(255,255,255,.06)" } }
         }
       }
     });
 
     chart2 = new Chart(document.getElementById("chart2"), {
       type: "line",
-      data: {
-        labels: ch.acumuladoVentas.labels,
-        datasets: [{ label: "Acumulado", data: ch.acumuladoVentas.values, tension: 0.25 }]
-      },
+      data: { labels: ch.acumuladoVentas.labels, datasets: [
+        { label: "Acumulado", data: ch.acumuladoVentas.values, tension: 0.25 }
+      ]},
       options: {
-        responsive: true,
-        plugins: { legend: { labels: { color: "#eaf0ff" } } },
-        scales: {
-          x: { ticks: { color: "rgba(234,240,255,.7)" }, grid: { color:"rgba(255,255,255,.06)" } },
-          y: { ticks: { color: "rgba(234,240,255,.7)" }, grid: { color:"rgba(255,255,255,.06)" } }
+        responsive:true,
+        plugins:{ legend:{ labels:{ color:"#eaf0ff" } } },
+        scales:{
+          x:{ ticks:{ color:"rgba(234,240,255,.7)" }, grid:{ color:"rgba(255,255,255,.06)" } },
+          y:{ ticks:{ color:"rgba(234,240,255,.7)" }, grid:{ color:"rgba(255,255,255,.06)" } }
         }
       }
     });
@@ -270,40 +255,45 @@
   function renderGastosCat(arr){
     const el = document.getElementById("gastosCat");
     el.innerHTML = "";
-    (arr || []).forEach(x => {
+    if(!arr?.length){
+      el.innerHTML = `<div class="item"><b>Sin datos</b><span>—</span></div>`;
+      return;
+    }
+    arr.forEach(x => {
       const row = document.createElement("div");
       row.className = "item";
       row.innerHTML = `<b>${x.name}</b><span>${money(x.total)}</span>`;
       el.appendChild(row);
     });
-    if(!arr || !arr.length){
-      el.innerHTML = `<div class="item"><b>Sin datos</b><span>—</span></div>`;
-    }
   }
 
   function renderServiciosAlert(s){
     const el = document.getElementById("servAlert");
-    if(!s){ el.innerHTML = `<div class="item"><b>Sin datos</b><span>—</span></div>`; return; }
-
+    if(!s){
+      el.innerHTML = `<div class="item"><b>Sin datos</b><span>—</span></div>`;
+      return;
+    }
     const v = s.vencidos || {count:0,total:0};
     const h = s.hoy || {count:0,total:0};
     const p = s.proximos || {count:0,total:0};
 
     el.innerHTML = `
-      <div class="item"><b><span class="dot bad"></span> Vencidos</b><span>${v.count} | ${money(v.total)}</span></div>
-      <div class="item"><b><span class="dot warn"></span> Hoy</b><span>${h.count} | ${money(h.total)}</span></div>
-      <div class="item"><b><span class="dot ok"></span> Próximos</b><span>${p.count} | ${money(p.total)}</span></div>
+      <div class="item"><b>🔴 Vencidos</b><span>${v.count} | ${money(v.total)}</span></div>
+      <div class="item"><b>🟡 Hoy</b><span>${h.count} | ${money(h.total)}</span></div>
+      <div class="item"><b>🟢 Próximos</b><span>${p.count} | ${money(p.total)}</span></div>
     `;
   }
 
   async function load(){
     try{
       setStatus("Cargando...");
-      const url = buildUrl();
+      const url = buildUrl("dashboard");
       const data = await jsonp(url);
 
       if(!data || !data.ok){
-        throw new Error((data && data.error) ? data.error : "Respuesta inválida");
+        const msg = (data && data.error) ? data.error : "Respuesta inválida del WebApp";
+        const stack = (data && data.stack) ? ("\n\n" + data.stack) : "";
+        throw new Error(msg + stack);
       }
 
       renderKPIs(data.kpis);
@@ -311,27 +301,38 @@
       renderGastosCat(data.breakdowns?.gastosPorCategoria || []);
       renderServiciosAlert(data.servicios?.alertas || null);
 
-      setStatus(`OK: ${data.period.mode === "month" ? ("Mes " + data.period.month + " / " + data.period.year) : "Rango"} actualizado`);
+      setStatus(`OK ✅ Actualizado (${data.period.mode === "month" ? ("Mes " + data.period.month + "/" + data.period.year) : "Rango"})`);
     }catch(err){
-      setStatus("ERROR: " + err.message, true);
+      setStatus("ERROR ❌ " + err.message, true);
+    }
+  }
+
+  async function ping(){
+    try{
+      setStatus("Probando API...");
+      const url = buildUrl("ping");
+      const data = await jsonp(url);
+      if(!data || !data.ok) throw new Error(data?.error || "Ping falló");
+      setStatus("Ping OK ✅ " + (data.now || ""), false);
+    }catch(err){
+      setStatus("Ping ERROR ❌ " + err.message, true);
     }
   }
 
   function init(){
-    // año selector
     const y = document.getElementById("year");
     const now = new Date();
-    const base = now.getFullYear();
-    for(let i=base-2; i<=base+2; i++){
+    for(let i=now.getFullYear()-2; i<=now.getFullYear()+2; i++){
       const opt = document.createElement("option");
       opt.value = String(i);
       opt.textContent = String(i);
       y.appendChild(opt);
     }
-    y.value = String(2026);
+    y.value = "2026";
     document.getElementById("month").value = String(now.getMonth()+1);
 
     document.getElementById("btn").addEventListener("click", load);
+    document.getElementById("btnPing").addEventListener("click", ping);
 
     document.getElementById("mode").addEventListener("change", () => {
       const mode = document.getElementById("mode").value;
