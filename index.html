@@ -1,480 +1,523 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>BRAVIZIMO'S | Dashboard Financiero</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
-    :root{--bg:#070a18;--card:rgba(255,255,255,.06);--card2:rgba(255,255,255,.08);--stroke:rgba(255,255,255,.12);
-      --txt:#eaf0ff;--muted:rgba(234,240,255,.75)}
-    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
-    body{margin:0;background:radial-gradient(1200px 700px at 30% 10%, #18205a 0%, rgba(24,32,90,0) 55%),
-      radial-gradient(1000px 600px at 70% 0%, #2b145f 0%, rgba(43,20,95,0) 55%), var(--bg);color:var(--txt);}
-    .wrap{max-width:1200px;margin:0 auto;padding:28px 16px 40px}
-    h1{margin:0 0 4px;font-size:18px;font-weight:800}
-    .sub{margin:0 0 16px;color:var(--muted);font-size:12px}
-    .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--card);border:1px solid var(--stroke);
-      padding:10px 12px;border-radius:14px}
-    select,button,input{background:rgba(0,0,0,.25);border:1px solid var(--stroke);color:var(--txt);
-      border-radius:10px;padding:8px 10px;font-size:12px;outline:none}
+    :root{
+      --bg1:#0b1020; --bg2:#120a2b;
+      --card:rgba(255,255,255,.06);
+      --card2:rgba(255,255,255,.09);
+      --txt:rgba(255,255,255,.92);
+      --mut:rgba(255,255,255,.65);
+      --line:rgba(255,255,255,.10);
+      --ok:#24d17e; --warn:#ffd34d; --bad:#ff4d6d;
+      --btn:rgba(255,255,255,.10);
+      --btn2:rgba(255,255,255,.16);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      color:var(--txt);
+      background:radial-gradient(1200px 700px at 30% 10%, #21325c 0%, rgba(33,50,92,0) 60%),
+                 radial-gradient(900px 600px at 70% 20%, #4b1b74 0%, rgba(75,27,116,0) 60%),
+                 linear-gradient(135deg,var(--bg1),var(--bg2));
+      min-height:100vh;
+    }
+    .wrap{max-width:1100px; margin:30px auto; padding:0 16px}
+    .title{font-weight:800; letter-spacing:.4px}
+    .sub{color:var(--mut); margin-top:2px; font-size:13px}
+    .bar{
+      margin-top:14px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.04));
+      border-radius:14px;
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .badge{
+      padding:6px 10px; border-radius:999px; font-size:12px;
+      border:1px solid var(--line); background:rgba(0,0,0,.18);
+    }
+    .badge.ok{border-color:rgba(36,209,126,.35)}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    select, input, button{
+      color:var(--txt);
+      background:var(--btn);
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:8px 10px;
+      outline:none;
+    }
     button{cursor:pointer}
-    .pill{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 14px}
-    .pill button{background:rgba(255,255,255,.06)}
-    .pill button.active{outline:2px solid rgba(110,231,255,.25);background:rgba(110,231,255,.10)}
-    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
-    .card{background:var(--card);border:1px solid var(--stroke);border-radius:16px;padding:12px}
-    .k{font-size:11px;color:var(--muted)}
-    .v{font-size:22px;font-weight:850;margin-top:6px}
-    .row2{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;margin-top:12px}
-    .big{min-height:320px}.small{min-height:320px}
-    .list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
-    .item{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:12px;background:var(--card2);border:1px solid var(--stroke)}
-    .status{margin:10px 0 0;padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);
-      background:rgba(110,231,255,.07);color:var(--muted);white-space:pre-wrap}
-    .status.err{background:rgba(255,110,110,.08);color:#ffd2d2;border-color:rgba(255,110,110,.25)}
-    table{width:100%;border-collapse:collapse;margin-top:10px}
-    th,td{border-bottom:1px solid rgba(255,255,255,.08);padding:8px 6px;font-size:12px;text-align:left;color:rgba(234,240,255,.9)}
-    th{color:rgba(234,240,255,.75);font-weight:700}
-    .hide{display:none}
-    @media (max-width: 980px){ .grid{grid-template-columns:repeat(2,1fr)} .row2{grid-template-columns:1fr} }
+    button:hover{background:var(--btn2)}
+    .tabs{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+    .tab{
+      padding:7px 10px; border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.12);
+      font-size:12px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .tab.active{background:rgba(255,255,255,.14)}
+    .grid{
+      margin-top:12px;
+      display:grid; gap:12px;
+      grid-template-columns:repeat(4,1fr);
+    }
+    .card{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.04));
+      border-radius:16px;
+      padding:12px;
+      overflow:hidden;
+    }
+    .k{font-size:12px; color:var(--mut)}
+    .bigNumber{font-size:22px; font-weight:800; margin-top:4px}
+    .span2{grid-column:span 2}
+    .span4{grid-column:span 4}
+    .chartBox{height:300px}
+    .list{display:flex; flex-direction:column; gap:8px; margin-top:6px}
+    .pillRow{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:8px;
+      background:rgba(0,0,0,.12);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:8px 10px;
+      font-size:12px;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;display:inline-block;margin-right:8px}
+    .dot.bad{background:var(--bad)}
+    .dot.warn{background:var(--warn)}
+    .dot.ok{background:var(--ok)}
+    table{width:100%; border-collapse:collapse; font-size:12px}
+    th,td{padding:8px 8px; border-bottom:1px solid var(--line); text-align:left}
+    th{color:var(--mut); font-weight:700}
+    .mut{color:var(--mut)}
+    @media (max-width:1000px){ .grid{grid-template-columns:repeat(2,1fr)} }
+    @media (max-width:640px){ .grid{grid-template-columns:1fr} .span2,.span4{grid-column:span 1} }
   </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>BRAVIZIMO'S | Dashboard Financiero</h1>
-  <p class="sub">Sincronizado con Google Sheets (Apps Script)</p>
+  <div class="wrap">
+    <div class="title">BRAVIZIMO'S | Dashboard Financiero</div>
+    <div class="sub">Sincronizado con Google Sheets (Apps Script)</div>
 
-  <div id="status" class="status">Listo para cargar…</div>
+    <div class="bar">
+      <div id="status" class="badge">Cargando...</div>
 
-  <div class="bar">
-    <label style="font-size:12px;color:var(--muted)">Modo</label>
-    <select id="mode">
-      <option value="month" selected>Mes</option>
-      <option value="range">Rango</option>
-    </select>
+      <div class="row">
+        <span class="mut" style="font-size:12px;">Modo</span>
+        <select id="mode">
+          <option value="month" selected>Mes</option>
+          <option value="range">Rango</option>
+        </select>
 
-    <label style="font-size:12px;color:var(--muted)">Mes</label>
-    <select id="month">
-      <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
-      <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
-      <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
-      <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
-    </select>
+        <span class="mut" style="font-size:12px;">Mes</span>
+        <select id="month"></select>
 
-    <label style="font-size:12px;color:var(--muted)">Año</label>
-    <select id="year"></select>
+        <span class="mut" style="font-size:12px;">Año</span>
+        <select id="year"></select>
 
-    <input id="start" type="date" style="display:none" />
-    <input id="end" type="date" style="display:none" />
-
-    <button id="btn">Actualizar</button>
-    <button id="btnPing">Probar API</button>
-  </div>
-
-  <div class="pill" id="tabs">
-    <button data-tab="finanzas" class="active">Finanzas</button>
-    <button data-tab="delivery">Delivery</button>
-    <button data-tab="clientes">Clientes</button>
-    <button data-tab="gastos">Gastos</button>
-    <button data-tab="servicios">Servicios</button>
-  </div>
-
-  <!-- FINANZAS -->
-  <section id="view-finanzas">
-    <div class="grid" id="kpis"></div>
-
-    <div class="row2">
-      <div class="card big">
-        <div class="k">Ventas vs Gastos (por día)</div>
-        <canvas id="chart1"></canvas>
-      </div>
-      <div class="card small">
-        <div class="k">Acumulado de ventas</div>
-        <canvas id="chart2"></canvas>
+        <button id="btnUpdate">Actualizar</button>
+        <button id="btnPing">Probar API</button>
       </div>
     </div>
 
-    <div class="row2" style="grid-template-columns:1fr 1fr; margin-top:12px">
-      <div class="card">
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-tab="finanzas">Finanzas</div>
+      <div class="tab" data-tab="delivery">Delivery</div>
+      <div class="tab" data-tab="clientes">Clientes</div>
+      <div class="tab" data-tab="gastos">Gastos</div>
+      <div class="tab" data-tab="servicios">Servicios</div>
+    </div>
+
+    <div id="view"></div>
+  </div>
+
+<script>
+/** ========= CONFIG ========= **/
+const API_URL = "https://script.google.com/macros/s/AKfycbyEKNgSTSul8LcjrWTP1uzvwdmmYdZxwiiAIqKpTvUJM-sugUfGRQTcE4t50GycaB-z/exec";
+/** ========================== **/
+
+let currentTab = "finanzas";
+let lastData = null;
+let charts = {};
+
+/** Utils **/
+const money = (n)=> "S/ " + (Number(n||0).toLocaleString("es-PE",{minimumFractionDigits:2, maximumFractionDigits:2}));
+const esc = (s)=> String(s??"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+const setStatus = (txt, ok=null)=>{
+  const el=document.getElementById("status");
+  el.textContent = txt;
+  el.className = "badge" + (ok===true ? " ok" : "");
+};
+
+function destroyChart(id){
+  if(charts[id]){ charts[id].destroy(); delete charts[id]; }
+}
+
+/** Dropdowns **/
+(function initFilters(){
+  const monthSel=document.getElementById("month");
+  const yearSel=document.getElementById("year");
+  const months=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  months.forEach((m,i)=>{
+    const o=document.createElement("option");
+    o.value=String(i+1);
+    o.textContent=m;
+    monthSel.appendChild(o);
+  });
+  const now=new Date();
+  monthSel.value=String(now.getMonth()+1);
+
+  const y0=now.getFullYear()-3;
+  for(let y=y0;y<=now.getFullYear()+1;y++){
+    const o=document.createElement("option");
+    o.value=String(y);
+    o.textContent=String(y);
+    yearSel.appendChild(o);
+  }
+  yearSel.value=String(now.getFullYear());
+})();
+
+/** Tabs **/
+document.getElementById("tabs").addEventListener("click",(e)=>{
+  const t=e.target.closest(".tab");
+  if(!t) return;
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  t.classList.add("active");
+  currentTab = t.dataset.tab;
+  if(lastData) renderAll(lastData);
+});
+
+/** Buttons **/
+document.getElementById("btnPing").addEventListener("click", async ()=>{
+  setStatus("Probando API...");
+  const url = API_URL + "?action=ping&callback=?";
+  try{
+    const res = await jsonp(url);
+    if(res.ok) setStatus("OK ✅ " + (res.now || ""), true);
+    else setStatus("ERROR: " + (res.error || "ping"));
+  }catch(err){
+    setStatus("ERROR: " + err.message);
+  }
+});
+
+document.getElementById("btnUpdate").addEventListener("click", ()=> loadData());
+
+/** JSONP loader **/
+function jsonp(url){
+  return new Promise((resolve,reject)=>{
+    const cb = "cb_" + Math.random().toString(16).slice(2);
+    const s = document.createElement("script");
+    const timer = setTimeout(()=>{
+      cleanup();
+      reject(new Error("Timeout"));
+    }, 20000);
+
+    function cleanup(){
+      clearTimeout(timer);
+      delete window[cb];
+      if(s && s.parentNode) s.parentNode.removeChild(s);
+    }
+
+    window[cb] = (data)=>{
+      cleanup();
+      resolve(data);
+    };
+
+    s.onerror = ()=>{
+      cleanup();
+      reject(new Error("Error cargando JSONP"));
+    };
+
+    s.src = url.replace("callback=?", "callback="+cb);
+    document.body.appendChild(s);
+  });
+}
+
+/** Load **/
+async function loadData(){
+  setStatus("Cargando...");
+  const mode = document.getElementById("mode").value;
+  const month = document.getElementById("month").value;
+  const year = document.getElementById("year").value;
+
+  const url = API_URL + `?action=dashboard&mode=${encodeURIComponent(mode)}&month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}&callback=?`;
+
+  try{
+    const data = await jsonp(url);
+    if(!data.ok) throw new Error(data.error || "Error API");
+    lastData = data;
+    setStatus("OK ✅ Actualizado", true);
+    renderAll(data);
+  }catch(err){
+    setStatus("ERROR: " + err.message);
+    document.getElementById("view").innerHTML = "";
+  }
+}
+
+/** Render wrapper **/
+function renderAll(data){
+  // limpiar charts viejos por vista
+  ["ch_fin1","ch_fin2","ch_g1","ch_d1"].forEach(destroyChart);
+
+  if(currentTab === "finanzas") renderFinanzas(data);
+  else if(currentTab === "gastos") renderGastos(data);
+  else if(currentTab === "delivery") renderDelivery(data);
+  else if(currentTab === "clientes") renderClientes(data);
+  else if(currentTab === "servicios") renderServicios(data);
+}
+
+/** FINANZAS **/
+function renderFinanzas(data){
+  const k = data.kpis || {};
+  const ch = data.charts || {};
+  const b = data.breakdowns || {};
+
+  const html = `
+    <div class="grid">
+      <div class="card"><div class="k">Ventas totales</div><div class="bigNumber">${money(k.ventasTotal)}</div></div>
+      <div class="card"><div class="k">Gastos totales</div><div class="bigNumber">${money(k.gastosTotal)}</div></div>
+      <div class="card"><div class="k">Utilidad</div><div class="bigNumber">${money(k.utilidad)}</div></div>
+      <div class="card"><div class="k">Saldo pendiente</div><div class="bigNumber">${money(k.saldoPendiente)}</div></div>
+
+      <div class="card"><div class="k">Delivery cobrado</div><div class="bigNumber">${money(k.deliveryCobrado)}</div></div>
+      <div class="card"><div class="k">Costo delivery</div><div class="bigNumber">${money(k.costoDelivery)}</div></div>
+      <div class="card"><div class="k">Margen delivery</div><div class="bigNumber">${money(k.margenDelivery)}</div></div>
+      <div class="card"><div class="k">Clientes (período)</div><div class="bigNumber">${(k.clientesTotalPeriodo||0)}</div></div>
+
+      <div class="card"><div class="k">Boletas / Facturas</div><div class="bigNumber">${(k.boletasFacturas||0)}</div></div>
+      <div class="card"><div class="k">Comprobantes faltantes</div><div class="bigNumber">${(k.comprobantesFaltantes||0)}</div></div>
+      <div class="card"><div class="k">Promedio diario (ventas / días con ventas)</div><div class="bigNumber">${money(k.promedioDiario)}</div></div>
+      <div class="card"><div class="k">Proyección mensual (prom × 30)</div><div class="bigNumber">${money(k.proyeccionMensual)}</div></div>
+
+      <div class="card span2">
+        <div class="k" style="margin-bottom:6px;">Ventas vs Gastos (por día)</div>
+        <div class="chartBox"><canvas id="ch_fin1"></canvas></div>
+      </div>
+
+      <div class="card span2">
+        <div class="k" style="margin-bottom:6px;">Acumulado de ventas</div>
+        <div class="chartBox"><canvas id="ch_fin2"></canvas></div>
+      </div>
+
+      <div class="card span2">
         <div class="k">Top Gastos por categoría</div>
-        <div id="gastosCat" class="list"></div>
+        <div class="list">
+          ${(b.gastosPorCategoria||[]).slice(0,10).map(x=>`
+            <div class="pillRow"><b>${esc(x.name)}</b><span>${money(x.total)}</span></div>
+          `).join("")}
+        </div>
       </div>
-      <div class="card">
-        <div class="k">Alertas de Servicios (PENDIENTE)</div>
-        <div id="servAlert"></div>
+
+      <div class="card span2">
+        <div class="k">Recojos en tienda (período)</div>
+        <div class="bigNumber">${(k.recojoCount||0)}</div>
+        <div class="mut" style="font-size:12px;margin-top:6px;">Se cuenta cuando Costo Delivery es “-”.</div>
       </div>
     </div>
-  </section>
+  `;
+  document.getElementById("view").innerHTML = html;
 
-  <!-- DELIVERY -->
-  <section id="view-delivery" class="hide">
-    <div class="row2" style="grid-template-columns:1fr 1fr;">
-      <div class="card big">
-        <div class="k">Delivery (Cobrado vs Costo) por día</div>
-        <canvas id="dChart"></canvas>
-      </div>
-      <div class="card">
-        <div class="k">Top delivery (por diferencia)</div>
-        <div id="dTop" class="list"></div>
-      </div>
-    </div>
-  </section>
+  // charts
+  const vsg = ch.ventasVsGastos || { labels:[], ventas:[], gastos:[] };
+  charts["ch_fin1"] = new Chart(document.getElementById("ch_fin1"),{
+    type:"line",
+    data:{
+      labels:vsg.labels,
+      datasets:[
+        {label:"Ventas", data:vsg.ventas, tension:.25},
+        {label:"Gastos", data:vsg.gastos, tension:.25}
+      ]
+    },
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:"#fff"}}}, scales:{x:{ticks:{color:"#bbb"}}, y:{ticks:{color:"#bbb"}}}}
+  });
 
-  <!-- CLIENTES -->
-  <section id="view-clientes" class="hide">
-    <div class="card">
-      <div class="k">Clientes del período (Top 200)</div>
-      <div style="overflow:auto">
-        <table id="cTable">
-          <thead><tr><th>#</th><th>Cliente</th><th>Celular</th><th>Última compra</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+  const acc = ch.acumuladoVentas || { labels:[], values:[] };
+  charts["ch_fin2"] = new Chart(document.getElementById("ch_fin2"),{
+    type:"line",
+    data:{ labels:acc.labels, datasets:[{label:"Acumulado", data:acc.values, tension:.25}] },
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:"#fff"}}}, scales:{x:{ticks:{color:"#bbb"}}, y:{ticks:{color:"#bbb"}}}}
+  });
+}
 
-  <!-- GASTOS -->
-  <section id="view-gastos" class="hide">
-    <div class="row2" style="grid-template-columns:1fr 1fr;">
-      <div class="card big">
-        <div class="k">Gastos por día</div>
-        <canvas id="gChart"></canvas>
+/** GASTOS **/
+function renderGastos(data){
+  const mod = data.modules?.gastos || {};
+  const top = mod.topCategorias || [];
+  const per = mod.porDia || { labels:[], total:[] };
+
+  const html = `
+    <div class="grid">
+      <div class="card span2">
+        <div class="k" style="margin-bottom:6px;">Gastos por día</div>
+        <div class="chartBox"><canvas id="ch_g1"></canvas></div>
       </div>
-      <div class="card">
+
+      <div class="card span2">
         <div class="k">Top categorías (monto)</div>
-        <div id="gTop" class="list"></div>
+        <div class="list">
+          ${top.slice(0,12).map(x=>`
+            <div class="pillRow"><b>${esc(x.name)}</b><span>${money(x.total)}</span></div>
+          `).join("")}
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="k">Total gastos (acumulado)</div>
+          <div class="bigNumber">${money(mod.totalAcumulado||0)}</div>
+        </div>
       </div>
     </div>
-  </section>
+  `;
+  document.getElementById("view").innerHTML = html;
 
-  <!-- SERVICIOS -->
-  <section id="view-servicios" class="hide">
-    <div class="row2" style="grid-template-columns:1fr 1fr;">
-      <div class="card">
-        <div class="k">Resumen alertas</div>
-        <div id="sResume"></div>
+  charts["ch_g1"] = new Chart(document.getElementById("ch_g1"),{
+    type:"line",
+    data:{ labels:per.labels, datasets:[{label:"Gastos", data:per.total, tension:.25}] },
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:"#fff"}}}, scales:{x:{ticks:{color:"#bbb"}}, y:{ticks:{color:"#bbb"}}}}
+  });
+}
+
+/** DELIVERY **/
+function renderDelivery(data){
+  const mod = data.modules?.delivery || {};
+  const per = mod.porDia || { labels:[], cobrado:[], costo:[], diferencia:[], recojoSeries:[] };
+  const top = mod.top || [];
+  const recojos = data.kpis?.recojoCount || 0;
+
+  const html = `
+    <div class="grid">
+      <div class="card span2">
+        <div class="k" style="margin-bottom:6px;">Delivery (Cobrado vs Costo) por día</div>
+        <div class="mut" style="font-size:12px;margin-bottom:8px;">Diferencia = Delivery cliente - Costo delivery. Si costo es “-” es recojo (costo 0).</div>
+        <div class="chartBox"><canvas id="ch_d1"></canvas></div>
       </div>
-      <div class="card">
-        <div class="k">Pendientes (detalle)</div>
-        <div style="overflow:auto">
-          <table id="sTable">
-            <thead><tr><th>Fecha</th><th>Tipo</th><th>Descripción</th><th>Monto</th><th>Estado</th></tr></thead>
-            <tbody></tbody>
+
+      <div class="card span2">
+        <div class="k">Top delivery (por diferencia)</div>
+        <div class="list">
+          ${top.slice(0,12).map(x=>`
+            <div class="pillRow">
+              <b>${esc(x.name)}</b>
+              <span>${money(x.diferencia)} <span class="mut">(Cob: ${money(x.cobrado)} | Cos: ${money(x.costo)})</span></span>
+            </div>
+          `).join("")}
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="k">Recojos en tienda (período)</div>
+          <div class="bigNumber">${recojos}</div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById("view").innerHTML = html;
+
+  charts["ch_d1"] = new Chart(document.getElementById("ch_d1"),{
+    type:"line",
+    data:{
+      labels:per.labels,
+      datasets:[
+        {label:"Cobrado", data:per.cobrado, tension:.25},
+        {label:"Costo", data:per.costo, tension:.25},
+        {label:"Diferencia", data:per.diferencia, tension:.25},
+      ]
+    },
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:"#fff"}}}, scales:{x:{ticks:{color:"#bbb"}}, y:{ticks:{color:"#bbb"}}}}
+  });
+}
+
+/** CLIENTES **/
+function renderClientes(data){
+  const list = data.modules?.clientes?.top || [];
+  const html = `
+    <div class="grid">
+      <div class="card span4">
+        <div class="k">Clientes del período (hasta 200)</div>
+        <div style="overflow:auto; margin-top:10px;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Cliente</th>
+                <th>Celular</th>
+                <th>Última compra</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list.map((x,i)=>`
+                <tr>
+                  <td>${i+1}</td>
+                  <td><b>${esc(x.cliente)}</b></td>
+                  <td>${esc(x.celular||"")}</td>
+                  <td>${esc(x.ultimaCompra||"")}</td>
+                </tr>
+              `).join("")}
+            </tbody>
           </table>
         </div>
       </div>
     </div>
-  </section>
+  `;
+  document.getElementById("view").innerHTML = html;
+}
 
-</div>
+/** SERVICIOS **/
+function renderServicios(data){
+  const a = data.modules?.servicios?.alertas || {};
+  const p = data.modules?.servicios?.pendientes || [];
+  const html = `
+    <div class="grid">
+      <div class="card span2">
+        <div class="k">Resumen alertas (PENDIENTE)</div>
+        <div class="list" style="margin-top:10px;">
+          <div class="pillRow"><span><span class="dot bad"></span><b>Vencidos</b></span><span>${a.vencidos?.count||0} | ${money(a.vencidos?.total||0)}</span></div>
+          <div class="pillRow"><span><span class="dot warn"></span><b>Hoy</b></span><span>${a.hoy?.count||0} | ${money(a.hoy?.total||0)}</span></div>
+          <div class="pillRow"><span><span class="dot ok"></span><b>Próximos</b></span><span>${a.proximos?.count||0} | ${money(a.proximos?.total||0)}</span></div>
+        </div>
+      </div>
 
-<script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbydpyW_PlUzSfPPf_2-QYH4NC5umzWqyh2SoqZ2kgSmwgCHbSOXtkLGKS5mmzRXYh4X/exec";
-  let chart1, chart2, dChart, gChart;
-  let LAST = null;
-  let ACTIVE_TAB = "finanzas";
+      <div class="card span2">
+        <div class="k">Pendientes (detalle)</div>
+        <div style="overflow:auto; margin-top:10px; max-height:420px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Descripción</th>
+                <th>Monto</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${p.map(x=>`
+                <tr>
+                  <td>${esc(x.fecha)}</td>
+                  <td>${esc(x.tipo||"")}</td>
+                  <td><b>${esc(x.descripcion||"")}</b></td>
+                  <td>${money(x.monto||0)}</td>
+                  <td>${esc(x.estado||"")}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+        <div class="mut" style="font-size:12px;margin-top:8px;">*Se usa DESCRIPCION de la hoja “servicios”.</div>
+      </div>
+    </div>
+  `;
+  document.getElementById("view").innerHTML = html;
+}
 
-  function money(n){
-    const x = Number(n || 0);
-    return "S/ " + x.toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2});
-  }
-  function setStatus(msg,isErr=false){
-    const el=document.getElementById("status");
-    el.textContent=msg;
-    el.className="status"+(isErr?" err":"");
-  }
-  function jsonp(url){
-    return new Promise((resolve,reject)=>{
-      const cb="cb_"+Math.random().toString(36).slice(2);
-      const script=document.createElement("script");
-      const timer=setTimeout(()=>{cleanup();reject(new Error("Timeout: WebApp no respondió."));},25000);
-      function cleanup(){clearTimeout(timer);script.remove();try{delete window[cb];}catch(e){window[cb]=undefined;}}
-      window[cb]=(data)=>{cleanup();resolve(data);};
-      script.onerror=()=>{cleanup();reject(new Error("No se pudo cargar JSONP."));};
-      script.src=url+(url.includes("?")?"&":"?")+"callback="+cb+"&_ts="+Date.now();
-      document.body.appendChild(script);
-    });
-  }
-  function buildUrl(action="dashboard"){
-    const mode=document.getElementById("mode").value;
-    const year=document.getElementById("year").value;
-    const month=document.getElementById("month").value;
-    const start=document.getElementById("start").value;
-    const end=document.getElementById("end").value;
-    const u=new URL(API_URL);
-    u.searchParams.set("action",action);
-    u.searchParams.set("mode",mode);
-    if(mode==="range"){ if(start)u.searchParams.set("start",start); if(end)u.searchParams.set("end",end); }
-    else { u.searchParams.set("year",year); u.searchParams.set("month",month); }
-    return u.toString();
-  }
-
-  // ====== TABS ======
-  function showTab(tab){
-    ACTIVE_TAB = tab;
-    document.querySelectorAll("#tabs button").forEach(b=>{
-      b.classList.toggle("active", b.dataset.tab===tab);
-    });
-    ["finanzas","delivery","clientes","gastos","servicios"].forEach(t=>{
-      document.getElementById("view-"+t).classList.toggle("hide", t!==tab);
-    });
-    // renderiza la vista con el último dataset
-    if(LAST) renderModules(LAST);
-  }
-
-  // ====== RENDER FINANZAS ======
-  function renderKPIs(k){
-    const items=[
-      ["Ventas totales",money(k.ventasTotal)],
-      ["Gastos totales",money(k.gastosTotal)],
-      ["Utilidad",money(k.utilidad)],
-      ["Saldo pendiente",money(k.saldoPendiente)],
-      ["Delivery cobrado",money(k.deliveryCobrado)],
-      ["Costo delivery",money(k.costoDelivery)],
-      ["Margen delivery",money(k.margenDelivery)],
-      ["Clientes (periodo)",String(k.clientesTotalPeriodo||0)],
-      ["Boletas / Facturas",String(k.boletasFacturas||0)],
-      ["Comprobantes faltantes",String(k.comprobantesFaltantes||0)],
-      ["Promedio diario",money(k.promedioDiario)],
-      ["Proyección mensual (prom × 30)",money(k.proyeccionMensual)],
-    ];
-    const wrap=document.getElementById("kpis");
-    wrap.innerHTML="";
-    items.forEach(([name,val])=>{
-      const div=document.createElement("div");
-      div.className="card";
-      div.innerHTML=`<div class="k">${name}</div><div class="v">${val}</div>`;
-      wrap.appendChild(div);
-    });
-  }
-
-  function renderChartsFinanzas(ch){
-    const labels=ch.ventasVsGastos.labels;
-    if(!labels?.length) return;
-
-    if(chart1)chart1.destroy();
-    if(chart2)chart2.destroy();
-
-    chart1=new Chart(document.getElementById("chart1"),{
-      type:"line",
-      data:{labels,datasets:[
-        {label:"Ventas",data:ch.ventasVsGastos.ventas,tension:0.25},
-        {label:"Gastos",data:ch.ventasVsGastos.gastos,tension:0.25},
-      ]},
-      options:{responsive:true,plugins:{legend:{labels:{color:"#eaf0ff"}}},
-        scales:{x:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}},
-                y:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}}}}
-    });
-
-    chart2=new Chart(document.getElementById("chart2"),{
-      type:"line",
-      data:{labels:ch.acumuladoVentas.labels,datasets:[{label:"Acumulado",data:ch.acumuladoVentas.values,tension:0.25}]},
-      options:{responsive:true,plugins:{legend:{labels:{color:"#eaf0ff"}}},
-        scales:{x:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}},
-                y:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}}}}
-    });
-  }
-
-  function renderGastosCat(arr){
-    const el=document.getElementById("gastosCat");
-    el.innerHTML="";
-    if(!arr?.length){ el.innerHTML=`<div class="item"><b>Sin datos</b><span>—</span></div>`; return; }
-    arr.forEach(x=>{
-      const row=document.createElement("div");
-      row.className="item";
-      row.innerHTML=`<b>${x.name}</b><span>${money(x.total)}</span>`;
-      el.appendChild(row);
-    });
-  }
-
-  function renderServiciosAlertSimple(s){
-    const el=document.getElementById("servAlert");
-    if(!s){ el.innerHTML=`<div class="item"><b>Sin datos</b><span>—</span></div>`; return; }
-    const v=s.vencidos||{count:0,total:0};
-    const h=s.hoy||{count:0,total:0};
-    const p=s.proximos||{count:0,total:0};
-    el.innerHTML=`
-      <div class="item"><b>🔴 Vencidos</b><span>${v.count} | ${money(v.total)}</span></div>
-      <div class="item"><b>🟡 Hoy</b><span>${h.count} | ${money(h.total)}</span></div>
-      <div class="item"><b>🟢 Próximos</b><span>${p.count} | ${money(p.total)}</span></div>
-    `;
-  }
-
-  // ====== RENDER MODULES ======
-  function renderModules(data){
-    // FINANZAS
-    if(ACTIVE_TAB==="finanzas"){
-      renderKPIs(data.kpis);
-      renderChartsFinanzas(data.charts);
-      renderGastosCat(data.breakdowns?.gastosPorCategoria||[]);
-      renderServiciosAlertSimple(data.modules?.servicios?.alertas || data.servicios?.alertas || null);
-      return;
-    }
-
-    // DELIVERY
-    if(ACTIVE_TAB==="delivery"){
-      const mod=data.modules?.delivery;
-      if(!mod){ setStatus("No hay módulo delivery.",true); return; }
-
-      // chart
-      const labels=mod.porDia?.labels||[];
-      if(dChart) dChart.destroy();
-      dChart=new Chart(document.getElementById("dChart"),{
-        type:"line",
-        data:{labels,datasets:[
-          {label:"Cobrado",data:mod.porDia.cobrado,tension:0.25},
-          {label:"Costo",data:mod.porDia.costo,tension:0.25},
-          {label:"Diferencia",data:mod.porDia.diferencia,tension:0.25},
-        ]},
-        options:{responsive:true,plugins:{legend:{labels:{color:"#eaf0ff"}}},
-          scales:{x:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}},
-                  y:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}}}}
-      });
-
-      // top list
-      const el=document.getElementById("dTop");
-      el.innerHTML="";
-      (mod.top||[]).forEach(x=>{
-        const row=document.createElement("div");
-        row.className="item";
-        row.innerHTML=`<b>${x.name}</b><span>${money(x.diferencia)} (Cob: ${money(x.cobrado)} | Cos: ${money(x.costo)})</span>`;
-        el.appendChild(row);
-      });
-      if(!(mod.top||[]).length) el.innerHTML=`<div class="item"><b>Sin datos</b><span>—</span></div>`;
-      return;
-    }
-
-    // CLIENTES
-    if(ACTIVE_TAB==="clientes"){
-      const arr=data.modules?.clientes?.top||[];
-      const tbody=document.querySelector("#cTable tbody");
-      tbody.innerHTML="";
-      arr.forEach((x,i)=>{
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${i+1}</td><td>${x.cliente||""}</td><td>${x.celular||""}</td><td>${x.ultimaCompra||""}</td>`;
-        tbody.appendChild(tr);
-      });
-      if(!arr.length){
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td colspan="4">Sin datos de clientes en el período</td>`;
-        tbody.appendChild(tr);
-      }
-      return;
-    }
-
-    // GASTOS
-    if(ACTIVE_TAB==="gastos"){
-      const mod=data.modules?.gastos;
-      if(!mod){ setStatus("No hay módulo gastos.",true); return; }
-
-      if(gChart) gChart.destroy();
-      gChart=new Chart(document.getElementById("gChart"),{
-        type:"line",
-        data:{labels:mod.porDia.labels,datasets:[{label:"Gastos",data:mod.porDia.total,tension:0.25}]},
-        options:{responsive:true,plugins:{legend:{labels:{color:"#eaf0ff"}}},
-          scales:{x:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}},
-                  y:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}}}}
-      });
-
-      const el=document.getElementById("gTop");
-      el.innerHTML="";
-      (mod.topCategorias||[]).forEach(x=>{
-        const row=document.createElement("div");
-        row.className="item";
-        row.innerHTML=`<b>${x.name}</b><span>${money(x.total)}</span>`;
-        el.appendChild(row);
-      });
-      if(!(mod.topCategorias||[]).length) el.innerHTML=`<div class="item"><b>Sin datos</b><span>—</span></div>`;
-      return;
-    }
-
-    // SERVICIOS
-    if(ACTIVE_TAB==="servicios"){
-      const mod=data.modules?.servicios;
-      const a=mod?.alertas;
-      const el=document.getElementById("sResume");
-      if(a){
-        el.innerHTML=`
-          <div class="item"><b>🔴 Vencidos</b><span>${a.vencidos.count} | ${money(a.vencidos.total)}</span></div>
-          <div class="item"><b>🟡 Hoy</b><span>${a.hoy.count} | ${money(a.hoy.total)}</span></div>
-          <div class="item"><b>🟢 Próximos</b><span>${a.proximos.count} | ${money(a.proximos.total)}</span></div>
-        `;
-      }else{
-        el.innerHTML=`<div class="item"><b>Sin datos</b><span>—</span></div>`;
-      }
-
-      const arr=mod?.pendientes||[];
-      const tbody=document.querySelector("#sTable tbody");
-      tbody.innerHTML="";
-      arr.forEach(x=>{
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td>${x.fecha||""}</td><td>${x.tipo||""}</td><td>${x.descripcion||""}</td><td>${money(x.monto)}</td><td>${x.estado||""}</td>`;
-        tbody.appendChild(tr);
-      });
-      if(!arr.length){
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td colspan="5">Sin pendientes en el período</td>`;
-        tbody.appendChild(tr);
-      }
-      return;
-    }
-  }
-
-  async function load(){
-    try{
-      setStatus("Cargando...");
-      const data=await jsonp(buildUrl("dashboard"));
-      if(!data || !data.ok) throw new Error((data?.error||"Respuesta inválida") + (data?.stack?("\n\n"+data.stack):""));
-      LAST = data;
-      renderModules(LAST);
-      setStatus("OK ✅ Actualizado");
-    }catch(err){
-      setStatus("ERROR ❌ "+err.message,true);
-    }
-  }
-
-  async function ping(){
-    try{
-      setStatus("Probando API...");
-      const data=await jsonp(buildUrl("ping"));
-      if(!data || !data.ok) throw new Error(data?.error||"Ping falló");
-      setStatus("Ping OK ✅ "+(data.now||""),false);
-    }catch(err){
-      setStatus("Ping ERROR ❌ "+err.message,true);
-    }
-  }
-
-  (function init(){
-    const y=document.getElementById("year");
-    const now=new Date();
-    for(let i=now.getFullYear()-2;i<=now.getFullYear()+2;i++){
-      const opt=document.createElement("option");
-      opt.value=String(i); opt.textContent=String(i);
-      y.appendChild(opt);
-    }
-    y.value="2026";
-    document.getElementById("month").value=String(now.getMonth()+1);
-
-    document.getElementById("btn").addEventListener("click",load);
-    document.getElementById("btnPing").addEventListener("click",ping);
-
-    document.getElementById("mode").addEventListener("change",()=>{
-      const mode=document.getElementById("mode").value;
-      const showRange=mode==="range";
-      document.getElementById("start").style.display=showRange?"inline-flex":"none";
-      document.getElementById("end").style.display=showRange?"inline-flex":"none";
-      document.getElementById("month").style.display=showRange?"none":"inline-flex";
-      document.getElementById("year").style.display=showRange?"none":"inline-flex";
-    });
-
-    // tabs click
-    document.querySelectorAll("#tabs button").forEach(b=>{
-      b.addEventListener("click",()=>showTab(b.dataset.tab));
-    });
-
-    load();
-  })();
+/** Auto-load **/
+loadData();
 </script>
 </body>
 </html>
