@@ -1,3 +1,4 @@
+<!-- USA ESTE ARCHIVO COMO index.html EN TU HOST (NETLIFY / VERCEL / ETC) -->
 <!doctype html>
 <html lang="es">
 <head>
@@ -109,6 +110,7 @@
         <span class="mut" style="font-size:12px;">Modo</span>
         <select id="mode">
           <option value="month" selected>Mes</option>
+          <option value="range">Rango</option>
         </select>
 
         <span class="mut" style="font-size:12px;">Mes</span>
@@ -134,7 +136,7 @@
   </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbz2F48hKFJ3o-fJIbKyC5RlXRzQviIYH4bWNn4fypQUk9W_iA4JxmLYMlWRBdyTtWHT/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwoD6ouEdijfPFenag8I4RNjWsBD0H5yWuebuphYSYkjPm0gouWFdzTxujVAztn2V_o/exec";
 
 let currentTab = "finanzas";
 let lastData = null;
@@ -204,7 +206,7 @@ function jsonp(url){
 
     function cleanup(){
       clearTimeout(timer);
-      try{ delete window[cb]; }catch(_){}
+      delete window[cb];
       if(s && s.parentNode) s.parentNode.removeChild(s);
     }
 
@@ -248,35 +250,26 @@ function renderAll(data){
 
 /** FINANZAS **/
 function renderFinanzas(data){
-  const f = data.finance || {};
-  const ventasPorDia = f.ventasPorDia || [];
-  const acumulado = f.acumuladoVentas || [];
-  const topCat = f.topGastosCategoria || [];
-  const alertas = f.alertasServicios || { vencidos:{}, hoy:{}, proximos:{} };
-
-  const labels = ventasPorDia.map(x=>x.date);
-  const v = ventasPorDia.map(x=>Number(x.ventas||0));
-  const g = ventasPorDia.map(x=>Number(x.gastos||0));
-
-  const labels2 = acumulado.map(x=>x.date);
-  const acc = acumulado.map(x=>Number(x.acumulado||0));
+  const k = data.kpis || {};
+  const ch = data.charts || {};
+  const b = data.breakdowns || {};
 
   const html = `
     <div class="grid">
-      <div class="card"><div class="k">Ventas totales</div><div class="bigNumber">${money(f.ventasTotales)}</div></div>
-      <div class="card"><div class="k">Gastos totales</div><div class="bigNumber">${money(f.gastosTotales)}</div></div>
-      <div class="card"><div class="k">Utilidad</div><div class="bigNumber">${money(f.utilidad)}</div></div>
-      <div class="card"><div class="k">Saldo pendiente</div><div class="bigNumber">${money(f.saldoPendiente)}</div></div>
+      <div class="card"><div class="k">Ventas totales</div><div class="bigNumber">${money(k.ventasTotal)}</div></div>
+      <div class="card"><div class="k">Gastos totales</div><div class="bigNumber">${money(k.gastosTotal)}</div></div>
+      <div class="card"><div class="k">Utilidad</div><div class="bigNumber">${money(k.utilidad)}</div></div>
+      <div class="card"><div class="k">Saldo pendiente</div><div class="bigNumber">${money(k.saldoPendiente)}</div></div>
 
-      <div class="card"><div class="k">Delivery cliente</div><div class="bigNumber">${money(f.deliveryCobrado)}</div></div>
-      <div class="card"><div class="k">Costo delivery</div><div class="bigNumber">${money(f.costoDelivery)}</div></div>
-      <div class="card"><div class="k">Margen delivery</div><div class="bigNumber">${money(f.margenDelivery)}</div></div>
-      <div class="card"><div class="k">Clientes (período)</div><div class="bigNumber">${(f.clientesTotal||0)}</div></div>
+      <div class="card"><div class="k">Delivery cobrado</div><div class="bigNumber">${money(k.deliveryCobrado)}</div></div>
+      <div class="card"><div class="k">Costo delivery</div><div class="bigNumber">${money(k.costoDelivery)}</div></div>
+      <div class="card"><div class="k">Margen delivery</div><div class="bigNumber">${money(k.margenDelivery)}</div></div>
+      <div class="card"><div class="k">Clientes (período)</div><div class="bigNumber">${(k.clientesTotalPeriodo||0)}</div></div>
 
-      <div class="card"><div class="k">Boletas / Facturas</div><div class="bigNumber">${(f.boletasFacturas||0)}</div></div>
-      <div class="card"><div class="k">Comprobantes faltantes</div><div class="bigNumber">${(f.comprobantesFaltantes||0)}</div></div>
-      <div class="card"><div class="k">Promedio diario</div><div class="bigNumber">${money(f.promedioDiario)}</div></div>
-      <div class="card"><div class="k">Proyección mensual (×30)</div><div class="bigNumber">${money(f.proyeccionMensual)}</div></div>
+      <div class="card"><div class="k">Boletas / Facturas</div><div class="bigNumber">${(k.boletasFacturas||0)}</div></div>
+      <div class="card"><div class="k">Comprobantes faltantes</div><div class="bigNumber">${(k.comprobantesFaltantes||0)}</div></div>
+      <div class="card"><div class="k">Promedio diario (ventas / días con ventas)</div><div class="bigNumber">${money(k.promedioDiario)}</div></div>
+      <div class="card"><div class="k">Proyección mensual (prom × 30)</div><div class="bigNumber">${money(k.proyeccionMensual)}</div></div>
 
       <div class="card span2">
         <div class="k" style="margin-bottom:6px;">Ventas vs Gastos (por día)</div>
@@ -291,48 +284,44 @@ function renderFinanzas(data){
       <div class="card span2">
         <div class="k">Top Gastos por categoría</div>
         <div class="list">
-          ${topCat.slice(0,10).map(x=>`
-            <div class="pillRow"><b>${esc(x.categoria)}</b><span>${money(x.monto)}</span></div>
+          ${(b.gastosPorCategoria||[]).slice(0,10).map(x=>`
+            <div class="pillRow"><b>${esc(x.name)}</b><span>${money(x.total)}</span></div>
           `).join("")}
         </div>
       </div>
 
       <div class="card span2">
-        <div class="k">Alertas de servicios (PENDIENTE)</div>
-        <div class="list" style="margin-top:10px;">
-          <div class="pillRow"><b>Vencidos</b><span>${alertas.vencidos?.count||0} | ${money(alertas.vencidos?.monto||0)}</span></div>
-          <div class="pillRow"><b>Hoy</b><span>${alertas.hoy?.count||0} | ${money(alertas.hoy?.monto||0)}</span></div>
-          <div class="pillRow"><b>Próximos</b><span>${alertas.proximos?.count||0} | ${money(alertas.proximos?.monto||0)}</span></div>
-        </div>
+        <div class="k">Recojos en tienda (período)</div>
+        <div class="bigNumber">${(k.recojoCount||0)}</div>
+        <div class="mut" style="font-size:12px;margin-top:6px;">Se cuenta cuando Costo Delivery es “-”.</div>
       </div>
     </div>
   `;
   document.getElementById("view").innerHTML = html;
 
+  const vsg = ch.ventasVsGastos || { labels:[], ventas:[], gastos:[] };
   charts["ch_fin1"] = new Chart(document.getElementById("ch_fin1"),{
     type:"line",
-    data:{ labels, datasets:[
-      {label:"Ventas", data:v, tension:.25},
-      {label:"Gastos", data:g, tension:.25}
+    data:{ labels:vsg.labels, datasets:[
+      {label:"Ventas", data:vsg.ventas, tension:.25},
+      {label:"Gastos", data:vsg.gastos, tension:.25}
     ]},
     options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:"#fff"}}}, scales:{x:{ticks:{color:"#bbb"}}, y:{ticks:{color:"#bbb"}}}}
   });
 
+  const acc = ch.acumuladoVentas || { labels:[], values:[] };
   charts["ch_fin2"] = new Chart(document.getElementById("ch_fin2"),{
     type:"line",
-    data:{ labels:labels2, datasets:[{label:"Acumulado", data:acc, tension:.25}] },
+    data:{ labels:acc.labels, datasets:[{label:"Acumulado", data:acc.values, tension:.25}] },
     options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:"#fff"}}}, scales:{x:{ticks:{color:"#bbb"}}, y:{ticks:{color:"#bbb"}}}}
   });
 }
 
 /** GASTOS **/
 function renderGastos(data){
-  const g = data.gastos || {};
-  const top = g.topCategorias || [];
-  const per = g.porDia || [];
-
-  const labels = per.map(x=>x.date);
-  const vals = per.map(x=>Number(x.monto||0));
+  const mod = data.modules?.gastos || {};
+  const top = mod.topCategorias || [];
+  const per = mod.porDia || { labels:[], total:[] };
 
   const html = `
     <div class="grid">
@@ -345,13 +334,13 @@ function renderGastos(data){
         <div class="k">Top categorías (monto)</div>
         <div class="list">
           ${top.slice(0,12).map(x=>`
-            <div class="pillRow"><b>${esc(x.categoria)}</b><span>${money(x.monto)}</span></div>
+            <div class="pillRow"><b>${esc(x.name)}</b><span>${money(x.total)}</span></div>
           `).join("")}
         </div>
 
         <div class="card" style="margin-top:12px">
           <div class="k">Total gastos (acumulado)</div>
-          <div class="bigNumber">${money(g.total||0)}</div>
+          <div class="bigNumber">${money(mod.totalAcumulado||0)}</div>
         </div>
       </div>
     </div>
@@ -360,32 +349,29 @@ function renderGastos(data){
 
   charts["ch_g1"] = new Chart(document.getElementById("ch_g1"),{
     type:"line",
-    data:{ labels, datasets:[{label:"Gastos", data:vals, tension:.25}] },
+    data:{ labels:per.labels, datasets:[{label:"Gastos", data:per.total, tension:.25}] },
     options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:"#fff"}}}, scales:{x:{ticks:{color:"#bbb"}}, y:{ticks:{color:"#bbb"}}}}
   });
 }
 
-/** ✅ DELIVERY (ACTUALIZADO SEGÚN TU PEDIDO) **/
+/** DELIVERY **/
 function renderDelivery(data){
-  const d = data.delivery || {};
-  const porDia = d.porDia || [];
-  const tot = d.totals || { deliveryCliente:0, costoDelivery:0, diferencia:0, recojos:0, deliveries:0 };
-  const distritos = d.porDistrito || [];
+  const mod = data.modules?.delivery || {};
+  const porDia = mod.porDia || [];
+  const tot = mod.totales || { deliveryCliente:0, costoDelivery:0, diferencia:0 };
+  const recojo = mod.recojoCount || 0;
+  const deli = mod.deliveryCount || 0;
 
-  // acumulado de diferencia por día
-  let acum = 0;
-  const porDia2 = porDia.map(x=>{
-    acum += Number(x.diferencia||0);
-    return { ...x, acumuladoDiferencia: acum };
-  });
+  const distritos = mod.distritos || [];
+  const distTot = mod.distritosTotales || { count:0, monto:0 };
 
   const html = `
     <div class="grid">
       <div class="card span4">
         <div class="k">Resumen delivery vs recojo</div>
         <div class="list" style="margin-top:10px;">
-          <div class="pillRow"><b>Recojo en tienda</b><span>${tot.recojos||0}</span></div>
-          <div class="pillRow"><b>Pedidos por delivery</b><span>${tot.deliveries||0}</span></div>
+          <div class="pillRow"><b>Recojo en tienda (Costo “-”)</b><span>${recojo}</span></div>
+          <div class="pillRow"><b>Pedidos por delivery</b><span>${deli}</span></div>
         </div>
 
         <div class="card" style="margin-top:12px">
@@ -393,16 +379,14 @@ function renderDelivery(data){
           <div class="list" style="margin-top:10px;">
             <div class="pillRow"><b>Total Delivery cliente</b><span>${money(tot.deliveryCliente)}</span></div>
             <div class="pillRow"><b>Total Costo delivery</b><span>${money(tot.costoDelivery)}</span></div>
-            <div class="pillRow"><b>Total Diferencia (Cliente - Costo)</b><span>${money(tot.diferencia)}</span></div>
+            <div class="pillRow"><b>Total Diferencia (Delivery cliente - Costo)</b><span>${money(tot.diferencia)}</span></div>
           </div>
         </div>
       </div>
 
       <div class="card span4">
-        <div class="k">Reporte por día: Delivery cliente vs Costo + Diferencia + Acumulado</div>
-        <div class="mut" style="font-size:12px;margin-top:6px;">
-          Diferencia = Delivery cliente - Costo delivery. Si es recojo, el costo se considera 0.
-        </div>
+        <div class="k">Reporte por día (Delivery cliente vs Costo + Diferencia + Acumulado)</div>
+        <div class="mut" style="font-size:12px;margin-top:6px;">Diferencia = Delivery cliente - Costo delivery. Si Costo es “-”, es recojo (costo 0).</div>
         <div style="overflow:auto; margin-top:10px;">
           <table>
             <thead>
@@ -411,19 +395,19 @@ function renderDelivery(data){
                 <th>Delivery cliente</th>
                 <th>Costo delivery</th>
                 <th>Diferencia</th>
-                <th>Acum. diferencia</th>
+                <th>Acumulado</th>
                 <th># Recojo</th>
                 <th># Delivery</th>
               </tr>
             </thead>
             <tbody>
-              ${porDia2.map(x=>`
+              ${porDia.map(x=>`
                 <tr>
-                  <td><b>${esc(x.date)}</b></td>
+                  <td><b>${esc(x.fecha)}</b></td>
                   <td>${money(x.deliveryCliente)}</td>
                   <td>${money(x.costoDelivery)}</td>
                   <td>${money(x.diferencia)}</td>
-                  <td><b>${money(x.acumuladoDiferencia)}</b></td>
+                  <td><b>${money(x.acumulado)}</b></td>
                   <td>${x.recojoCount||0}</td>
                   <td>${x.deliveryCount||0}</td>
                 </tr>
@@ -434,8 +418,8 @@ function renderDelivery(data){
                 <td><b>${money(tot.costoDelivery)}</b></td>
                 <td><b>${money(tot.diferencia)}</b></td>
                 <td class="mut">—</td>
-                <td><b>${tot.recojos||0}</b></td>
-                <td><b>${tot.deliveries||0}</b></td>
+                <td><b>${recojo}</b></td>
+                <td><b>${deli}</b></td>
               </tr>
             </tbody>
           </table>
@@ -443,28 +427,29 @@ function renderDelivery(data){
       </div>
 
       <div class="card span4">
-        <div class="k">Reporte por distritos (veces y monto acumulado)</div>
+        <div class="k">Reporte por distritos entregados</div>
+        <div class="mut" style="font-size:12px;margin-top:6px;">Solo cuenta entregas con delivery (cuando Costo Delivery NO es “-”).</div>
         <div style="overflow:auto; margin-top:10px;">
           <table>
             <thead>
               <tr>
                 <th>Distrito</th>
-                <th>Veces</th>
-                <th>Monto acumulado</th>
+                <th>Cantidad (veces)</th>
+                <th>Monto acumulado (pedido)</th>
               </tr>
             </thead>
             <tbody>
               ${distritos.map(x=>`
                 <tr>
                   <td><b>${esc(x.distrito)}</b></td>
-                  <td>${x.veces||0}</td>
+                  <td>${x.count||0}</td>
                   <td>${money(x.monto||0)}</td>
                 </tr>
               `).join("")}
               <tr>
                 <td><b>TOTAL</b></td>
-                <td><b>${distritos.reduce((a,b)=>a+(Number(b.veces||0)),0)}</b></td>
-                <td><b>${money(distritos.reduce((a,b)=>a+(Number(b.monto||0)),0))}</b></td>
+                <td><b>${distTot.count||0}</b></td>
+                <td><b>${money(distTot.monto||0)}</b></td>
               </tr>
             </tbody>
           </table>
@@ -478,12 +463,11 @@ function renderDelivery(data){
 
 /** CLIENTES **/
 function renderClientes(data){
-  const c = data.clientes || {};
-  const list = c.ultimos200 || [];
+  const list = data.modules?.clientes?.top || [];
   const html = `
     <div class="grid">
       <div class="card span4">
-        <div class="k">Clientes (hasta 200)</div>
+        <div class="k">Clientes del período (hasta 200)</div>
         <div style="overflow:auto; margin-top:10px;">
           <table>
             <thead>
@@ -512,21 +496,22 @@ function renderClientes(data){
   document.getElementById("view").innerHTML = html;
 }
 
-/** SERVICIOS **/
+/** ✅ SERVICIOS **/
 function renderServicios(data){
-  const s = data.servicios || {};
-  const a = s.alertasResumen || {};
-  const p = s.pendientesDetalle || [];
+  const mod = data.modules?.servicios || {};
+  const a = mod.alertas || {};
+  const p = mod.pendientes || [];
 
   const html = `
     <div class="grid">
       <div class="card span2">
         <div class="k">Resumen alertas (PENDIENTE)</div>
         <div class="list" style="margin-top:10px;">
-          <div class="pillRow"><b>Vencidos</b><span>${a.vencidos?.count||0} | ${money(a.vencidos?.monto||0)}</span></div>
-          <div class="pillRow"><b>Hoy</b><span>${a.hoy?.count||0} | ${money(a.hoy?.monto||0)}</span></div>
-          <div class="pillRow"><b>Próximos</b><span>${a.proximos?.count||0} | ${money(a.proximos?.monto||0)}</span></div>
+          <div class="pillRow"><b>Vencidos</b><span>${a.vencidos?.count||0} | ${money(a.vencidos?.total||0)}</span></div>
+          <div class="pillRow"><b>Hoy</b><span>${a.hoy?.count||0} | ${money(a.hoy?.total||0)}</span></div>
+          <div class="pillRow"><b>Próximos</b><span>${a.proximos?.count||0} | ${money(a.proximos?.total||0)}</span></div>
         </div>
+        ${mod.debug ? `<div class="mut" style="font-size:12px;margin-top:10px;">${esc(mod.debug)}</div>` : ``}
       </div>
 
       <div class="card span2">
