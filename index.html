@@ -75,4 +75,71 @@
       min-height:340px;
     }
     .panel h3{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:600}
-    .footer{color:var(--muted);font-size:12px;margin-top:14px
+    .footer{color:var(--muted);font-size:12px;margin-top:14px}
+    @media (max-width:980px){
+      .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .grid2{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>BRAVIZIMO'S | Dashboard Financiero</h1>
+    <p class="sub">Si algo falla, aquí verás el error (ya no pantalla blanca).</p>
+
+    <div id="status" class="status">Cargando...</div>
+
+    <div class="controls">
+      <label style="color:var(--muted);font-size:14px">Modo</label>
+      <select id="mode">
+        <option value="month" selected>Mes</option>
+      </select>
+
+      <label style="color:var(--muted);font-size:14px">Mes</label>
+      <select id="month"></select>
+
+      <label style="color:var(--muted);font-size:14px">Año</label>
+      <select id="year"></select>
+
+      <button id="btn">Actualizar</button>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="label">Ventas totales</div>
+        <div class="value" id="ventas">S/ 0.00</div>
+      </div>
+      <div class="card">
+        <div class="label">Gastos totales</div>
+        <div class="value" id="gastos">S/ 0.00</div>
+      </div>
+      <div class="card">
+        <div class="label">Utilidad</div>
+        <div class="value" id="utilidad">S/ 0.00</div>
+      </div>
+      <div class="card">
+        <div class="label">Saldo pendiente</div>
+        <div class="value" id="pendiente">S/ 0.00</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <h3>Ventas vs Gastos + Saldo (por día)</h3>
+        <canvas id="chartDaily"></canvas>
+      </div>
+      <div class="panel">
+        <h3>Acumulado de ventas</h3>
+        <canvas id="chartAccum"></canvas>
+      </div>
+    </div>
+
+    <div class="footer">
+      Tip: Si Gastos sale 0, revisa que la hoja tenga fechas dentro del mes y que la columna se llame exactamente <b>T.SOLES</b>.
+    </div>
+  </div>
+
+  <script src="./script.js"></script>
+</body>
+</html>
