@@ -1,4 +1,3 @@
-<!-- USA ESTE ARCHIVO COMO index.html EN TU HOST (NETLIFY / VERCEL / ETC) -->
 <!doctype html>
 <html lang="es">
 <head>
@@ -136,7 +135,7 @@
   </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwoD6ouEdijfPFenag8I4RNjWsBD0H5yWuebuphYSYkjPm0gouWFdzTxujVAztn2V_o/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxYJLSxPXfN7PwH6Gj_RIs7YcC3j-Y3OvCgZQ6wW6pTE_N7duXjSgS3P66E0yqgofDQ/exec";
 
 let currentTab = "finanzas";
 let lastData = null;
@@ -268,7 +267,7 @@ function renderFinanzas(data){
 
       <div class="card"><div class="k">Boletas / Facturas</div><div class="bigNumber">${(k.boletasFacturas||0)}</div></div>
       <div class="card"><div class="k">Comprobantes faltantes</div><div class="bigNumber">${(k.comprobantesFaltantes||0)}</div></div>
-      <div class="card"><div class="k">Promedio diario (ventas / días con ventas)</div><div class="bigNumber">${money(k.promedioDiario)}</div></div>
+      <div class="card"><div class="k">Promedio diario (ventas / días del mes)</div><div class="bigNumber">${money(k.promedioDiario)}</div></div>
       <div class="card"><div class="k">Proyección mensual (prom × 30)</div><div class="bigNumber">${money(k.proyeccionMensual)}</div></div>
 
       <div class="card span2">
@@ -461,13 +460,13 @@ function renderDelivery(data){
   document.getElementById("view").innerHTML = html;
 }
 
-/** CLIENTES **/
+/** ✅ CLIENTES (desde envios + monto acumulado) **/
 function renderClientes(data){
   const list = data.modules?.clientes?.top || [];
   const html = `
     <div class="grid">
       <div class="card span4">
-        <div class="k">Clientes del período (hasta 200)</div>
+        <div class="k">Clientes del período (Top por monto acumulado, hasta 200)</div>
         <div style="overflow:auto; margin-top:10px;">
           <table>
             <thead>
@@ -476,6 +475,7 @@ function renderClientes(data){
                 <th>Cliente</th>
                 <th>Celular</th>
                 <th>Última compra</th>
+                <th>Monto acumulado</th>
               </tr>
             </thead>
             <tbody>
@@ -485,10 +485,14 @@ function renderClientes(data){
                   <td><b>${esc(x.cliente)}</b></td>
                   <td>${esc(x.celular||"")}</td>
                   <td>${esc(x.ultimaCompra||"")}</td>
+                  <td><b>${money(x.montoAcumulado||0)}</b></td>
                 </tr>
               `).join("")}
             </tbody>
           </table>
+        </div>
+        <div class="mut" style="font-size:12px;margin-top:8px;">
+          *Fuente: hoja <b>envios</b> (Cliente, Teléfono, Fecha, Monto).
         </div>
       </div>
     </div>
@@ -496,11 +500,16 @@ function renderClientes(data){
   document.getElementById("view").innerHTML = html;
 }
 
-/** ✅ SERVICIOS **/
+/** ✅ SERVICIOS (corrige vacío y muestra faltantes si existen) **/
 function renderServicios(data){
   const mod = data.modules?.servicios || {};
   const a = mod.alertas || {};
   const p = mod.pendientes || [];
+  const faltan = mod.faltanColumnas || [];
+
+  const avisoFaltan = faltan.length
+    ? `<div class="mut" style="font-size:12px;margin-top:10px;">Faltan columnas en "servicios": <b>${esc(faltan.join(", "))}</b></div>`
+    : '';
 
   const html = `
     <div class="grid">
@@ -511,7 +520,7 @@ function renderServicios(data){
           <div class="pillRow"><b>Hoy</b><span>${a.hoy?.count||0} | ${money(a.hoy?.total||0)}</span></div>
           <div class="pillRow"><b>Próximos</b><span>${a.proximos?.count||0} | ${money(a.proximos?.total||0)}</span></div>
         </div>
-        ${mod.debug ? `<div class="mut" style="font-size:12px;margin-top:10px;">${esc(mod.debug)}</div>` : ``}
+        ${avisoFaltan}
       </div>
 
       <div class="card span2">
@@ -530,17 +539,20 @@ function renderServicios(data){
             <tbody>
               ${p.map(x=>`
                 <tr>
-                  <td>${esc(x.fecha)}</td>
+                  <td>${esc(x.fecha||"")}</td>
                   <td>${esc(x.tipo||"")}</td>
                   <td><b>${esc(x.descripcion||"")}</b></td>
                   <td>${money(x.monto||0)}</td>
                   <td>${esc(x.estado||"")}</td>
                 </tr>
               `).join("")}
+              ${p.length ? "" : `<tr><td colspan="5" class="mut">No hay pendientes en este período.</td></tr>`}
             </tbody>
           </table>
         </div>
-        <div class="mut" style="font-size:12px;margin-top:8px;">*Se usa DESCRIPCION de la hoja “servicios”.</div>
+        <div class="mut" style="font-size:12px;margin-top:8px;">
+          *Se usa <b>DESCRIPCION</b> (y TIPO si existe, sino PAGA) de la hoja “servicios”.
+        </div>
       </div>
     </div>
   `;
