@@ -109,6 +109,7 @@
         <span class="mut" style="font-size:12px;">Modo</span>
         <select id="mode">
           <option value="month" selected>Mes</option>
+          <option value="range">Rango</option>
         </select>
 
         <span class="mut" style="font-size:12px;">Mes</span>
@@ -134,10 +135,8 @@
   </div>
 
 <script>
-/** 🔥 PEGA AQUÍ tu URL del WebApp */
-const API_URL = "https://script.google.com/macros/s/AKfycbzj9a081cvJKr8K_fDi0X53NxMR_Wu8AbVq0-i1c_NANm6LfAhGAosKX4LqpQapDyrd/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyOzILiNXddEpi3XNjxvP9e5quqAVgeNXodAInjYwNpNuMFs_YJNHscGTJcEKtFKv6E/exec"; // <-- TU URL
 
-/*************/
 let currentTab = "finanzas";
 let lastData = null;
 let charts = {};
@@ -239,7 +238,7 @@ async function loadData(){
 }
 
 function renderAll(data){
-  ["ch_fin1","ch_fin2","ch_g1"].forEach(destroyChart);
+  ["ch_fin1","ch_fin2","ch_g1","ch_srv_alertas"].forEach(destroyChart);
 
   if(currentTab === "finanzas") renderFinanzas(data);
   else if(currentTab === "gastos") renderGastos(data);
@@ -455,7 +454,6 @@ function renderDelivery(data){
           </table>
         </div>
       </div>
-
     </div>
   `;
   document.getElementById("view").innerHTML = html;
@@ -467,7 +465,7 @@ function renderClientes(data){
   const html = `
     <div class="grid">
       <div class="card span4">
-        <div class="k">Clientes del período (hasta 200) — ordenado por monto acumulado</div>
+        <div class="k">Clientes del período (hasta 200) + Monto acumulado</div>
         <div style="overflow:auto; margin-top:10px;">
           <table>
             <thead>
@@ -498,11 +496,33 @@ function renderClientes(data){
   document.getElementById("view").innerHTML = html;
 }
 
-/** SERVICIOS **/
+/** ✅ SERVICIOS (FINAL) **/
 function renderServicios(data){
   const mod = data.modules?.servicios || {};
   const a = mod.alertas || {};
-  const p = mod.pendientes || [];
+  const pendientes = mod.pendientes || [];
+  const todos = mod.todos || [];
+  const err = mod.error ? `<div class="mut" style="font-size:12px;margin-top:10px;">⚠️ ${esc(mod.error)}</div>` : "";
+
+  function badgeEstado(estado){
+    const s = String(estado||"").toUpperCase();
+    let color = "#bbb"; // gris
+    if(s.includes("PEND")) color = "#ffd34d";        // amarillo
+    else if(s.includes("PAG")) color = "#24d17e";    // verde
+    else if(s.includes("BAJA") || s.includes("ANUL")) color = "#ff4d6d"; // rojo
+    return `<span style="display:inline-flex;align-items:center;gap:8px;">
+      <span style="width:10px;height:10px;border-radius:999px;background:${color};display:inline-block;"></span>
+      <span>${esc(estado||"")}</span>
+    </span>`;
+  }
+
+  const labels = ["Vencidos","Hoy","Próximos"];
+  const values = [
+    Number(a.vencidos?.count||0),
+    Number(a.hoy?.count||0),
+    Number(a.proximos?.count||0)
+  ];
+
   const html = `
     <div class="grid">
       <div class="card span2">
@@ -512,12 +532,19 @@ function renderServicios(data){
           <div class="pillRow"><b>Hoy</b><span>${a.hoy?.count||0} | ${money(a.hoy?.total||0)}</span></div>
           <div class="pillRow"><b>Próximos</b><span>${a.proximos?.count||0} | ${money(a.proximos?.total||0)}</span></div>
         </div>
-        ${mod.error ? `<div class="mut" style="font-size:12px;margin-top:8px;">⚠️ ${esc(mod.error)}</div>` : ``}
+
+        <div class="card" style="margin-top:12px">
+          <div class="k" style="margin-bottom:6px;">Gráfico alertas (PENDIENTE)</div>
+          <div class="chartBox" style="height:220px"><canvas id="ch_srv_alertas"></canvas></div>
+        </div>
+        ${err}
       </div>
 
       <div class="card span2">
-        <div class="k">Pendientes (detalle)</div>
-        <div style="overflow:auto; margin-top:10px; max-height:420px;">
+        <div class="k">Servicios del período (TODOS)</div>
+        <div class="mut" style="font-size:12px;margin-top:6px;">Fecha = FECHA DE PAGO | Tipo = PAGA | Descripción = DESCRIPCIÓN | Monto = MONTO | Estado = ESTADO</div>
+
+        <div style="overflow:auto; margin-top:10px; max-height:520px;">
           <table>
             <thead>
               <tr>
@@ -529,23 +556,35 @@ function renderServicios(data){
               </tr>
             </thead>
             <tbody>
-              ${p.length ? p.map(x=>`
+              ${(todos.length ? todos : []).map(x=>`
                 <tr>
-                  <td>${esc(x.fecha)}</td>
+                  <td><b>${esc(x.fecha||"")}</b></td>
                   <td>${esc(x.tipo||"")}</td>
-                  <td><b>${esc(x.descripcion||"")}</b></td>
+                  <td>${esc(x.descripcion||"")}</td>
                   <td>${money(x.monto||0)}</td>
-                  <td>${esc(x.estado||"")}</td>
+                  <td>${badgeEstado(x.estado)}</td>
                 </tr>
-              `).join("") : `<tr><td colspan="5" class="mut">No hay pendientes en este período.</td></tr>`}
+              `).join("")}
+              ${(!todos.length ? `<tr><td colspan="5" class="mut">No hay servicios en este período.</td></tr>` : ``)}
             </tbody>
           </table>
         </div>
-        <div class="mut" style="font-size:12px;margin-top:8px;">*Se usa FECHA DE PAGO + PAGA + DESCRIPCIÓN + MONTO + ESTADO (hoja “servicios”).</div>
+
+        <div class="mut" style="font-size:12px;margin-top:8px;">
+          *Pendientes detectados: ${pendientes.length}
+        </div>
       </div>
     </div>
   `;
+
   document.getElementById("view").innerHTML = html;
+
+  destroyChart("ch_srv_alertas");
+  charts["ch_srv_alertas"] = new Chart(document.getElementById("ch_srv_alertas"),{
+    type:"doughnut",
+    data:{ labels, datasets:[{ data: values }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:"#fff" } } } }
+  });
 }
 
 loadData();
