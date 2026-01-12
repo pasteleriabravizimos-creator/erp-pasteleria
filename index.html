@@ -3,176 +3,76 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BRAVIZIMO'S | Dashboard</title>
-
-  <!-- Chart.js (si esto no carga, antes te quedabas blanco) -->
+  <title>BRAVIZIMO'S | Dashboard Financiero</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
   <style>
-    body{margin:0;font-family:system-ui;background:#0b1020;color:#fff}
-    .wrap{max-width:1100px;margin:0 auto;padding:18px}
-    .row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-    .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px}
-    .muted{color:rgba(255,255,255,.65);font-size:13px}
-    .big{font-size:24px;font-weight:700}
-    .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
-    select,button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;border-radius:10px;padding:8px 10px}
-    button{cursor:pointer}
-    .err{background:rgba(255,0,0,.12);border:1px solid rgba(255,0,0,.25)}
-    .ok{background:rgba(0,255,120,.10);border:1px solid rgba(0,255,120,.20)}
-    canvas{width:100% !important;height:320px !important}
-    @media(max-width:900px){.row{grid-template-columns:repeat(2,1fr)}}
-  </style>
-</head>
-
-<body>
-  <div class="wrap">
-    <h2 style="margin:0 0 6px">BRAVIZIMO'S | Dashboard Financiero</h2>
-    <div class="muted">Si algo falla, aquí verás el error (ya no pantalla blanca).</div>
-
-    <div id="msg" class="card muted" style="margin:12px 0; display:none;"></div>
-
-    <div class="bar">
-      <label class="muted">Modo</label>
-      <select id="mode">
-        <option>Mes</option>
-      </select>
-
-      <label class="muted">Mes</label>
-      <select id="month">
-        <option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option>
-        <option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option>
-        <option>Setiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option>
-      </select>
-
-      <label class="muted">Año</label>
-      <select id="year">
-        <option>2026</option><option>2025</option><option>2024</option>
-      </select>
-
-      <button id="btn">Actualizar</button>
-    </div>
-
-    <div class="row">
-      <div class="card"><div class="muted">Ventas totales</div><div id="k_ventas" class="big">-</div></div>
-      <div class="card"><div class="muted">Gastos totales</div><div id="k_gastos" class="big">-</div></div>
-      <div class="card"><div class="muted">Utilidad</div><div id="k_util" class="big">-</div></div>
-      <div class="card"><div class="muted">Saldo pendiente</div><div id="k_saldo" class="big">-</div></div>
-    </div>
-
-    <div style="height:12px"></div>
-
-    <div class="row" style="grid-template-columns:1fr 1fr">
-      <div class="card">
-        <div class="muted">Ventas vs Gastos + Saldo (por día)</div>
-        <canvas id="chart_fin1"></canvas>
-      </div>
-      <div class="card">
-        <div class="muted">Acumulado de ventas</div>
-        <canvas id="chart_fin2"></canvas>
-      </div>
-    </div>
-  </div>
-
-<script>
-/*** PON AQUÍ TU WEB APP URL ***/
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjcXUiyjhxP9TmIbgeuvPcasJqJtONkEbcnbQIkwlLCm7JAJy2JjoOtiZeR1sKc10_/exec";
-
-/*** Helpers ***/
-const $ = (id)=>document.getElementById(id);
-const money = (n)=>"S/ " + Number(n||0).toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2});
-let charts = {};
-
-function showMsg(text, type="ok"){
-  const el = $("msg");
-  el.style.display = "block";
-  el.className = "card " + (type==="err" ? "err" : "ok");
-  el.textContent = text;
-}
-
-window.addEventListener("error", (e)=>{
-  showMsg("ERROR JS: " + (e.message || "desconocido"), "err");
-});
-
-async function fetchJson(url){
-  const r = await fetch(url, { cache:"no-store" });
-  if(!r.ok) throw new Error("HTTP " + r.status + " al llamar: " + url);
-  return await r.json();
-}
-
-function destroy(id){
-  if(charts[id]){ charts[id].destroy(); delete charts[id]; }
-}
-
-function renderCharts(data){
-  destroy("fin1"); destroy("fin2");
-
-  if(typeof Chart === "undefined"){
-    showMsg("Chart.js NO cargó (CDN bloqueado o offline). KPIs igual deberían verse.", "err");
-    return;
-  }
-
-  const series = data.finanzasSeries || [];
-  const labels = series.map(x=>x.fecha);
-
-  const c1 = $("chart_fin1").getContext("2d");
-  charts.fin1 = new Chart(c1,{
-    type:"bar",
-    data:{
-      labels,
-      datasets:[
-        { label:"Ventas", data: series.map(x=>x.ventas||0) },
-        { label:"Gastos", data: series.map(x=>x.gastos||0) },
-        { label:"Saldo Pendiente", data: series.map(x=>x.saldoPendiente||0), type:"line" }
-      ]
-    },
-    options:{ responsive:true }
-  });
-
-  const c2 = $("chart_fin2").getContext("2d");
-  charts.fin2 = new Chart(c2,{
-    type:"line",
-    data:{ labels, datasets:[{ label:"Ventas acumuladas", data: series.map(x=>x.ventasAcum||0) }] },
-    options:{ responsive:true }
-  });
-}
-
-async function load(){
-  try{
-    if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("PEGAR_AQUI")){
-      showMsg("Falta configurar APPS_SCRIPT_URL en el index.html", "err");
-      return;
+    :root{
+      --bg:#0b1020;
+      --panel:#121a2e;
+      --panel2:#0f172a;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --border:rgba(255,255,255,.10);
+      --ok:#10b981;
+      --warn:#f59e0b;
     }
-
-    const mode = $("mode").value;
-    const month = $("month").value;
-    const year = $("year").value;
-
-    // 1) ping para verificar conexión
-    const ping = await fetchJson(`${APPS_SCRIPT_URL}?action=ping&_=${Date.now()}`);
-    if(!ping.ok) throw new Error("Ping no ok: " + JSON.stringify(ping));
-
-    // 2) data real
-    const data = await fetchJson(`${APPS_SCRIPT_URL}?action=data&mode=${encodeURIComponent(mode)}&month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}&_=${Date.now()}`);
-    if(!data.ok) throw new Error("Data no ok: " + JSON.stringify(data));
-
-    // KPIs
-    $("k_ventas").textContent = money(data.kpis?.ventasTotales);
-    $("k_gastos").textContent = money(data.kpis?.gastosTotales);
-    $("k_util").textContent   = money(data.kpis?.utilidad);
-    $("k_saldo").textContent  = money(data.kpis?.saldoPendiente);
-
-    showMsg(`OK: ${data.period?.monthName} ${data.period?.year} (${data.period?.from} a ${data.period?.to})`, "ok");
-    renderCharts(data);
-
-  } catch(err){
-    showMsg("ERROR CARGANDO: " + (err.message || String(err)), "err");
-    console.error(err);
-  }
-}
-
-$("btn").addEventListener("click", load);
-load();
-</script>
-</body>
-</html>
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:radial-gradient(1200px 600px at 50% -100px, #1f2a4a 0%, var(--bg) 55%);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+    }
+    .wrap{max-width:1120px;margin:40px auto;padding:0 18px}
+    h1{margin:0 0 6px;font-size:26px;letter-spacing:.3px}
+    .sub{margin:0 0 18px;color:var(--muted);font-size:14px}
+    .status{
+      background:rgba(16,185,129,.10);
+      border:1px solid rgba(16,185,129,.25);
+      padding:12px 14px;border-radius:12px;margin:18px 0 18px;
+      font-size:14px
+    }
+    .controls{
+      display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+      margin:6px 0 16px;
+    }
+    select,button{
+      background:var(--panel2);
+      color:var(--text);
+      border:1px solid var(--border);
+      padding:8px 10px;
+      border-radius:10px;
+      font-size:14px;
+      outline:none;
+    }
+    button{cursor:pointer}
+    .cards{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+      margin:12px 0 16px;
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px 14px 12px;
+      min-height:86px;
+    }
+    .label{color:var(--muted);font-size:13px;margin-bottom:6px}
+    .value{font-size:24px;font-weight:700}
+    .grid2{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:12px;
+      margin-top:10px;
+    }
+    .panel{
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+      min-height:340px;
+    }
+    .panel h3{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:600}
+    .footer{color:var(--muted);font-size:12px;margin-top:14px
