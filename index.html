@@ -2,65 +2,137 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BRAVIZIMO'S | Dashboard Financiero</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BRAVIZIMO'S | Dashboard Insumos por Fecha</title>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
   <style>
-    :root{--bg:#0b1020;--panel:#121a2e;--panel2:#0f172a;--text:#e5e7eb;--muted:#9ca3af;--border:rgba(255,255,255,.10)}
-    *{box-sizing:border-box}
-    body{margin:0;background:radial-gradient(1200px 600px at 50% -100px,#1f2a4a 0%,var(--bg) 55%);color:var(--text);font-family:system-ui}
-    .wrap{max-width:1120px;margin:40px auto;padding:0 18px}
-    h1{margin:0 0 6px;font-size:26px}
-    .sub{margin:0 0 18px;color:var(--muted);font-size:14px}
-    .status{background:rgba(16,185,129,.10);border:1px solid rgba(16,185,129,.25);padding:12px 14px;border-radius:12px;margin:18px 0;font-size:14px}
-    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:6px 0 16px}
-    select,button{background:var(--panel2);color:var(--text);border:1px solid var(--border);padding:8px 10px;border-radius:10px;font-size:14px}
-    button{cursor:pointer}
-    .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:12px 0 16px}
-    .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid var(--border);border-radius:14px;padding:14px;min-height:86px}
-    .label{color:var(--muted);font-size:13px;margin-bottom:6px}
-    .value{font-size:24px;font-weight:700}
-    .grid2{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
-    .panel{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.01));border:1px solid var(--border);border-radius:14px;padding:14px;min-height:340px}
-    .panel h3{margin:0 0 10px;font-size:14px;color:var(--muted);font-weight:600}
-    @media (max-width:980px){.cards{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+    body { font-family: Arial, sans-serif; margin:0; background:#fafafa; }
+    header { padding: 14px 18px; background:#111; color:#fff; }
+    main { padding: 16px; max-width: 1200px; margin: 0 auto; }
+    .row { display:flex; gap:12px; flex-wrap:wrap; align-items:end; }
+    .cardGrid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-top: 14px;}
+    .card { background:#fff; border:1px solid #e6e6e6; border-radius:10px; padding:12px; }
+    .kpiTitle { font-size:12px; color:#666; }
+    .kpiValue { font-size:22px; font-weight:700; margin-top:6px; }
+    label { display:block; font-size:12px; color:#444; margin-bottom:4px; }
+    input, select, button { padding: 10px; font-size: 14px; border-radius:8px; border:1px solid #ddd; background:#fff; }
+    button { cursor:pointer; background:#111; color:#fff; border:1px solid #111; }
+    button.secondary { background:#fff; color:#111; }
+    h3 { margin: 18px 0 8px; }
+    table { border-collapse: collapse; width:100%; background:#fff; border:1px solid #e6e6e6; border-radius:10px; overflow:hidden; }
+    th, td { padding:8px; border-bottom:1px solid #eee; text-align:left; font-size:13px; }
+    th { background:#f5f5f5; }
+    .twoCol { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    @media (max-width: 900px){ .twoCol { grid-template-columns: 1fr; } }
+    .muted { color:#666; font-size:12px; }
+    .warn { color:#b45309; font-size:12px; }
+    .err { color:#b91c1c; font-size:12px; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>BRAVIZIMO'S | Dashboard Financiero</h1>
-    <p class="sub">Si algo falla, aquí verás el error.</p>
+  <header>
+    <div style="font-weight:700;">BRAVIZIMO'S — Dashboard Insumos por Fecha</div>
+    <div class="muted" style="color:#cfcfcf;">Ventas/Producción → Packs → Recetas → Insumos → Costos → Margen</div>
+  </header>
 
-    <div id="status" class="status">Cargando...</div>
-
-    <div class="controls">
-      <label style="color:var(--muted);font-size:14px">Mes</label>
-      <select id="month"></select>
-
-      <label style="color:var(--muted);font-size:14px">Año</label>
-      <select id="year"></select>
-
-      <button id="btn">Actualizar</button>
-    </div>
-
-    <div class="cards">
-      <div class="card"><div class="label">Ventas totales</div><div class="value" id="ventas">S/ 0.00</div></div>
-      <div class="card"><div class="label">Gastos totales</div><div class="value" id="gastos">S/ 0.00</div></div>
-      <div class="card"><div class="label">Utilidad</div><div class="value" id="utilidad">S/ 0.00</div></div>
-      <div class="card"><div class="label">Saldo pendiente</div><div class="value" id="pendiente">S/ 0.00</div></div>
-    </div>
-
-    <div class="grid2">
-      <div class="panel">
-        <h3>Ventas vs Gastos + Saldo (por día)</h3>
-        <canvas id="chartDaily"></canvas>
+  <main>
+    <div class="row">
+      <div>
+        <label>Fecha</label>
+        <input type="date" id="fecha" />
       </div>
-      <div class="panel">
-        <h3>Acumulado de ventas</h3>
-        <canvas id="chartAccum"></canvas>
+
+      <div>
+        <label>Hoja producción/ventas</label>
+        <input id="prodSheet" placeholder="ej: enero 2026" value="enero 2026" />
+        <div class="muted">Debe ser el nombre exacto de la pestaña donde está tu reporte diario.</div>
+      </div>
+
+      <div style="min-width:320px; flex:1;">
+        <label>URL Web App (Apps Script)</label>
+        <input id="apiUrl" placeholder="Pega aquí tu URL de Apps Script (Web App)" />
+        <div class="muted">La URL termina en /exec</div>
+      </div>
+
+      <button id="btnCargar">Calcular</button>
+      <button id="btnExportar" class="secondary">Exportar CSV Insumos</button>
+    </div>
+
+    <div id="msg" class="muted" style="margin-top:10px;"></div>
+
+    <div class="cardGrid">
+      <div class="card">
+        <div class="kpiTitle">Venta total (S/)</div>
+        <div class="kpiValue" id="kpiVenta">—</div>
+      </div>
+      <div class="card">
+        <div class="kpiTitle">Costo total insumos (S/)</div>
+        <div class="kpiValue" id="kpiCosto">—</div>
+      </div>
+      <div class="card">
+        <div class="kpiTitle">Utilidad estimada (S/)</div>
+        <div class="kpiValue" id="kpiUtilidad">—</div>
+      </div>
+      <div class="card">
+        <div class="kpiTitle">Margen (%)</div>
+        <div class="kpiValue" id="kpiMargen">—</div>
+      </div>
+      <div class="card">
+        <div class="kpiTitle">Unidades totales</div>
+        <div class="kpiValue" id="kpiUnidades">—</div>
+      </div>
+      <div class="card">
+        <div class="kpiTitle">Insumos distintos</div>
+        <div class="kpiValue" id="kpiInsumos">—</div>
       </div>
     </div>
-  </div>
+
+    <div class="twoCol" style="margin-top:12px;">
+      <div class="card">
+        <div style="font-weight:700; margin-bottom:8px;">Top productos por cantidad</div>
+        <canvas id="chTopProductos"></canvas>
+      </div>
+      <div class="card">
+        <div style="font-weight:700; margin-bottom:8px;">Costo por insumo (Top)</div>
+        <canvas id="chCostoInsumo"></canvas>
+      </div>
+    </div>
+
+    <h3>Productos consolidados (incluye packs desarmados)</h3>
+    <div class="muted">Si un producto no tiene receta, aparecerá en “observaciones”.</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Precio venta</th>
+          <th>Venta estimada</th>
+          <th>Costo estimado</th>
+          <th>Utilidad</th>
+        </tr>
+      </thead>
+      <tbody id="tbProductos"></tbody>
+    </table>
+
+    <h3>Insumos requeridos</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Insumo</th>
+          <th>Cantidad requerida</th>
+          <th>Unidad</th>
+          <th>Costo unitario</th>
+          <th>Costo total</th>
+        </tr>
+      </thead>
+      <tbody id="tbInsumos"></tbody>
+    </table>
+
+    <h3>Observaciones</h3>
+    <div id="obs" class="warn">—</div>
+  </main>
 
   <script src="./script.js"></script>
 </body>
