@@ -9,7 +9,6 @@
     :root{
       --bg1:#0b1020; --bg2:#120a2b;
       --card:rgba(255,255,255,.06);
-      --card2:rgba(255,255,255,.09);
       --txt:rgba(255,255,255,.92);
       --mut:rgba(255,255,255,.65);
       --line:rgba(255,255,255,.10);
@@ -43,7 +42,7 @@
     }
     .badge.ok{border-color:rgba(36,209,126,.35)}
     .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
-    select, input, button{
+    select, button{
       color:var(--txt);
       background:var(--btn);
       border:1px solid var(--line);
@@ -90,10 +89,6 @@
       padding:8px 10px;
       font-size:12px;
     }
-    .dot{width:10px;height:10px;border-radius:999px;display:inline-block;margin-right:8px}
-    .dot.bad{background:var(--bad)}
-    .dot.warn{background:var(--warn)}
-    .dot.ok{background:var(--ok)}
     table{width:100%; border-collapse:collapse; font-size:12px}
     th,td{padding:8px 8px; border-bottom:1px solid var(--line); text-align:left}
     th{color:var(--mut); font-weight:700}
@@ -140,15 +135,12 @@
   </div>
 
 <script>
-/** ========= CONFIG ========= **/
-const API_URL = "https://script.google.com/macros/s/AKfycbw2YcPLQXZjLdgm5CTAoCQMycfanKca29JaX60UEYR5EEq1D1kle3IaTBTxflVAdMwL/exec";
-/** ========================== **/
+const API_URL = "https://script.google.com/macros/s/AKfycbxQ_TLzOY1fDpxx2ruyT1KrhgoM955fnxoqBrWYFhyyiLID8b374nv7yNvYbJHiuqaY/exec";
 
 let currentTab = "finanzas";
 let lastData = null;
 let charts = {};
 
-/** Utils **/
 const money = (n)=> "S/ " + (Number(n||0).toLocaleString("es-PE",{minimumFractionDigits:2, maximumFractionDigits:2}));
 const esc = (s)=> String(s??"").replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
 const setStatus = (txt, ok=null)=>{
@@ -156,12 +148,8 @@ const setStatus = (txt, ok=null)=>{
   el.textContent = txt;
   el.className = "badge" + (ok===true ? " ok" : "");
 };
+function destroyChart(id){ if(charts[id]){ charts[id].destroy(); delete charts[id]; } }
 
-function destroyChart(id){
-  if(charts[id]){ charts[id].destroy(); delete charts[id]; }
-}
-
-/** Dropdowns **/
 (function initFilters(){
   const monthSel=document.getElementById("month");
   const yearSel=document.getElementById("year");
@@ -185,7 +173,6 @@ function destroyChart(id){
   yearSel.value=String(now.getFullYear());
 })();
 
-/** Tabs **/
 document.getElementById("tabs").addEventListener("click",(e)=>{
   const t=e.target.closest(".tab");
   if(!t) return;
@@ -195,7 +182,6 @@ document.getElementById("tabs").addEventListener("click",(e)=>{
   if(lastData) renderAll(lastData);
 });
 
-/** Buttons **/
 document.getElementById("btnPing").addEventListener("click", async ()=>{
   setStatus("Probando API...");
   const url = API_URL + "?action=ping&callback=?";
@@ -207,17 +193,14 @@ document.getElementById("btnPing").addEventListener("click", async ()=>{
     setStatus("ERROR: " + err.message);
   }
 });
-
 document.getElementById("btnUpdate").addEventListener("click", ()=> loadData());
 
-/** JSONP loader **/
 function jsonp(url){
   return new Promise((resolve,reject)=>{
     const cb = "cb_" + Math.random().toString(16).slice(2);
     const s = document.createElement("script");
     const timer = setTimeout(()=>{
-      cleanup();
-      reject(new Error("Timeout"));
+      cleanup(); reject(new Error("Timeout"));
     }, 20000);
 
     function cleanup(){
@@ -226,22 +209,14 @@ function jsonp(url){
       if(s && s.parentNode) s.parentNode.removeChild(s);
     }
 
-    window[cb] = (data)=>{
-      cleanup();
-      resolve(data);
-    };
-
-    s.onerror = ()=>{
-      cleanup();
-      reject(new Error("Error cargando JSONP"));
-    };
+    window[cb] = (data)=>{ cleanup(); resolve(data); };
+    s.onerror = ()=>{ cleanup(); reject(new Error("Error cargando JSONP")); };
 
     s.src = url.replace("callback=?", "callback="+cb);
     document.body.appendChild(s);
   });
 }
 
-/** Load **/
 async function loadData(){
   setStatus("Cargando...");
   const mode = document.getElementById("mode").value;
@@ -262,14 +237,12 @@ async function loadData(){
   }
 }
 
-/** Render wrapper **/
 function renderAll(data){
-  // limpiar charts viejos por vista
-  ["ch_fin1","ch_fin2","ch_g1","ch_d1"].forEach(destroyChart);
+  ["ch_fin1","ch_fin2","ch_g1"].forEach(destroyChart);
 
   if(currentTab === "finanzas") renderFinanzas(data);
   else if(currentTab === "gastos") renderGastos(data);
-  else if(currentTab === "delivery") renderDelivery(data);
+  else if(currentTab === "delivery") renderDelivery(data); // ✅ Nuevo delivery
   else if(currentTab === "clientes") renderClientes(data);
   else if(currentTab === "servicios") renderServicios(data);
 }
@@ -325,17 +298,13 @@ function renderFinanzas(data){
   `;
   document.getElementById("view").innerHTML = html;
 
-  // charts
   const vsg = ch.ventasVsGastos || { labels:[], ventas:[], gastos:[] };
   charts["ch_fin1"] = new Chart(document.getElementById("ch_fin1"),{
     type:"line",
-    data:{
-      labels:vsg.labels,
-      datasets:[
-        {label:"Ventas", data:vsg.ventas, tension:.25},
-        {label:"Gastos", data:vsg.gastos, tension:.25}
-      ]
-    },
+    data:{ labels:vsg.labels, datasets:[
+      {label:"Ventas", data:vsg.ventas, tension:.25},
+      {label:"Gastos", data:vsg.gastos, tension:.25}
+    ]},
     options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:"#fff"}}}, scales:{x:{ticks:{color:"#bbb"}}, y:{ticks:{color:"#bbb"}}}}
   });
 
@@ -384,53 +353,111 @@ function renderGastos(data){
   });
 }
 
-/** DELIVERY **/
+/** ✅ DELIVERY (NUEVO) **/
 function renderDelivery(data){
   const mod = data.modules?.delivery || {};
-  const per = mod.porDia || { labels:[], cobrado:[], costo:[], diferencia:[], recojoSeries:[] };
-  const top = mod.top || [];
-  const recojos = data.kpis?.recojoCount || 0;
+  const porDia = mod.porDia || [];
+  const tot = mod.totales || { deliveryCliente:0, costoDelivery:0, diferencia:0 };
+  const recojo = mod.recojoCount || 0;
+  const deli = mod.deliveryCount || 0;
+
+  const distritos = mod.distritos || [];
+  const distTot = mod.distritosTotales || { count:0, monto:0 };
 
   const html = `
     <div class="grid">
-      <div class="card span2">
-        <div class="k" style="margin-bottom:6px;">Delivery (Cobrado vs Costo) por día</div>
-        <div class="mut" style="font-size:12px;margin-bottom:8px;">Diferencia = Delivery cliente - Costo delivery. Si costo es “-” es recojo (costo 0).</div>
-        <div class="chartBox"><canvas id="ch_d1"></canvas></div>
-      </div>
-
-      <div class="card span2">
-        <div class="k">Top delivery (por diferencia)</div>
-        <div class="list">
-          ${top.slice(0,12).map(x=>`
-            <div class="pillRow">
-              <b>${esc(x.name)}</b>
-              <span>${money(x.diferencia)} <span class="mut">(Cob: ${money(x.cobrado)} | Cos: ${money(x.costo)})</span></span>
-            </div>
-          `).join("")}
+      <div class="card span4">
+        <div class="k">Resumen delivery vs recojo</div>
+        <div class="list" style="margin-top:10px;">
+          <div class="pillRow"><b>Recojo en tienda (Costo “-”)</b><span>${recojo}</span></div>
+          <div class="pillRow"><b>Pedidos por delivery</b><span>${deli}</span></div>
         </div>
 
         <div class="card" style="margin-top:12px">
-          <div class="k">Recojos en tienda (período)</div>
-          <div class="bigNumber">${recojos}</div>
+          <div class="k">Totales (período)</div>
+          <div class="list" style="margin-top:10px;">
+            <div class="pillRow"><b>Total Delivery cliente</b><span>${money(tot.deliveryCliente)}</span></div>
+            <div class="pillRow"><b>Total Costo delivery</b><span>${money(tot.costoDelivery)}</span></div>
+            <div class="pillRow"><b>Total Diferencia (Delivery cliente - Costo)</b><span>${money(tot.diferencia)}</span></div>
+          </div>
         </div>
       </div>
+
+      <div class="card span4">
+        <div class="k">Reporte por día (Delivery cliente vs Costo + Diferencia + Acumulado)</div>
+        <div class="mut" style="font-size:12px;margin-top:6px;">Diferencia = Delivery cliente - Costo delivery. Si Costo es “-”, es recojo (costo 0).</div>
+        <div style="overflow:auto; margin-top:10px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Delivery cliente</th>
+                <th>Costo delivery</th>
+                <th>Diferencia</th>
+                <th>Acumulado</th>
+                <th># Recojo</th>
+                <th># Delivery</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${porDia.map(x=>`
+                <tr>
+                  <td><b>${esc(x.fecha)}</b></td>
+                  <td>${money(x.deliveryCliente)}</td>
+                  <td>${money(x.costoDelivery)}</td>
+                  <td>${money(x.diferencia)}</td>
+                  <td><b>${money(x.acumulado)}</b></td>
+                  <td>${x.recojoCount||0}</td>
+                  <td>${x.deliveryCount||0}</td>
+                </tr>
+              `).join("")}
+              <tr>
+                <td><b>TOTAL</b></td>
+                <td><b>${money(tot.deliveryCliente)}</b></td>
+                <td><b>${money(tot.costoDelivery)}</b></td>
+                <td><b>${money(tot.diferencia)}</b></td>
+                <td class="mut">—</td>
+                <td><b>${recojo}</b></td>
+                <td><b>${deli}</b></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card span4">
+        <div class="k">Reporte por distritos entregados</div>
+        <div class="mut" style="font-size:12px;margin-top:6px;">Solo cuenta entregas con delivery (cuando Costo Delivery NO es “-”).</div>
+        <div style="overflow:auto; margin-top:10px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Distrito</th>
+                <th>Cantidad (veces)</th>
+                <th>Monto acumulado (pedido)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${distritos.map(x=>`
+                <tr>
+                  <td><b>${esc(x.distrito)}</b></td>
+                  <td>${x.count||0}</td>
+                  <td>${money(x.monto||0)}</td>
+                </tr>
+              `).join("")}
+              <tr>
+                <td><b>TOTAL</b></td>
+                <td><b>${distTot.count||0}</b></td>
+                <td><b>${money(distTot.monto||0)}</b></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   `;
   document.getElementById("view").innerHTML = html;
-
-  charts["ch_d1"] = new Chart(document.getElementById("ch_d1"),{
-    type:"line",
-    data:{
-      labels:per.labels,
-      datasets:[
-        {label:"Cobrado", data:per.cobrado, tension:.25},
-        {label:"Costo", data:per.costo, tension:.25},
-        {label:"Diferencia", data:per.diferencia, tension:.25},
-      ]
-    },
-    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:"#fff"}}}, scales:{x:{ticks:{color:"#bbb"}}, y:{ticks:{color:"#bbb"}}}}
-  });
 }
 
 /** CLIENTES **/
@@ -477,9 +504,9 @@ function renderServicios(data){
       <div class="card span2">
         <div class="k">Resumen alertas (PENDIENTE)</div>
         <div class="list" style="margin-top:10px;">
-          <div class="pillRow"><span><span class="dot bad"></span><b>Vencidos</b></span><span>${a.vencidos?.count||0} | ${money(a.vencidos?.total||0)}</span></div>
-          <div class="pillRow"><span><span class="dot warn"></span><b>Hoy</b></span><span>${a.hoy?.count||0} | ${money(a.hoy?.total||0)}</span></div>
-          <div class="pillRow"><span><span class="dot ok"></span><b>Próximos</b></span><span>${a.proximos?.count||0} | ${money(a.proximos?.total||0)}</span></div>
+          <div class="pillRow"><b>Vencidos</b><span>${a.vencidos?.count||0} | ${money(a.vencidos?.total||0)}</span></div>
+          <div class="pillRow"><b>Hoy</b><span>${a.hoy?.count||0} | ${money(a.hoy?.total||0)}</span></div>
+          <div class="pillRow"><b>Próximos</b><span>${a.proximos?.count||0} | ${money(a.proximos?.total||0)}</span></div>
         </div>
       </div>
 
@@ -516,7 +543,6 @@ function renderServicios(data){
   document.getElementById("view").innerHTML = html;
 }
 
-/** Auto-load **/
 loadData();
 </script>
 </body>
