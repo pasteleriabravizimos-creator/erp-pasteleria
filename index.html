@@ -1,77 +1,178 @@
-<script>
-/************ CONFIG ************/
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjcXUiyjhxP9TmIbgeuvPcasJqJtONkEbcnbQIkwlLCm7JAJy2JjoOtiZeR1sKc10_/exec";
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BRAVIZIMO'S | Dashboard</title>
 
-/************ STATE ************/
+  <!-- Chart.js (si esto no carga, antes te quedabas blanco) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    body{margin:0;font-family:system-ui;background:#0b1020;color:#fff}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px}
+    .row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px}
+    .muted{color:rgba(255,255,255,.65);font-size:13px}
+    .big{font-size:24px;font-weight:700}
+    .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
+    select,button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff;border-radius:10px;padding:8px 10px}
+    button{cursor:pointer}
+    .err{background:rgba(255,0,0,.12);border:1px solid rgba(255,0,0,.25)}
+    .ok{background:rgba(0,255,120,.10);border:1px solid rgba(0,255,120,.20)}
+    canvas{width:100% !important;height:320px !important}
+    @media(max-width:900px){.row{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h2 style="margin:0 0 6px">BRAVIZIMO'S | Dashboard Financiero</h2>
+    <div class="muted">Si algo falla, aquí verás el error (ya no pantalla blanca).</div>
+
+    <div id="msg" class="card muted" style="margin:12px 0; display:none;"></div>
+
+    <div class="bar">
+      <label class="muted">Modo</label>
+      <select id="mode">
+        <option>Mes</option>
+      </select>
+
+      <label class="muted">Mes</label>
+      <select id="month">
+        <option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option>
+        <option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option>
+        <option>Setiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option>
+      </select>
+
+      <label class="muted">Año</label>
+      <select id="year">
+        <option>2026</option><option>2025</option><option>2024</option>
+      </select>
+
+      <button id="btn">Actualizar</button>
+    </div>
+
+    <div class="row">
+      <div class="card"><div class="muted">Ventas totales</div><div id="k_ventas" class="big">-</div></div>
+      <div class="card"><div class="muted">Gastos totales</div><div id="k_gastos" class="big">-</div></div>
+      <div class="card"><div class="muted">Utilidad</div><div id="k_util" class="big">-</div></div>
+      <div class="card"><div class="muted">Saldo pendiente</div><div id="k_saldo" class="big">-</div></div>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="row" style="grid-template-columns:1fr 1fr">
+      <div class="card">
+        <div class="muted">Ventas vs Gastos + Saldo (por día)</div>
+        <canvas id="chart_fin1"></canvas>
+      </div>
+      <div class="card">
+        <div class="muted">Acumulado de ventas</div>
+        <canvas id="chart_fin2"></canvas>
+      </div>
+    </div>
+  </div>
+
+<script>
+/*** PON AQUÍ TU WEB APP URL ***/
+const APPS_SCRIPT_URL = "PEGAR_AQUI_TU_WEBAPP_URL";
+
+/*** Helpers ***/
+const $ = (id)=>document.getElementById(id);
+const money = (n)=>"S/ " + Number(n||0).toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2});
 let charts = {};
 
-function money(n){
-  const x = Number(n||0);
-  return "S/ " + x.toLocaleString("es-PE", {minimumFractionDigits:2, maximumFractionDigits:2});
-}
-function setMsg(text, show=true){
-  const el = document.getElementById("msg");
-  if(!show){ el.classList.add("hidden"); el.textContent=""; return; }
-  el.classList.remove("hidden"); el.textContent = text;
+function showMsg(text, type="ok"){
+  const el = $("msg");
+  el.style.display = "block";
+  el.className = "card " + (type==="err" ? "err" : "ok");
+  el.textContent = text;
 }
 
-async function fetchData(){
-  const mode = document.getElementById("mode").value;
-  const month = document.getElementById("month").value;
-  const year = document.getElementById("year").value;
+window.addEventListener("error", (e)=>{
+  showMsg("ERROR JS: " + (e.message || "desconocido"), "err");
+});
 
-  const url = `${APPS_SCRIPT_URL}?action=data&mode=${encodeURIComponent(mode)}&month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}&_=${Date.now()}`;
-  const res = await fetch(url);
-  if(!res.ok) throw new Error("No se pudo cargar data");
-  return await res.json();
+async function fetchJson(url){
+  const r = await fetch(url, { cache:"no-store" });
+  if(!r.ok) throw new Error("HTTP " + r.status + " al llamar: " + url);
+  return await r.json();
 }
 
-function destroyChart(id){
+function destroy(id){
   if(charts[id]){ charts[id].destroy(); delete charts[id]; }
 }
 
-/************ FIN CHARTS (ACTUALIZADO) ************/
-function renderFinCharts(d){
-  destroyChart("chart_fin1");
-  destroyChart("chart_fin2");
+function renderCharts(data){
+  destroy("fin1"); destroy("fin2");
 
-  const series = d.finanzasSeries || [];
+  if(typeof Chart === "undefined"){
+    showMsg("Chart.js NO cargó (CDN bloqueado o offline). KPIs igual deberían verse.", "err");
+    return;
+  }
+
+  const series = data.finanzasSeries || [];
   const labels = series.map(x=>x.fecha);
 
-  // 1) Ventas vs Gastos + Saldo Pendiente (por día)
-  const ctx1 = document.getElementById("chart_fin1");
-  charts["chart_fin1"] = new Chart(ctx1, {
+  const c1 = $("chart_fin1").getContext("2d");
+  charts.fin1 = new Chart(c1,{
     type:"bar",
     data:{
       labels,
       datasets:[
         { label:"Ventas", data: series.map(x=>x.ventas||0) },
         { label:"Gastos", data: series.map(x=>x.gastos||0) },
-        { label:"Saldo Pendiente", data: series.map(x=>x.saldoPendiente||0), type:"line" },
+        { label:"Saldo Pendiente", data: series.map(x=>x.saldoPendiente||0), type:"line" }
       ]
     },
-    options:{
-      responsive:true,
-      plugins:{legend:{labels:{color:"rgba(255,255,255,.8)"}}},
-      scales:{x:{ticks:{color:"rgba(255,255,255,.6)"}}, y:{ticks:{color:"rgba(255,255,255,.6)"}}}
-    }
+    options:{ responsive:true }
   });
 
-  // 2) Acumulado de ventas
-  const ctx2 = document.getElementById("chart_fin2");
-  charts["chart_fin2"] = new Chart(ctx2, {
+  const c2 = $("chart_fin2").getContext("2d");
+  charts.fin2 = new Chart(c2,{
     type:"line",
-    data:{
-      labels,
-      datasets:[
-        { label:"Ventas acumuladas", data: series.map(x=>x.ventasAcum||0) }
-      ]
-    },
-    options:{
-      responsive:true,
-      plugins:{legend:{labels:{color:"rgba(255,255,255,.8)"}}},
-      scales:{x:{ticks:{color:"rgba(255,255,255,.6)"}}, y:{ticks:{color:"rgba(255,255,255,.6)"}}}
-    }
+    data:{ labels, datasets:[{ label:"Ventas acumuladas", data: series.map(x=>x.ventasAcum||0) }] },
+    options:{ responsive:true }
   });
 }
+
+async function load(){
+  try{
+    if(!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("PEGAR_AQUI")){
+      showMsg("Falta configurar APPS_SCRIPT_URL en el index.html", "err");
+      return;
+    }
+
+    const mode = $("mode").value;
+    const month = $("month").value;
+    const year = $("year").value;
+
+    // 1) ping para verificar conexión
+    const ping = await fetchJson(`${APPS_SCRIPT_URL}?action=ping&_=${Date.now()}`);
+    if(!ping.ok) throw new Error("Ping no ok: " + JSON.stringify(ping));
+
+    // 2) data real
+    const data = await fetchJson(`${APPS_SCRIPT_URL}?action=data&mode=${encodeURIComponent(mode)}&month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}&_=${Date.now()}`);
+    if(!data.ok) throw new Error("Data no ok: " + JSON.stringify(data));
+
+    // KPIs
+    $("k_ventas").textContent = money(data.kpis?.ventasTotales);
+    $("k_gastos").textContent = money(data.kpis?.gastosTotales);
+    $("k_util").textContent   = money(data.kpis?.utilidad);
+    $("k_saldo").textContent  = money(data.kpis?.saldoPendiente);
+
+    showMsg(`OK: ${data.period?.monthName} ${data.period?.year} (${data.period?.from} a ${data.period?.to})`, "ok");
+    renderCharts(data);
+
+  } catch(err){
+    showMsg("ERROR CARGANDO: " + (err.message || String(err)), "err");
+    console.error(err);
+  }
+}
+
+$("btn").addEventListener("click", load);
+load();
 </script>
+</body>
+</html>
