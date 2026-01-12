@@ -1,203 +1,537 @@
 <!doctype html>
-<html>
+<html lang="es">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>ERP Dashboard</title>
-  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BRAVIZIMO'S | Dashboard Financiero</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; margin:0; background:#fafafa;}
-    header{padding:16px 20px; background:#111; color:#fff;}
-    .wrap{padding:16px 20px; max-width:1200px; margin:0 auto;}
-    .grid{display:grid; gap:12px;}
-    .kpis{grid-template-columns:repeat(4,minmax(0,1fr));}
-    .card{background:#fff; border:1px solid #eee; border-radius:14px; padding:14px;}
-    .kpi-title{font-size:12px; color:#666; margin-bottom:6px;}
-    .kpi-value{font-size:22px; font-weight:700;}
-    .two{grid-template-columns:repeat(2,minmax(0,1fr));}
-    .chart{height:360px;}
-    table{width:100%; border-collapse:collapse;}
-    th,td{padding:10px; border-bottom:1px solid #eee; text-align:left; font-size:14px;}
-    th{color:#666; font-weight:600;}
-    .muted{color:#777; font-size:12px;}
-    .btn{border:1px solid #ddd; background:#fff; border-radius:10px; padding:8px 10px; cursor:pointer;}
-    @media(max-width:900px){
-      .kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
-      .two{grid-template-columns:1fr;}
+    :root{
+      --bg1:#06121f; --bg2:#1a1230;
+      --card:rgba(255,255,255,.06);
+      --stroke:rgba(255,255,255,.10);
+      --text:#eaf2ff; --muted:rgba(234,242,255,.7);
+      --ok:rgba(50,220,160,.16);
     }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,Segoe UI,Roboto,Arial;
+      color:var(--text);
+      background:radial-gradient(1200px 700px at 20% 20%, #0b2745 0%, transparent 50%),
+                 radial-gradient(900px 600px at 80% 30%, #2a1747 0%, transparent 55%),
+                 linear-gradient(120deg,var(--bg1),var(--bg2));
+      min-height:100vh;
+    }
+    .wrap{max-width:1180px;margin:0 auto;padding:34px 18px 60px;}
+    .title{font-weight:800;letter-spacing:.2px}
+    .sub{color:var(--muted);margin-top:4px;font-size:13px}
+    .bar{
+      margin-top:14px;padding:12px 14px;border-radius:12px;
+      background:var(--ok);border:1px solid rgba(50,220,160,.25);
+      color:#c7ffe9;font-weight:600;
+    }
+    .toprow{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:14px}
+    .ctrl{
+      display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+      padding:10px 12px;border-radius:14px;background:var(--card);border:1px solid var(--stroke)
+    }
+    select,button{
+      background:rgba(0,0,0,.25);color:var(--text);
+      border:1px solid rgba(255,255,255,.15);
+      border-radius:10px;padding:8px 10px;font-weight:600;
+      outline:none;
+    }
+    button{cursor:pointer}
+    .tabs{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .tab{
+      padding:8px 12px;border-radius:999px;
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+      cursor:pointer;font-weight:700;font-size:13px;
+    }
+    .tab.active{background:rgba(255,255,255,.12)}
+    .grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:12px}
+    .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+    @media (max-width:980px){.grid4{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
+    .card{
+      background:var(--card);border:1px solid var(--stroke);
+      border-radius:18px;padding:14px; backdrop-filter: blur(10px);
+      box-shadow:0 10px 30px rgba(0,0,0,.25);
+    }
+    .kpi-title{color:var(--muted);font-size:12px;font-weight:700}
+    .kpi{font-size:24px;font-weight:900;margin-top:6px}
+    .section{display:none}
+    .section.active{display:block}
+    .h{font-weight:900;margin:4px 0 2px}
+    .p{color:var(--muted);font-size:12px;margin:0 0 10px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
+    th{color:var(--muted);text-align:left;font-weight:800}
+    .right{text-align:right}
+    .small{font-size:12px;color:var(--muted)}
+    .err{background:rgba(255,70,70,.12);border:1px solid rgba(255,70,70,.25);color:#ffd4d4}
   </style>
 </head>
-
 <body>
-<header>
-  <div style="max-width:1200px;margin:0 auto; display:flex; justify-content:space-between; gap:12px; align-items:center;">
-    <div>
-      <div style="font-weight:700;">ERP Dashboard</div>
-      <div class="muted">Sincronizado con Google Sheets</div>
+  <div class="wrap">
+    <div class="title">BRAVIZIMO'S | Dashboard Financiero</div>
+    <div class="sub">Sincronizado con Google Sheets (Apps Script)</div>
+
+    <div id="status" class="bar">Cargando...</div>
+
+    <div class="toprow">
+      <div class="ctrl">
+        <span class="small">Modo</span>
+        <select id="mode">
+          <option value="mes" selected>Mes</option>
+          <option value="rango">Rango</option>
+        </select>
+
+        <span class="small">Mes</span>
+        <select id="month"></select>
+
+        <span class="small">Año</span>
+        <select id="year"></select>
+
+        <button id="btn">Actualizar</button>
+      </div>
     </div>
-    <button class="btn" id="btnReload">Actualizar</button>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="finanzas">Finanzas</div>
+      <div class="tab" data-tab="delivery">Delivery</div>
+      <div class="tab" data-tab="vendedoras">Vendedoras</div>
+      <div class="tab" data-tab="productos">Productos</div>
+      <div class="tab" data-tab="clientes">Clientes</div>
+      <div class="tab" data-tab="gastos">Gastos</div>
+      <div class="tab" data-tab="medios">Medios de pago</div>
+      <div class="tab" data-tab="servicios">Servicios</div>
+    </div>
+
+    <!-- FINANZAS -->
+    <div id="finanzas" class="section active">
+      <div class="grid4">
+        <div class="card"><div class="kpi-title">Ventas totales</div><div class="kpi" id="k_ventas">S/ 0.00</div></div>
+        <div class="card"><div class="kpi-title">Gastos totales</div><div class="kpi" id="k_gastos">S/ 0.00</div></div>
+        <div class="card"><div class="kpi-title">Utilidad</div><div class="kpi" id="k_utilidad">S/ 0.00</div></div>
+        <div class="card"><div class="kpi-title">Saldo pendiente</div><div class="kpi" id="k_saldo">S/ 0.00</div></div>
+      </div>
+
+      <div class="grid4">
+        <div class="card"><div class="kpi-title">Delivery cobrado</div><div class="kpi" id="k_del_cob">S/ 0.00</div></div>
+        <div class="card"><div class="kpi-title">Costo delivery</div><div class="kpi" id="k_del_cos">S/ 0.00</div></div>
+        <div class="card"><div class="kpi-title">Margen delivery</div><div class="kpi" id="k_del_mar">S/ 0.00</div></div>
+        <div class="card"><div class="kpi-title">Clientes (total)</div><div class="kpi" id="k_cli">0</div></div>
+      </div>
+
+      <div class="grid4">
+        <div class="card"><div class="kpi-title">Boletas / Facturas</div><div class="kpi" id="k_bf">0</div></div>
+        <div class="card"><div class="kpi-title">Comprobantes faltantes</div><div class="kpi" id="k_cf">0</div></div>
+        <div class="card"><div class="kpi-title">Promedio diario (hasta hoy)</div><div class="kpi" id="k_avg">S/ 0.00</div></div>
+        <div class="card"><div class="kpi-title">Proyección mensual (prom × 30)</div><div class="kpi" id="k_proj">S/ 0.00</div></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="h">Ventas vs Gastos + Saldo (por día)</div>
+          <div class="p">Ventas (nota de ventas), Gastos (GASTOS), Saldo pendiente (por pagar).</div>
+          <canvas id="ch_fin"></canvas>
+        </div>
+        <div class="card">
+          <div class="h">Acumulado de ventas</div>
+          <div class="p">Suma progresiva por día.</div>
+          <canvas id="ch_acum"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- DELIVERY -->
+    <div id="delivery" class="section">
+      <div class="grid2">
+        <div class="card">
+          <div class="h">Delivery por día</div>
+          <div class="p">Cobrado vs costo vs diferencia (cobrado - costo).</div>
+          <canvas id="ch_del"></canvas>
+        </div>
+        <div class="card">
+          <div class="h">Recojo en tienda (por día)</div>
+          <div class="p">Cantidad de recojos.</div>
+          <canvas id="ch_rec"></canvas>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div class="h">Detalle delivery por día</div>
+        <table>
+          <thead><tr><th>Fecha</th><th class="right">Cobrado</th><th class="right">Costo</th><th class="right">Diferencia</th></tr></thead>
+          <tbody id="tb_delivery"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VENDEDORAS -->
+    <div id="vendedoras" class="section">
+      <div class="grid2">
+        <div class="card">
+          <div class="h">Resumen por vendedora (Top)</div>
+          <div class="p">Monto y pedidos (nota de ventas).</div>
+          <canvas id="ch_vtop"></canvas>
+        </div>
+        <div class="card">
+          <div class="h">Vendedoras por día (ventas y saldo)</div>
+          <div class="p">Detalle por fecha y vendedora.</div>
+          <table>
+            <thead><tr><th>Fecha</th><th>Vendedora</th><th class="right">Pedidos</th><th class="right">Monto</th><th class="right">Saldo</th></tr></thead>
+            <tbody id="tb_vdia"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCTOS -->
+    <div id="productos" class="section">
+      <div class="card">
+        <div class="h">Top productos (por cantidad acumulada)</div>
+        <div class="p">Ordenado por cantidad (incluye monto si existe).</div>
+        <table>
+          <thead><tr><th>Producto</th><th class="right">Cantidad</th><th class="right">Monto</th></tr></thead>
+          <tbody id="tb_topprod"></tbody>
+        </table>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div class="h">Productos por día (para saber qué preparar)</div>
+        <div class="p">Agrupado por fecha y producto.</div>
+        <table>
+          <thead><tr><th>Fecha</th><th>Producto</th><th class="right">Cantidad</th></tr></thead>
+          <tbody id="tb_proddia"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CLIENTES -->
+    <div id="clientes" class="section">
+      <div class="card">
+        <div class="h">Clientes del período (hasta 200)</div>
+        <div class="p">Ordenado por monto acumulado (desc). Incluye numeración y cantidad de pedidos.</div>
+        <table>
+          <thead><tr><th>#</th><th>Cliente</th><th>Celular</th><th>Última compra</th><th class="right">Pedidos</th><th class="right">Monto</th></tr></thead>
+          <tbody id="tb_clientes"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- GASTOS -->
+    <div id="gastos" class="section">
+      <div class="card">
+        <div class="h">Gastos por categoría</div>
+        <div class="p">Se lee de hoja GASTOS (columna T.SOLES / Total).</div>
+        <table>
+          <thead><tr><th>Categoría</th><th class="right">Registros</th><th class="right">Monto</th></tr></thead>
+          <tbody id="tb_gcat"></tbody>
+          <tfoot>
+            <tr>
+              <th colspan="2" class="right">TOTAL</th>
+              <th class="right" id="gcat_total">S/ 0.00</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- MEDIOS -->
+    <div id="medios" class="section">
+      <div class="card">
+        <div class="h">Medios de pago (INGRESOS)</div>
+        <div class="p">Suma de pagos registrados (1er Pago + 2do Pago) agrupado por cuenta destino.</div>
+        <table>
+          <thead><tr><th>Medio</th><th class="right">Registros</th><th class="right">Monto (ingresos)</th></tr></thead>
+          <tbody id="tb_medios"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SERVICIOS -->
+    <div id="servicios" class="section">
+      <div class="grid2">
+        <div class="card">
+          <div class="h">Servicios: Pagado vs Pendiente (por día)</div>
+          <div class="p">Sumatoria por día según estado.</div>
+          <canvas id="ch_srv"></canvas>
+        </div>
+        <div class="card">
+          <div class="h">Servicios (lista)</div>
+          <div class="p">Tipo / Fecha / Monto / Estado / Medio / Obs.</div>
+          <table>
+            <thead><tr><th>Tipo</th><th>Fecha</th><th class="right">Monto</th><th>Estado</th><th>Medio</th><th>Obs</th></tr></thead>
+            <tbody id="tb_srv"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
-</header>
-
-<div class="wrap">
-  <div id="status" class="muted">Cargando datos…</div>
-
-  <div class="grid kpis" style="margin-top:12px;">
-    <div class="card"><div class="kpi-title">Ingresos (caja)</div><div id="kpiIngresos" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Gastos</div><div id="kpiGastos" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Utilidad</div><div id="kpiUtilidad" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Pedidos</div><div id="kpiPedidos" class="kpi-value">—</div></div>
-
-    <div class="card"><div class="kpi-title">Ventas (Total pedidos)</div><div id="kpiVentasPedidos" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Clientes nuevos</div><div id="kpiNuevos" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Clientes recurrentes</div><div id="kpiRecurrentes" class="kpi-value">—</div></div>
-    <div class="card"><div class="kpi-title">Boletas / Facturas / Pend.</div><div id="kpiComp" class="kpi-value">—</div></div>
-  </div>
-
-  <div class="grid two" style="margin-top:12px;">
-    <div class="card">
-      <div style="font-weight:700; margin-bottom:8px;">Ingresos vs Gastos por día</div>
-      <div id="chartIngresosGastos" class="chart"></div>
-    </div>
-    <div class="card">
-      <div style="font-weight:700; margin-bottom:8px;">Ingresos acumulados</div>
-      <div id="chartAcumulado" class="chart"></div>
-    </div>
-  </div>
-
-  <div class="grid two" style="margin-top:12px;">
-    <div class="card">
-      <div style="font-weight:700; margin-bottom:8px;">Ingresos por categoría</div>
-      <div id="chartCategorias" class="chart"></div>
-    </div>
-    <div class="card">
-      <div style="font-weight:700; margin-bottom:8px;">Ingresos por distrito</div>
-      <div id="chartDistritos" class="chart"></div>
-    </div>
-  </div>
-
-  <div class="card" style="margin-top:12px;">
-    <div style="font-weight:700; margin-bottom:8px;">Reporte de vendedoras</div>
-    <div style="overflow:auto; max-height:360px;">
-      <table id="tablaVendedoras">
-        <thead>
-          <tr><th>Vendedora</th><th>Ingresos</th><th>Pedidos</th><th>Ticket prom.</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="muted" style="margin-top:12px;" id="footerMeta"></div>
-</div>
 
 <script>
-  // ✅ Pega tu URL del Web App aquí
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyfPaptyVNwsVD6YSn3Qe1Jnou6u8oEOUFWRQUkpkcstvw0nWBQwM4SS2oApqe3LZPZ/exec";
+  // 👉 PON AQUÍ TU WEB APP URL (termina en /exec)
+  const API_URL = "PEGAR_AQUI_TU_URL_DE_WEBAPP";
 
-  google.charts.load('current', {packages:['corechart']});
+  const $ = (id)=>document.getElementById(id);
+  const fmt = (n)=>"S/ " + (Number(n||0).toFixed(2));
+  const months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-  const money = (n) => new Intl.NumberFormat('es-PE', {style:'currency', currency:'PEN'}).format(Number(n||0));
-  const num = (n) => new Intl.NumberFormat('es-PE').format(Number(n||0));
+  // Fill selects
+  const monthSel = $("month");
+  months.forEach((m,i)=>{
+    const opt=document.createElement("option");
+    opt.value=String(i+1);
+    opt.textContent=m;
+    monthSel.appendChild(opt);
+  });
+  const yearSel = $("year");
+  for(let y=2024;y<=2032;y++){
+    const opt=document.createElement("option");
+    opt.value=String(y);
+    opt.textContent=String(y);
+    yearSel.appendChild(opt);
+  }
+  // default hoy
+  const now = new Date();
+  monthSel.value = String(now.getMonth()+1);
+  yearSel.value = String(now.getFullYear());
 
-  // ✅ JSONP loader (evita CORS)
-  function loadJSONP(){
-    return new Promise((resolve, reject) => {
-      const cbName = "cb_" + Math.random().toString(36).slice(2);
-
-      window[cbName] = (data) => {
-        delete window[cbName];
-        script.remove();
-        resolve(data);
-      };
-
-      const script = document.createElement("script");
-      script.src = `${APPS_SCRIPT_URL}?action=data&callback=${cbName}&_=${Date.now()}`;
-      script.onerror = () => {
-        delete window[cbName];
-        script.remove();
-        reject(new Error("No se pudo cargar data desde Apps Script"));
-      };
-
-      document.body.appendChild(script);
+  // Tabs
+  document.querySelectorAll(".tab").forEach(t=>{
+    t.addEventListener("click", ()=>{
+      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+      document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+      t.classList.add("active");
+      $(t.dataset.tab).classList.add("active");
     });
+  });
+
+  // Charts holders
+  let CH = {};
+
+  function destroyChart(id){
+    if(CH[id]){ CH[id].destroy(); CH[id]=null; }
   }
 
-  function draw(data){
-    document.getElementById('kpiIngresos').textContent = money(data.kpis.ingresos);
-    document.getElementById('kpiGastos').textContent = money(data.kpis.gastos);
-    document.getElementById('kpiUtilidad').textContent = money(data.kpis.utilidad);
-    document.getElementById('kpiPedidos').textContent = num(data.kpis.pedidos);
-    document.getElementById('kpiVentasPedidos').textContent = money(data.kpis.ventasPedidos);
-    document.getElementById('kpiNuevos').textContent = num(data.kpis.clientesNuevos);
-    document.getElementById('kpiRecurrentes').textContent = num(data.kpis.clientesRecurrentes);
+  async function load(){
+    $("status").classList.remove("err");
+    $("status").textContent = "Cargando...";
+    const mode = $("mode").value;
+    const month = $("month").value;
+    const year = $("year").value;
 
-    const bo = data.kpis.comprobantes?.boletas ?? 0;
-    const fa = data.kpis.comprobantes?.facturas ?? 0;
-    const pe = data.kpis.comprobantes?.pendientes ?? 0;
-    document.getElementById('kpiComp').textContent = `${num(bo)} / ${num(fa)} / ${num(pe)}`;
+    const url = `${API_URL}?mode=${encodeURIComponent(mode)}&month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}`;
+    const res = await fetch(url);
+    const data = await res.json();
 
-    const ig = new google.visualization.DataTable();
-    ig.addColumn('string','Día');
-    ig.addColumn('number','Ingresos');
-    ig.addColumn('number','Gastos');
-    data.series.ingresosGastosDia.forEach(r => ig.addRow([r.date, Number(r.ingresos), Number(r.gastos)]));
-    new google.visualization.LineChart(document.getElementById('chartIngresosGastos'))
-      .draw(ig, {legend:{position:'bottom'}, height:360});
-
-    const ac = new google.visualization.DataTable();
-    ac.addColumn('string','Día');
-    ac.addColumn('number','Acumulado');
-    data.series.acumulado.forEach(r => ac.addRow([r.date, Number(r.acumulado)]));
-    new google.visualization.LineChart(document.getElementById('chartAcumulado'))
-      .draw(ac, {legend:{position:'bottom'}, height:360});
-
-    const cat = new google.visualization.DataTable();
-    cat.addColumn('string','Categoría');
-    cat.addColumn('number','Ingresos');
-    (data.breakdowns.categorias || []).slice(0,12).forEach(r => cat.addRow([r.name, Number(r.value)]));
-    new google.visualization.PieChart(document.getElementById('chartCategorias'))
-      .draw(cat, {legend:{position:'right'}, height:360});
-
-    const dist = new google.visualization.DataTable();
-    dist.addColumn('string','Distrito');
-    dist.addColumn('number','Ingresos');
-    (data.breakdowns.distritos || []).slice(0,12).forEach(r => dist.addRow([r.name, Number(r.value)]));
-    new google.visualization.BarChart(document.getElementById('chartDistritos'))
-      .draw(dist, {legend:{position:'none'}, height:360});
-
-    const tbody = document.querySelector('#tablaVendedoras tbody');
-    tbody.innerHTML = '';
-    (data.breakdowns.vendedoras || []).forEach(r => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${r.name}</td>
-        <td>${money(r.ingresos)}</td>
-        <td>${num(r.pedidos)}</td>
-        <td>${money(r.ticketProm)}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    document.getElementById('footerMeta').textContent = `Actualizado: ${data.meta.generatedAt}`;
-  }
-
-  async function loadAndRender(){
-    document.getElementById('status').textContent = 'Cargando datos…';
-    try{
-      const data = await loadJSONP();
-      document.getElementById('status').textContent = '';
-      draw(data);
-      window.onresize = () => draw(data);
-    }catch(err){
-      document.getElementById('status').textContent = 'Error: ' + err.message;
-      console.error(err);
+    if(!data.ok){
+      $("status").classList.add("err");
+      $("status").textContent = "ERROR: " + (data.error || "No se pudo cargar");
+      return;
     }
+
+    $("status").textContent = `OK: ${data.range.label}`;
+
+    // KPIs
+    $("k_ventas").textContent = fmt(data.metrics.ventasTotales);
+    $("k_gastos").textContent = fmt(data.metrics.gastosTotales);
+    $("k_utilidad").textContent = fmt(data.metrics.utilidad);
+    $("k_saldo").textContent = fmt(data.metrics.saldoPendiente);
+
+    $("k_del_cob").textContent = fmt(data.metrics.deliveryCobrado);
+    $("k_del_cos").textContent = fmt(data.metrics.costoDelivery);
+    $("k_del_mar").textContent = fmt(data.metrics.margenDelivery);
+
+    $("k_cli").textContent = String(data.metrics.clientesTotal || 0);
+    $("k_bf").textContent = String(data.metrics.boletasFacturas || 0);
+    $("k_cf").textContent = String(data.metrics.comprobantesFaltantes || 0);
+
+    // promedio y proyección (según días con ventas en el rango)
+    const fin = data.charts.finanzasPorDia || [];
+    const diasConVentas = fin.filter(x => Number(x.ventas||0) > 0).length || 0;
+    const avg = diasConVentas ? (Number(data.metrics.ventasTotales||0) / diasConVentas) : 0;
+    $("k_avg").textContent = fmt(avg);
+    $("k_proj").textContent = fmt(avg * 30);
+
+    // Chart Finanzas por día
+    destroyChart("fin");
+    const finLabels = fin.map(x=>x.date);
+    CH.fin = new Chart($("ch_fin"), {
+      type: "bar",
+      data: {
+        labels: finLabels,
+        datasets: [
+          { label:"Ventas", data: fin.map(x=>x.ventas) },
+          { label:"Gastos", data: fin.map(x=>x.gastos) },
+          { label:"Saldo Pendiente", type:"line", data: fin.map(x=>x.saldo) }
+        ]
+      },
+      options: { responsive:true, maintainAspectRatio:false }
+    });
+
+    // Chart Acumulado
+    destroyChart("acum");
+    const acum = data.charts.acumuladoVentas || [];
+    CH.acum = new Chart($("ch_acum"), {
+      type:"line",
+      data:{ labels: acum.map(x=>x.date), datasets:[ {label:"Ventas acumuladas", data: acum.map(x=>x.ventasAcum)} ] },
+      options:{ responsive:true, maintainAspectRatio:false }
+    });
+
+    // Delivery charts + tabla
+    const del = data.charts.deliveryPorDia || [];
+    destroyChart("del");
+    CH.del = new Chart($("ch_del"), {
+      type:"bar",
+      data:{
+        labels: del.map(x=>x.date),
+        datasets:[
+          {label:"Cobrado", data: del.map(x=>x.cobrado)},
+          {label:"Costo", data: del.map(x=>x.costo)},
+          {label:"Diferencia", data: del.map(x=>x.diferencia)}
+        ]
+      },
+      options:{ responsive:true, maintainAspectRatio:false }
+    });
+
+    const rec = data.charts.recojoTiendaPorDia || [];
+    destroyChart("rec");
+    CH.rec = new Chart($("ch_rec"), {
+      type:"line",
+      data:{ labels: rec.map(x=>x.date), datasets:[{label:"Recojo (cant)", data: rec.map(x=>x.cant)}] },
+      options:{ responsive:true, maintainAspectRatio:false }
+    });
+
+    renderTable($("tb_delivery"), data.tables.deliveryDetallePorDia || [], (r)=>`
+      <tr>
+        <td>${r.fecha}</td>
+        <td class="right">${fmt(r.cobrado)}</td>
+        <td class="right">${fmt(r.costo)}</td>
+        <td class="right">${fmt(r.diferencia)}</td>
+      </tr>
+    `);
+
+    // Vendedoras
+    const vtop = data.charts.vendedorasTop || [];
+    destroyChart("vtop");
+    CH.vtop = new Chart($("ch_vtop"), {
+      type:"bar",
+      data:{
+        labels: vtop.map(x=>x.vendedora),
+        datasets:[
+          {label:"Monto", data: vtop.map(x=>x.monto)},
+          {label:"Pedidos", data: vtop.map(x=>x.pedidos)}
+        ]
+      },
+      options:{ responsive:true, maintainAspectRatio:false }
+    });
+
+    renderTable($("tb_vdia"), data.tables.vendedorasPorDia || [], (r)=>`
+      <tr>
+        <td>${r.fecha}</td>
+        <td>${r.vendedora}</td>
+        <td class="right">${r.pedidos}</td>
+        <td class="right">${fmt(r.monto)}</td>
+        <td class="right">${fmt(r.saldo)}</td>
+      </tr>
+    `);
+
+    // Productos
+    renderTable($("tb_topprod"), data.tables.topProductos || [], (r)=>`
+      <tr>
+        <td>${r.producto}</td>
+        <td class="right">${Number(r.cantidad||0).toFixed(2)}</td>
+        <td class="right">${fmt(r.monto)}</td>
+      </tr>
+    `);
+    renderTable($("tb_proddia"), (data.tables.productosPorDia || []).slice(0,300), (r)=>`
+      <tr>
+        <td>${r.fecha}</td>
+        <td>${r.producto}</td>
+        <td class="right">${Number(r.cantidad||0).toFixed(2)}</td>
+      </tr>
+    `);
+
+    // Clientes
+    renderTable($("tb_clientes"), data.tables.clientesTop || [], (r)=>`
+      <tr>
+        <td>${r.n}</td>
+        <td>${escapeHtml(r.cliente||"")}</td>
+        <td>${escapeHtml(r.celular||"")}</td>
+        <td>${r.ultimaCompra||""}</td>
+        <td class="right">${r.pedidos||0}</td>
+        <td class="right">${fmt(r.monto)}</td>
+      </tr>
+    `);
+
+    // Gastos por categoría + total
+    const gcat = data.tables.gastosPorCategoria || {rows:[], total:0};
+    renderTable($("tb_gcat"), gcat.rows || [], (r)=>`
+      <tr>
+        <td>${escapeHtml(r.categoria||"")}</td>
+        <td class="right">${r.registros||0}</td>
+        <td class="right">${fmt(r.monto)}</td>
+      </tr>
+    `);
+    $("gcat_total").textContent = fmt(gcat.total || 0);
+
+    // Medios de pago
+    renderTable($("tb_medios"), data.tables.mediosPagoIngresos || [], (r)=>`
+      <tr>
+        <td>${escapeHtml(r.medio||"")}</td>
+        <td class="right">${r.registros||0}</td>
+        <td class="right">${fmt(r.monto)}</td>
+      </tr>
+    `);
+
+    // Servicios
+    const srv = data.charts.serviciosPagadoVsPendiente || [];
+    destroyChart("srv");
+    CH.srv = new Chart($("ch_srv"), {
+      type:"bar",
+      data:{
+        labels: srv.map(x=>x.date),
+        datasets:[
+          {label:"Pagado", data: srv.map(x=>x.pagado)},
+          {label:"Pendiente", data: srv.map(x=>x.pendiente)}
+        ]
+      },
+      options:{ responsive:true, maintainAspectRatio:false }
+    });
+
+    renderTable($("tb_srv"), (data.tables.serviciosLista || []).slice(0,200), (r)=>`
+      <tr>
+        <td>${escapeHtml(r.tipo||"")}</td>
+        <td>${r.fecha||""}</td>
+        <td class="right">${fmt(r.monto)}</td>
+        <td>${escapeHtml(r.estado||"")}</td>
+        <td>${escapeHtml(r.medio||"")}</td>
+        <td>${escapeHtml(r.obs||"")}</td>
+      </tr>
+    `);
   }
 
-  document.getElementById('btnReload').addEventListener('click', loadAndRender);
-  google.charts.setOnLoadCallback(loadAndRender);
-</script>
+  function renderTable(tbody, arr, rowTpl){
+    if(!tbody) return;
+    if(!arr || !arr.length){
+      tbody.innerHTML = `<tr><td colspan="99" class="small">Sin registros.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = arr.map(rowTpl).join("");
+  }
 
+  function escapeHtml(s){
+    return String(s||"")
+      .replaceAll("&","&amp;").replaceAll("<","&lt;")
+      .replaceAll(">","&gt;").replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  $("btn").addEventListener("click", load);
+  load();
+</script>
 </body>
 </html>
