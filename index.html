@@ -109,7 +109,6 @@
         <span class="mut" style="font-size:12px;">Modo</span>
         <select id="mode">
           <option value="month" selected>Mes</option>
-          <option value="range">Rango</option>
         </select>
 
         <span class="mut" style="font-size:12px;">Mes</span>
@@ -135,7 +134,7 @@
   </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxYJLSxPXfN7PwH6Gj_RIs7YcC3j-Y3OvCgZQ6wW6pTE_N7duXjSgS3P66E0yqgofDQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzfqANquAAkZdPjJ1WaPOGnf2n7aS5HqW52cnCzalLru4vogz-GuJ_QfDSCrqhCEUx4/exec";
 
 let currentTab = "finanzas";
 let lastData = null;
@@ -267,7 +266,7 @@ function renderFinanzas(data){
 
       <div class="card"><div class="k">Boletas / Facturas</div><div class="bigNumber">${(k.boletasFacturas||0)}</div></div>
       <div class="card"><div class="k">Comprobantes faltantes</div><div class="bigNumber">${(k.comprobantesFaltantes||0)}</div></div>
-      <div class="card"><div class="k">Promedio diario (ventas / días del mes)</div><div class="bigNumber">${money(k.promedioDiario)}</div></div>
+      <div class="card"><div class="k">Promedio diario (ventas / días transcurridos)</div><div class="bigNumber">${money(k.promedioDiario)}</div></div>
       <div class="card"><div class="k">Proyección mensual (prom × 30)</div><div class="bigNumber">${money(k.proyeccionMensual)}</div></div>
 
       <div class="card span2">
@@ -460,13 +459,13 @@ function renderDelivery(data){
   document.getElementById("view").innerHTML = html;
 }
 
-/** ✅ CLIENTES (desde envios + monto acumulado) **/
+/** CLIENTES (desde envios + monto acumulado) **/
 function renderClientes(data){
   const list = data.modules?.clientes?.top || [];
   const html = `
     <div class="grid">
       <div class="card span4">
-        <div class="k">Clientes del período (Top por monto acumulado, hasta 200)</div>
+        <div class="k">Clientes del período (hasta 200) — ordenado por mayor monto</div>
         <div style="overflow:auto; margin-top:10px;">
           <table>
             <thead>
@@ -491,25 +490,18 @@ function renderClientes(data){
             </tbody>
           </table>
         </div>
-        <div class="mut" style="font-size:12px;margin-top:8px;">
-          *Fuente: hoja <b>envios</b> (Cliente, Teléfono, Fecha, Monto).
-        </div>
       </div>
     </div>
   `;
   document.getElementById("view").innerHTML = html;
 }
 
-/** ✅ SERVICIOS (corrige vacío y muestra faltantes si existen) **/
+/** SERVICIOS **/
 function renderServicios(data){
   const mod = data.modules?.servicios || {};
   const a = mod.alertas || {};
   const p = mod.pendientes || [];
-  const faltan = mod.faltanColumnas || [];
-
-  const avisoFaltan = faltan.length
-    ? `<div class="mut" style="font-size:12px;margin-top:10px;">Faltan columnas en "servicios": <b>${esc(faltan.join(", "))}</b></div>`
-    : '';
+  const debug = mod.debug || "";
 
   const html = `
     <div class="grid">
@@ -520,7 +512,7 @@ function renderServicios(data){
           <div class="pillRow"><b>Hoy</b><span>${a.hoy?.count||0} | ${money(a.hoy?.total||0)}</span></div>
           <div class="pillRow"><b>Próximos</b><span>${a.proximos?.count||0} | ${money(a.proximos?.total||0)}</span></div>
         </div>
-        ${avisoFaltan}
+        ${debug ? `<div class="mut" style="font-size:12px;margin-top:10px;">${esc(debug)}</div>` : ``}
       </div>
 
       <div class="card span2">
@@ -537,22 +529,19 @@ function renderServicios(data){
               </tr>
             </thead>
             <tbody>
-              ${p.map(x=>`
+              ${p.length ? p.map(x=>`
                 <tr>
-                  <td>${esc(x.fecha||"")}</td>
+                  <td>${esc(x.fecha)}</td>
                   <td>${esc(x.tipo||"")}</td>
                   <td><b>${esc(x.descripcion||"")}</b></td>
                   <td>${money(x.monto||0)}</td>
                   <td>${esc(x.estado||"")}</td>
                 </tr>
-              `).join("")}
-              ${p.length ? "" : `<tr><td colspan="5" class="mut">No hay pendientes en este período.</td></tr>`}
+              `).join("") : `<tr><td colspan="5" class="mut">No hay pendientes en este período.</td></tr>`}
             </tbody>
           </table>
         </div>
-        <div class="mut" style="font-size:12px;margin-top:8px;">
-          *Se usa <b>DESCRIPCION</b> (y TIPO si existe, sino PAGA) de la hoja “servicios”.
-        </div>
+        <div class="mut" style="font-size:12px;margin-top:8px;">*Se usa DESCRIPCION (con o sin tilde) y TIPO (o PAGA si no existe) de la hoja “servicios”.</div>
       </div>
     </div>
   `;
