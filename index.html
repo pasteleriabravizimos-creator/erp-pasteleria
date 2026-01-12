@@ -4,534 +4,347 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>BRAVIZIMO'S | Dashboard Financiero</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
   <style>
     :root{
-      --bg1:#06121f; --bg2:#1a1230;
+      --bg:#070a18;
       --card:rgba(255,255,255,.06);
-      --stroke:rgba(255,255,255,.10);
-      --text:#eaf2ff; --muted:rgba(234,242,255,.7);
-      --ok:rgba(50,220,160,.16);
+      --card2:rgba(255,255,255,.08);
+      --stroke:rgba(255,255,255,.12);
+      --txt:#eaf0ff;
+      --muted:rgba(234,240,255,.75);
+      --accent:#6ee7ff;
+      --warn:#ffd36e;
+      --bad:#ff6e6e;
+      --ok:#7CFFB2;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family:system-ui,Segoe UI,Roboto,Arial;
-      color:var(--text);
-      background:radial-gradient(1200px 700px at 20% 20%, #0b2745 0%, transparent 50%),
-                 radial-gradient(900px 600px at 80% 30%, #2a1747 0%, transparent 55%),
-                 linear-gradient(120deg,var(--bg1),var(--bg2));
-      min-height:100vh;
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    body{margin:0;background:radial-gradient(1200px 700px at 30% 10%, #18205a 0%, rgba(24,32,90,0) 55%), radial-gradient(1000px 600px at 70% 0%, #2b145f 0%, rgba(43,20,95,0) 55%), var(--bg); color:var(--txt);}
+    .wrap{max-width:1200px;margin:0 auto;padding:28px 16px 40px}
+    h1{margin:0 0 4px;font-size:18px;font-weight:800;letter-spacing:.3px}
+    .sub{margin:0 0 16px;color:var(--muted);font-size:12px}
+
+    .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--card);border:1px solid var(--stroke);padding:10px 12px;border-radius:14px}
+    select,button,input{background:rgba(0,0,0,.25);border:1px solid var(--stroke);color:var(--txt);border-radius:10px;padding:8px 10px;font-size:12px;outline:none}
+    button{cursor:pointer;background:linear-gradient(90deg, rgba(110,231,255,.18), rgba(124,255,178,.14));}
+    button:hover{border-color:rgba(255,255,255,.22)}
+    .pill{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 14px}
+    .pill button{background:rgba(255,255,255,.06)}
+    .pill button.active{border-color:rgba(110,231,255,.55); box-shadow:0 0 0 4px rgba(110,231,255,.08) inset;}
+
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+    .card{background:var(--card);border:1px solid var(--stroke);border-radius:16px;padding:12px}
+    .k{font-size:11px;color:var(--muted)}
+    .v{font-size:22px;font-weight:850;margin-top:6px}
+    .row2{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;margin-top:12px}
+    .big{min-height:320px}
+    .small{min-height:320px}
+    .tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-top:8px}
+    .dot{width:8px;height:8px;border-radius:999px;background:var(--accent)}
+    .dot.warn{background:var(--warn)}
+    .dot.bad{background:var(--bad)}
+    .dot.ok{background:var(--ok)}
+
+    .list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+    .item{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:12px;background:var(--card2);border:1px solid var(--stroke)}
+    .item b{font-size:12px}
+    .item span{font-size:12px;color:var(--muted)}
+
+    .status{margin:10px 0 0;padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);background:rgba(110,231,255,.07);color:var(--muted)}
+    .status.err{background:rgba(255,110,110,.08);color:#ffd2d2;border-color:rgba(255,110,110,.25)}
+    @media (max-width: 980px){
+      .grid{grid-template-columns:repeat(2,1fr)}
+      .row2{grid-template-columns:1fr}
     }
-    .wrap{max-width:1180px;margin:0 auto;padding:34px 18px 60px;}
-    .title{font-weight:800;letter-spacing:.2px}
-    .sub{color:var(--muted);margin-top:4px;font-size:13px}
-    .bar{
-      margin-top:14px;padding:12px 14px;border-radius:12px;
-      background:var(--ok);border:1px solid rgba(50,220,160,.25);
-      color:#c7ffe9;font-weight:600;
-    }
-    .toprow{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:14px}
-    .ctrl{
-      display:flex;gap:10px;align-items:center;flex-wrap:wrap;
-      padding:10px 12px;border-radius:14px;background:var(--card);border:1px solid var(--stroke)
-    }
-    select,button{
-      background:rgba(0,0,0,.25);color:var(--text);
-      border:1px solid rgba(255,255,255,.15);
-      border-radius:10px;padding:8px 10px;font-weight:600;
-      outline:none;
-    }
-    button{cursor:pointer}
-    .tabs{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    .tab{
-      padding:8px 12px;border-radius:999px;
-      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
-      cursor:pointer;font-weight:700;font-size:13px;
-    }
-    .tab.active{background:rgba(255,255,255,.12)}
-    .grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:12px}
-    .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
-    @media (max-width:980px){.grid4{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
-    .card{
-      background:var(--card);border:1px solid var(--stroke);
-      border-radius:18px;padding:14px; backdrop-filter: blur(10px);
-      box-shadow:0 10px 30px rgba(0,0,0,.25);
-    }
-    .kpi-title{color:var(--muted);font-size:12px;font-weight:700}
-    .kpi{font-size:24px;font-weight:900;margin-top:6px}
-    .section{display:none}
-    .section.active{display:block}
-    .h{font-weight:900;margin:4px 0 2px}
-    .p{color:var(--muted);font-size:12px;margin:0 0 10px}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
-    th{color:var(--muted);text-align:left;font-weight:800}
-    .right{text-align:right}
-    .small{font-size:12px;color:var(--muted)}
-    .err{background:rgba(255,70,70,.12);border:1px solid rgba(255,70,70,.25);color:#ffd4d4}
   </style>
 </head>
+
 <body>
   <div class="wrap">
-    <div class="title">BRAVIZIMO'S | Dashboard Financiero</div>
-    <div class="sub">Sincronizado con Google Sheets (Apps Script)</div>
+    <h1>BRAVIZIMO'S | Dashboard Financiero</h1>
+    <p class="sub">Sincronizado con Google Sheets (Apps Script)</p>
 
-    <div id="status" class="bar">Cargando...</div>
+    <div id="status" class="status">Cargando...</div>
 
-    <div class="toprow">
-      <div class="ctrl">
-        <span class="small">Modo</span>
-        <select id="mode">
-          <option value="mes" selected>Mes</option>
-          <option value="rango">Rango</option>
-        </select>
+    <div class="bar">
+      <label style="font-size:12px;color:var(--muted)">Modo</label>
+      <select id="mode">
+        <option value="month" selected>Mes</option>
+        <option value="range">Rango</option>
+      </select>
 
-        <span class="small">Mes</span>
-        <select id="month"></select>
+      <label style="font-size:12px;color:var(--muted)">Mes</label>
+      <select id="month">
+        <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+        <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+        <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+        <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+      </select>
 
-        <span class="small">Año</span>
-        <select id="year"></select>
+      <label style="font-size:12px;color:var(--muted)">Año</label>
+      <select id="year"></select>
 
-        <button id="btn">Actualizar</button>
+      <input id="start" type="date" style="display:none" />
+      <input id="end" type="date" style="display:none" />
+
+      <button id="btn">Actualizar</button>
+    </div>
+
+    <div class="pill">
+      <button class="active" data-tab="fin">Finanzas</button>
+      <button data-tab="del">Delivery</button>
+      <button data-tab="cli">Clientes</button>
+      <button data-tab="gas">Gastos</button>
+      <button data-tab="ser">Servicios</button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid" id="kpis"></div>
+
+    <div class="row2">
+      <div class="card big">
+        <div class="k">Ventas vs Gastos (por día)</div>
+        <canvas id="chart1"></canvas>
+      </div>
+      <div class="card small">
+        <div class="k">Acumulado de ventas</div>
+        <canvas id="chart2"></canvas>
       </div>
     </div>
 
-    <div class="tabs">
-      <div class="tab active" data-tab="finanzas">Finanzas</div>
-      <div class="tab" data-tab="delivery">Delivery</div>
-      <div class="tab" data-tab="vendedoras">Vendedoras</div>
-      <div class="tab" data-tab="productos">Productos</div>
-      <div class="tab" data-tab="clientes">Clientes</div>
-      <div class="tab" data-tab="gastos">Gastos</div>
-      <div class="tab" data-tab="medios">Medios de pago</div>
-      <div class="tab" data-tab="servicios">Servicios</div>
-    </div>
-
-    <!-- FINANZAS -->
-    <div id="finanzas" class="section active">
-      <div class="grid4">
-        <div class="card"><div class="kpi-title">Ventas totales</div><div class="kpi" id="k_ventas">S/ 0.00</div></div>
-        <div class="card"><div class="kpi-title">Gastos totales</div><div class="kpi" id="k_gastos">S/ 0.00</div></div>
-        <div class="card"><div class="kpi-title">Utilidad</div><div class="kpi" id="k_utilidad">S/ 0.00</div></div>
-        <div class="card"><div class="kpi-title">Saldo pendiente</div><div class="kpi" id="k_saldo">S/ 0.00</div></div>
-      </div>
-
-      <div class="grid4">
-        <div class="card"><div class="kpi-title">Delivery cobrado</div><div class="kpi" id="k_del_cob">S/ 0.00</div></div>
-        <div class="card"><div class="kpi-title">Costo delivery</div><div class="kpi" id="k_del_cos">S/ 0.00</div></div>
-        <div class="card"><div class="kpi-title">Margen delivery</div><div class="kpi" id="k_del_mar">S/ 0.00</div></div>
-        <div class="card"><div class="kpi-title">Clientes (total)</div><div class="kpi" id="k_cli">0</div></div>
-      </div>
-
-      <div class="grid4">
-        <div class="card"><div class="kpi-title">Boletas / Facturas</div><div class="kpi" id="k_bf">0</div></div>
-        <div class="card"><div class="kpi-title">Comprobantes faltantes</div><div class="kpi" id="k_cf">0</div></div>
-        <div class="card"><div class="kpi-title">Promedio diario (hasta hoy)</div><div class="kpi" id="k_avg">S/ 0.00</div></div>
-        <div class="card"><div class="kpi-title">Proyección mensual (prom × 30)</div><div class="kpi" id="k_proj">S/ 0.00</div></div>
-      </div>
-
-      <div class="grid2">
-        <div class="card">
-          <div class="h">Ventas vs Gastos + Saldo (por día)</div>
-          <div class="p">Ventas (nota de ventas), Gastos (GASTOS), Saldo pendiente (por pagar).</div>
-          <canvas id="ch_fin"></canvas>
-        </div>
-        <div class="card">
-          <div class="h">Acumulado de ventas</div>
-          <div class="p">Suma progresiva por día.</div>
-          <canvas id="ch_acum"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- DELIVERY -->
-    <div id="delivery" class="section">
-      <div class="grid2">
-        <div class="card">
-          <div class="h">Delivery por día</div>
-          <div class="p">Cobrado vs costo vs diferencia (cobrado - costo).</div>
-          <canvas id="ch_del"></canvas>
-        </div>
-        <div class="card">
-          <div class="h">Recojo en tienda (por día)</div>
-          <div class="p">Cantidad de recojos.</div>
-          <canvas id="ch_rec"></canvas>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:12px">
-        <div class="h">Detalle delivery por día</div>
-        <table>
-          <thead><tr><th>Fecha</th><th class="right">Cobrado</th><th class="right">Costo</th><th class="right">Diferencia</th></tr></thead>
-          <tbody id="tb_delivery"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- VENDEDORAS -->
-    <div id="vendedoras" class="section">
-      <div class="grid2">
-        <div class="card">
-          <div class="h">Resumen por vendedora (Top)</div>
-          <div class="p">Monto y pedidos (nota de ventas).</div>
-          <canvas id="ch_vtop"></canvas>
-        </div>
-        <div class="card">
-          <div class="h">Vendedoras por día (ventas y saldo)</div>
-          <div class="p">Detalle por fecha y vendedora.</div>
-          <table>
-            <thead><tr><th>Fecha</th><th>Vendedora</th><th class="right">Pedidos</th><th class="right">Monto</th><th class="right">Saldo</th></tr></thead>
-            <tbody id="tb_vdia"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- PRODUCTOS -->
-    <div id="productos" class="section">
+    <div class="row2" style="grid-template-columns:1fr 1fr; margin-top:12px">
       <div class="card">
-        <div class="h">Top productos (por cantidad acumulada)</div>
-        <div class="p">Ordenado por cantidad (incluye monto si existe).</div>
-        <table>
-          <thead><tr><th>Producto</th><th class="right">Cantidad</th><th class="right">Monto</th></tr></thead>
-          <tbody id="tb_topprod"></tbody>
-        </table>
+        <div class="k">Top Gastos por categoría</div>
+        <div id="gastosCat" class="list"></div>
       </div>
-
-      <div class="card" style="margin-top:12px">
-        <div class="h">Productos por día (para saber qué preparar)</div>
-        <div class="p">Agrupado por fecha y producto.</div>
-        <table>
-          <thead><tr><th>Fecha</th><th>Producto</th><th class="right">Cantidad</th></tr></thead>
-          <tbody id="tb_proddia"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- CLIENTES -->
-    <div id="clientes" class="section">
       <div class="card">
-        <div class="h">Clientes del período (hasta 200)</div>
-        <div class="p">Ordenado por monto acumulado (desc). Incluye numeración y cantidad de pedidos.</div>
-        <table>
-          <thead><tr><th>#</th><th>Cliente</th><th>Celular</th><th>Última compra</th><th class="right">Pedidos</th><th class="right">Monto</th></tr></thead>
-          <tbody id="tb_clientes"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- GASTOS -->
-    <div id="gastos" class="section">
-      <div class="card">
-        <div class="h">Gastos por categoría</div>
-        <div class="p">Se lee de hoja GASTOS (columna T.SOLES / Total).</div>
-        <table>
-          <thead><tr><th>Categoría</th><th class="right">Registros</th><th class="right">Monto</th></tr></thead>
-          <tbody id="tb_gcat"></tbody>
-          <tfoot>
-            <tr>
-              <th colspan="2" class="right">TOTAL</th>
-              <th class="right" id="gcat_total">S/ 0.00</th>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-    </div>
-
-    <!-- MEDIOS -->
-    <div id="medios" class="section">
-      <div class="card">
-        <div class="h">Medios de pago (INGRESOS)</div>
-        <div class="p">Suma de pagos registrados (1er Pago + 2do Pago) agrupado por cuenta destino.</div>
-        <table>
-          <thead><tr><th>Medio</th><th class="right">Registros</th><th class="right">Monto (ingresos)</th></tr></thead>
-          <tbody id="tb_medios"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- SERVICIOS -->
-    <div id="servicios" class="section">
-      <div class="grid2">
-        <div class="card">
-          <div class="h">Servicios: Pagado vs Pendiente (por día)</div>
-          <div class="p">Sumatoria por día según estado.</div>
-          <canvas id="ch_srv"></canvas>
-        </div>
-        <div class="card">
-          <div class="h">Servicios (lista)</div>
-          <div class="p">Tipo / Fecha / Monto / Estado / Medio / Obs.</div>
-          <table>
-            <thead><tr><th>Tipo</th><th>Fecha</th><th class="right">Monto</th><th>Estado</th><th>Medio</th><th>Obs</th></tr></thead>
-            <tbody id="tb_srv"></tbody>
-          </table>
-        </div>
+        <div class="k">Alertas de Servicios (PENDIENTE)</div>
+        <div id="servAlert"></div>
       </div>
     </div>
 
   </div>
 
 <script>
-  // 👉 PON AQUÍ TU WEB APP URL (termina en /exec)
-  const API_URL = "https://script.google.com/macros/s/AKfycbygNHtQPA-rmqpqChngcCuQMpQPO9NZSFQnabxH5-HwfhTgHEIU6zp5jbqxFOYyqdIM/exec";
+  // ✅ TU WEB APP:
+  const API_URL = "https://script.google.com/macros/s/AKfycbyEKNgSTSul8LcjrWTP1uzvwdmmYdZxwiiAIqKpTvUJM-sugUfGRQTcE4t50GycaB-z/exec";
 
-  const $ = (id)=>document.getElementById(id);
-  const fmt = (n)=>"S/ " + (Number(n||0).toFixed(2));
-  const months = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  let chart1, chart2;
 
-  // Fill selects
-  const monthSel = $("month");
-  months.forEach((m,i)=>{
-    const opt=document.createElement("option");
-    opt.value=String(i+1);
-    opt.textContent=m;
-    monthSel.appendChild(opt);
-  });
-  const yearSel = $("year");
-  for(let y=2024;y<=2032;y++){
-    const opt=document.createElement("option");
-    opt.value=String(y);
-    opt.textContent=String(y);
-    yearSel.appendChild(opt);
+  function money(n){
+    const x = Number(n || 0);
+    return "S/ " + x.toLocaleString("es-PE", {minimumFractionDigits:2, maximumFractionDigits:2});
   }
-  // default hoy
-  const now = new Date();
-  monthSel.value = String(now.getMonth()+1);
-  yearSel.value = String(now.getFullYear());
 
-  // Tabs
-  document.querySelectorAll(".tab").forEach(t=>{
-    t.addEventListener("click", ()=>{
-      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-      document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-      t.classList.add("active");
-      $(t.dataset.tab).classList.add("active");
+  function setStatus(msg, isErr=false){
+    const el = document.getElementById("status");
+    el.textContent = msg;
+    el.className = "status" + (isErr ? " err" : "");
+  }
+
+  // JSONP para evitar CORS (Netlify)
+  function jsonp(url){
+    return new Promise((resolve, reject) => {
+      const cb = "cb_" + Math.random().toString(36).slice(2);
+      const script = document.createElement("script");
+      const timeout = setTimeout(() => {
+        cleanup();
+        reject(new Error("Timeout JSONP"));
+      }, 20000);
+
+      function cleanup(){
+        clearTimeout(timeout);
+        script.remove();
+        delete window[cb];
+      }
+
+      window[cb] = (data) => {
+        cleanup();
+        resolve(data);
+      };
+
+      script.onerror = () => {
+        cleanup();
+        reject(new Error("Error cargando JSONP"));
+      };
+
+      script.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb;
+      document.body.appendChild(script);
     });
-  });
+  }
 
-  // Charts holders
-  let CH = {};
+  function buildUrl(){
+    const mode = document.getElementById("mode").value;
+    const year = document.getElementById("year").value;
+    const month = document.getElementById("month").value;
+    const start = document.getElementById("start").value;
+    const end = document.getElementById("end").value;
 
-  function destroyChart(id){
-    if(CH[id]){ CH[id].destroy(); CH[id]=null; }
+    const u = new URL(API_URL);
+    u.searchParams.set("action", "dashboard");
+    u.searchParams.set("mode", mode);
+
+    if(mode === "range"){
+      if(start) u.searchParams.set("start", start);
+      if(end) u.searchParams.set("end", end);
+    } else {
+      u.searchParams.set("year", year);
+      u.searchParams.set("month", month);
+    }
+    return u.toString();
+  }
+
+  function renderKPIs(k){
+    const items = [
+      ["Ventas totales", money(k.ventasTotal)],
+      ["Gastos totales", money(k.gastosTotal)],
+      ["Utilidad", money(k.utilidad)],
+      ["Saldo pendiente", money(k.saldoPendiente)],
+      ["Delivery cobrado", money(k.deliveryCobrado)],
+      ["Costo delivery", money(k.costoDelivery)],
+      ["Margen delivery", money(k.margenDelivery)],
+      ["Clientes (periodo)", String(k.clientesTotalPeriodo || 0)],
+      ["Boletas / Facturas", String(k.boletasFacturas || 0)],
+      ["Comprobantes faltantes", String(k.comprobantesFaltantes || 0)],
+      ["Promedio diario", money(k.promedioDiario)],
+      ["Proyección mensual (prom × 30)", money(k.proyeccionMensual)],
+    ];
+
+    const wrap = document.getElementById("kpis");
+    wrap.innerHTML = "";
+    items.forEach(([name, val]) => {
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `<div class="k">${name}</div><div class="v">${val}</div>`;
+      wrap.appendChild(div);
+    });
+  }
+
+  function renderCharts(ch){
+    const labels = ch.ventasVsGastos.labels;
+    const ventas = ch.ventasVsGastos.ventas;
+    const gastos = ch.ventasVsGastos.gastos;
+
+    if(chart1) chart1.destroy();
+    if(chart2) chart2.destroy();
+
+    chart1 = new Chart(document.getElementById("chart1"), {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          { label: "Ventas", data: ventas, tension: 0.25 },
+          { label: "Gastos", data: gastos, tension: 0.25 },
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: "#eaf0ff" } } },
+        scales: {
+          x: { ticks: { color: "rgba(234,240,255,.7)" }, grid: { color:"rgba(255,255,255,.06)" } },
+          y: { ticks: { color: "rgba(234,240,255,.7)" }, grid: { color:"rgba(255,255,255,.06)" } }
+        }
+      }
+    });
+
+    chart2 = new Chart(document.getElementById("chart2"), {
+      type: "line",
+      data: {
+        labels: ch.acumuladoVentas.labels,
+        datasets: [{ label: "Acumulado", data: ch.acumuladoVentas.values, tension: 0.25 }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: "#eaf0ff" } } },
+        scales: {
+          x: { ticks: { color: "rgba(234,240,255,.7)" }, grid: { color:"rgba(255,255,255,.06)" } },
+          y: { ticks: { color: "rgba(234,240,255,.7)" }, grid: { color:"rgba(255,255,255,.06)" } }
+        }
+      }
+    });
+  }
+
+  function renderGastosCat(arr){
+    const el = document.getElementById("gastosCat");
+    el.innerHTML = "";
+    (arr || []).forEach(x => {
+      const row = document.createElement("div");
+      row.className = "item";
+      row.innerHTML = `<b>${x.name}</b><span>${money(x.total)}</span>`;
+      el.appendChild(row);
+    });
+    if(!arr || !arr.length){
+      el.innerHTML = `<div class="item"><b>Sin datos</b><span>—</span></div>`;
+    }
+  }
+
+  function renderServiciosAlert(s){
+    const el = document.getElementById("servAlert");
+    if(!s){ el.innerHTML = `<div class="item"><b>Sin datos</b><span>—</span></div>`; return; }
+
+    const v = s.vencidos || {count:0,total:0};
+    const h = s.hoy || {count:0,total:0};
+    const p = s.proximos || {count:0,total:0};
+
+    el.innerHTML = `
+      <div class="item"><b><span class="dot bad"></span> Vencidos</b><span>${v.count} | ${money(v.total)}</span></div>
+      <div class="item"><b><span class="dot warn"></span> Hoy</b><span>${h.count} | ${money(h.total)}</span></div>
+      <div class="item"><b><span class="dot ok"></span> Próximos</b><span>${p.count} | ${money(p.total)}</span></div>
+    `;
   }
 
   async function load(){
-    $("status").classList.remove("err");
-    $("status").textContent = "Cargando...";
-    const mode = $("mode").value;
-    const month = $("month").value;
-    const year = $("year").value;
+    try{
+      setStatus("Cargando...");
+      const url = buildUrl();
+      const data = await jsonp(url);
 
-    const url = `${API_URL}?mode=${encodeURIComponent(mode)}&month=${encodeURIComponent(month)}&year=${encodeURIComponent(year)}`;
-    const res = await fetch(url);
-    const data = await res.json();
+      if(!data || !data.ok){
+        throw new Error((data && data.error) ? data.error : "Respuesta inválida");
+      }
 
-    if(!data.ok){
-      $("status").classList.add("err");
-      $("status").textContent = "ERROR: " + (data.error || "No se pudo cargar");
-      return;
+      renderKPIs(data.kpis);
+      renderCharts(data.charts);
+      renderGastosCat(data.breakdowns?.gastosPorCategoria || []);
+      renderServiciosAlert(data.servicios?.alertas || null);
+
+      setStatus(`OK: ${data.period.mode === "month" ? ("Mes " + data.period.month + " / " + data.period.year) : "Rango"} actualizado`);
+    }catch(err){
+      setStatus("ERROR: " + err.message, true);
     }
-
-    $("status").textContent = `OK: ${data.range.label}`;
-
-    // KPIs
-    $("k_ventas").textContent = fmt(data.metrics.ventasTotales);
-    $("k_gastos").textContent = fmt(data.metrics.gastosTotales);
-    $("k_utilidad").textContent = fmt(data.metrics.utilidad);
-    $("k_saldo").textContent = fmt(data.metrics.saldoPendiente);
-
-    $("k_del_cob").textContent = fmt(data.metrics.deliveryCobrado);
-    $("k_del_cos").textContent = fmt(data.metrics.costoDelivery);
-    $("k_del_mar").textContent = fmt(data.metrics.margenDelivery);
-
-    $("k_cli").textContent = String(data.metrics.clientesTotal || 0);
-    $("k_bf").textContent = String(data.metrics.boletasFacturas || 0);
-    $("k_cf").textContent = String(data.metrics.comprobantesFaltantes || 0);
-
-    // promedio y proyección (según días con ventas en el rango)
-    const fin = data.charts.finanzasPorDia || [];
-    const diasConVentas = fin.filter(x => Number(x.ventas||0) > 0).length || 0;
-    const avg = diasConVentas ? (Number(data.metrics.ventasTotales||0) / diasConVentas) : 0;
-    $("k_avg").textContent = fmt(avg);
-    $("k_proj").textContent = fmt(avg * 30);
-
-    // Chart Finanzas por día
-    destroyChart("fin");
-    const finLabels = fin.map(x=>x.date);
-    CH.fin = new Chart($("ch_fin"), {
-      type: "bar",
-      data: {
-        labels: finLabels,
-        datasets: [
-          { label:"Ventas", data: fin.map(x=>x.ventas) },
-          { label:"Gastos", data: fin.map(x=>x.gastos) },
-          { label:"Saldo Pendiente", type:"line", data: fin.map(x=>x.saldo) }
-        ]
-      },
-      options: { responsive:true, maintainAspectRatio:false }
-    });
-
-    // Chart Acumulado
-    destroyChart("acum");
-    const acum = data.charts.acumuladoVentas || [];
-    CH.acum = new Chart($("ch_acum"), {
-      type:"line",
-      data:{ labels: acum.map(x=>x.date), datasets:[ {label:"Ventas acumuladas", data: acum.map(x=>x.ventasAcum)} ] },
-      options:{ responsive:true, maintainAspectRatio:false }
-    });
-
-    // Delivery charts + tabla
-    const del = data.charts.deliveryPorDia || [];
-    destroyChart("del");
-    CH.del = new Chart($("ch_del"), {
-      type:"bar",
-      data:{
-        labels: del.map(x=>x.date),
-        datasets:[
-          {label:"Cobrado", data: del.map(x=>x.cobrado)},
-          {label:"Costo", data: del.map(x=>x.costo)},
-          {label:"Diferencia", data: del.map(x=>x.diferencia)}
-        ]
-      },
-      options:{ responsive:true, maintainAspectRatio:false }
-    });
-
-    const rec = data.charts.recojoTiendaPorDia || [];
-    destroyChart("rec");
-    CH.rec = new Chart($("ch_rec"), {
-      type:"line",
-      data:{ labels: rec.map(x=>x.date), datasets:[{label:"Recojo (cant)", data: rec.map(x=>x.cant)}] },
-      options:{ responsive:true, maintainAspectRatio:false }
-    });
-
-    renderTable($("tb_delivery"), data.tables.deliveryDetallePorDia || [], (r)=>`
-      <tr>
-        <td>${r.fecha}</td>
-        <td class="right">${fmt(r.cobrado)}</td>
-        <td class="right">${fmt(r.costo)}</td>
-        <td class="right">${fmt(r.diferencia)}</td>
-      </tr>
-    `);
-
-    // Vendedoras
-    const vtop = data.charts.vendedorasTop || [];
-    destroyChart("vtop");
-    CH.vtop = new Chart($("ch_vtop"), {
-      type:"bar",
-      data:{
-        labels: vtop.map(x=>x.vendedora),
-        datasets:[
-          {label:"Monto", data: vtop.map(x=>x.monto)},
-          {label:"Pedidos", data: vtop.map(x=>x.pedidos)}
-        ]
-      },
-      options:{ responsive:true, maintainAspectRatio:false }
-    });
-
-    renderTable($("tb_vdia"), data.tables.vendedorasPorDia || [], (r)=>`
-      <tr>
-        <td>${r.fecha}</td>
-        <td>${r.vendedora}</td>
-        <td class="right">${r.pedidos}</td>
-        <td class="right">${fmt(r.monto)}</td>
-        <td class="right">${fmt(r.saldo)}</td>
-      </tr>
-    `);
-
-    // Productos
-    renderTable($("tb_topprod"), data.tables.topProductos || [], (r)=>`
-      <tr>
-        <td>${r.producto}</td>
-        <td class="right">${Number(r.cantidad||0).toFixed(2)}</td>
-        <td class="right">${fmt(r.monto)}</td>
-      </tr>
-    `);
-    renderTable($("tb_proddia"), (data.tables.productosPorDia || []).slice(0,300), (r)=>`
-      <tr>
-        <td>${r.fecha}</td>
-        <td>${r.producto}</td>
-        <td class="right">${Number(r.cantidad||0).toFixed(2)}</td>
-      </tr>
-    `);
-
-    // Clientes
-    renderTable($("tb_clientes"), data.tables.clientesTop || [], (r)=>`
-      <tr>
-        <td>${r.n}</td>
-        <td>${escapeHtml(r.cliente||"")}</td>
-        <td>${escapeHtml(r.celular||"")}</td>
-        <td>${r.ultimaCompra||""}</td>
-        <td class="right">${r.pedidos||0}</td>
-        <td class="right">${fmt(r.monto)}</td>
-      </tr>
-    `);
-
-    // Gastos por categoría + total
-    const gcat = data.tables.gastosPorCategoria || {rows:[], total:0};
-    renderTable($("tb_gcat"), gcat.rows || [], (r)=>`
-      <tr>
-        <td>${escapeHtml(r.categoria||"")}</td>
-        <td class="right">${r.registros||0}</td>
-        <td class="right">${fmt(r.monto)}</td>
-      </tr>
-    `);
-    $("gcat_total").textContent = fmt(gcat.total || 0);
-
-    // Medios de pago
-    renderTable($("tb_medios"), data.tables.mediosPagoIngresos || [], (r)=>`
-      <tr>
-        <td>${escapeHtml(r.medio||"")}</td>
-        <td class="right">${r.registros||0}</td>
-        <td class="right">${fmt(r.monto)}</td>
-      </tr>
-    `);
-
-    // Servicios
-    const srv = data.charts.serviciosPagadoVsPendiente || [];
-    destroyChart("srv");
-    CH.srv = new Chart($("ch_srv"), {
-      type:"bar",
-      data:{
-        labels: srv.map(x=>x.date),
-        datasets:[
-          {label:"Pagado", data: srv.map(x=>x.pagado)},
-          {label:"Pendiente", data: srv.map(x=>x.pendiente)}
-        ]
-      },
-      options:{ responsive:true, maintainAspectRatio:false }
-    });
-
-    renderTable($("tb_srv"), (data.tables.serviciosLista || []).slice(0,200), (r)=>`
-      <tr>
-        <td>${escapeHtml(r.tipo||"")}</td>
-        <td>${r.fecha||""}</td>
-        <td class="right">${fmt(r.monto)}</td>
-        <td>${escapeHtml(r.estado||"")}</td>
-        <td>${escapeHtml(r.medio||"")}</td>
-        <td>${escapeHtml(r.obs||"")}</td>
-      </tr>
-    `);
   }
 
-  function renderTable(tbody, arr, rowTpl){
-    if(!tbody) return;
-    if(!arr || !arr.length){
-      tbody.innerHTML = `<tr><td colspan="99" class="small">Sin registros.</td></tr>`;
-      return;
+  function init(){
+    // año selector
+    const y = document.getElementById("year");
+    const now = new Date();
+    const base = now.getFullYear();
+    for(let i=base-2; i<=base+2; i++){
+      const opt = document.createElement("option");
+      opt.value = String(i);
+      opt.textContent = String(i);
+      y.appendChild(opt);
     }
-    tbody.innerHTML = arr.map(rowTpl).join("");
+    y.value = String(2026);
+    document.getElementById("month").value = String(now.getMonth()+1);
+
+    document.getElementById("btn").addEventListener("click", load);
+
+    document.getElementById("mode").addEventListener("change", () => {
+      const mode = document.getElementById("mode").value;
+      const showRange = mode === "range";
+      document.getElementById("start").style.display = showRange ? "inline-flex" : "none";
+      document.getElementById("end").style.display = showRange ? "inline-flex" : "none";
+      document.getElementById("month").style.display = showRange ? "none" : "inline-flex";
+      document.getElementById("year").style.display = showRange ? "none" : "inline-flex";
+    });
+
+    load();
   }
 
-  function escapeHtml(s){
-    return String(s||"")
-      .replaceAll("&","&amp;").replaceAll("<","&lt;")
-      .replaceAll(">","&gt;").replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
-
-  $("btn").addEventListener("click", load);
-  load();
+  init();
 </script>
 </body>
 </html>
