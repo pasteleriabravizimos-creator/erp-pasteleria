@@ -5,279 +5,248 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>BRAVIZIMO'S | Dashboard Financiero</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
   <style>
-    :root{
-      --bg:#070a18; --card:rgba(255,255,255,.06); --card2:rgba(255,255,255,.08);
-      --stroke:rgba(255,255,255,.12); --txt:#eaf0ff; --muted:rgba(234,240,255,.75);
-      --accent:#6ee7ff; --warn:#ffd36e; --bad:#ff6e6e; --ok:#7CFFB2;
-    }
+    :root{--bg:#070a18;--card:rgba(255,255,255,.06);--card2:rgba(255,255,255,.08);--stroke:rgba(255,255,255,.12);
+      --txt:#eaf0ff;--muted:rgba(234,240,255,.75)}
     *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
     body{margin:0;background:radial-gradient(1200px 700px at 30% 10%, #18205a 0%, rgba(24,32,90,0) 55%),
-         radial-gradient(1000px 600px at 70% 0%, #2b145f 0%, rgba(43,20,95,0) 55%), var(--bg); color:var(--txt);}
+      radial-gradient(1000px 600px at 70% 0%, #2b145f 0%, rgba(43,20,95,0) 55%), var(--bg);color:var(--txt);}
     .wrap{max-width:1200px;margin:0 auto;padding:28px 16px 40px}
-    h1{margin:0 0 4px;font-size:18px;font-weight:800;letter-spacing:.3px}
+    h1{margin:0 0 4px;font-size:18px;font-weight:800}
     .sub{margin:0 0 16px;color:var(--muted);font-size:12px}
-    .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--card);
-         border:1px solid var(--stroke);padding:10px 12px;border-radius:14px}
+    .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--card);border:1px solid var(--stroke);
+      padding:10px 12px;border-radius:14px}
     select,button,input{background:rgba(0,0,0,.25);border:1px solid var(--stroke);color:var(--txt);
-         border-radius:10px;padding:8px 10px;font-size:12px;outline:none}
-    button{cursor:pointer;background:linear-gradient(90deg, rgba(110,231,255,.18), rgba(124,255,178,.14));}
-    button:hover{border-color:rgba(255,255,255,.22)}
+      border-radius:10px;padding:8px 10px;font-size:12px;outline:none}
+    button{cursor:pointer}
     .pill{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 14px}
     .pill button{background:rgba(255,255,255,.06)}
-    .pill button.active{border-color:rgba(110,231,255,.55); box-shadow:0 0 0 4px rgba(110,231,255,.08) inset;}
     .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
     .card{background:var(--card);border:1px solid var(--stroke);border-radius:16px;padding:12px}
     .k{font-size:11px;color:var(--muted)}
     .v{font-size:22px;font-weight:850;margin-top:6px}
     .row2{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;margin-top:12px}
-    .big{min-height:320px}
-    .small{min-height:320px}
+    .big{min-height:320px}.small{min-height:320px}
     .list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
-    .item{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:12px;
-          background:var(--card2);border:1px solid var(--stroke)}
-    .item b{font-size:12px}
-    .item span{font-size:12px;color:var(--muted)}
+    .item{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:12px;background:var(--card2);border:1px solid var(--stroke)}
     .status{margin:10px 0 0;padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);
-            background:rgba(110,231,255,.07);color:var(--muted);white-space:pre-wrap}
+      background:rgba(110,231,255,.07);color:var(--muted);white-space:pre-wrap}
     .status.err{background:rgba(255,110,110,.08);color:#ffd2d2;border-color:rgba(255,110,110,.25)}
     @media (max-width: 980px){ .grid{grid-template-columns:repeat(2,1fr)} .row2{grid-template-columns:1fr} }
   </style>
 </head>
-
 <body>
-  <div class="wrap">
-    <h1>BRAVIZIMO'S | Dashboard Financiero</h1>
-    <p class="sub">Sincronizado con Google Sheets (Apps Script)</p>
+<div class="wrap">
+  <h1>BRAVIZIMO'S | Dashboard Financiero</h1>
+  <p class="sub">Sincronizado con Google Sheets (Apps Script)</p>
 
-    <div id="status" class="status">Listo para cargar…</div>
+  <div id="status" class="status">Listo para cargar…</div>
 
-    <div class="bar">
-      <label style="font-size:12px;color:var(--muted)">Modo</label>
-      <select id="mode">
-        <option value="month" selected>Mes</option>
-        <option value="range">Rango</option>
-      </select>
+  <div class="bar">
+    <label style="font-size:12px;color:var(--muted)">Modo</label>
+    <select id="mode">
+      <option value="month" selected>Mes</option>
+      <option value="range">Rango</option>
+    </select>
 
-      <label style="font-size:12px;color:var(--muted)">Mes</label>
-      <select id="month">
-        <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
-        <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
-        <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
-        <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
-      </select>
+    <label style="font-size:12px;color:var(--muted)">Mes</label>
+    <select id="month">
+      <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+      <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+      <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+      <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+    </select>
 
-      <label style="font-size:12px;color:var(--muted)">Año</label>
-      <select id="year"></select>
+    <label style="font-size:12px;color:var(--muted)">Año</label>
+    <select id="year"></select>
 
-      <input id="start" type="date" style="display:none" />
-      <input id="end" type="date" style="display:none" />
+    <input id="start" type="date" style="display:none" />
+    <input id="end" type="date" style="display:none" />
 
-      <button id="btn">Actualizar</button>
-      <button id="btnPing">Probar API</button>
+    <button id="btn">Actualizar</button>
+    <button id="btnPing">Probar API</button>
+  </div>
+
+  <div class="pill">
+    <button class="active">Finanzas</button>
+    <button>Delivery</button>
+    <button>Clientes</button>
+    <button>Gastos</button>
+    <button>Servicios</button>
+  </div>
+
+  <div class="grid" id="kpis"></div>
+
+  <div class="row2">
+    <div class="card big">
+      <div class="k">Ventas vs Gastos (por día)</div>
+      <canvas id="chart1"></canvas>
     </div>
-
-    <div class="pill">
-      <button class="active">Finanzas</button>
-      <button>Delivery</button>
-      <button>Clientes</button>
-      <button>Gastos</button>
-      <button>Servicios</button>
-    </div>
-
-    <div class="grid" id="kpis"></div>
-
-    <div class="row2">
-      <div class="card big">
-        <div class="k">Ventas vs Gastos (por día)</div>
-        <canvas id="chart1"></canvas>
-      </div>
-      <div class="card small">
-        <div class="k">Acumulado de ventas</div>
-        <canvas id="chart2"></canvas>
-      </div>
-    </div>
-
-    <div class="row2" style="grid-template-columns:1fr 1fr; margin-top:12px">
-      <div class="card">
-        <div class="k">Top Gastos por categoría</div>
-        <div id="gastosCat" class="list"></div>
-      </div>
-      <div class="card">
-        <div class="k">Alertas de Servicios (PENDIENTE)</div>
-        <div id="servAlert"></div>
-      </div>
+    <div class="card small">
+      <div class="k">Acumulado de ventas</div>
+      <canvas id="chart2"></canvas>
     </div>
   </div>
 
+  <div class="row2" style="grid-template-columns:1fr 1fr; margin-top:12px">
+    <div class="card">
+      <div class="k">Top Gastos por categoría</div>
+      <div id="gastosCat" class="list"></div>
+    </div>
+    <div class="card">
+      <div class="k">Alertas de Servicios (PENDIENTE)</div>
+      <div id="servAlert"></div>
+    </div>
+  </div>
+</div>
+
 <script>
-  // ✅ TU WEB APP:
-  const API_URL = "https://script.google.com/macros/s/AKfycbyB1lSZGaqJEOf800aDRYPdbIKObQBgYv9vxO8UwpIe7xVYAbh60EkzuRBjdVeeZtP5/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbyEKNgSTSul8LcjrWTP1uzvwdmmYdZxwiiAIqKpTvUJM-sugUfGRQTcE4t50GycaB-z/exec";
 
   let chart1, chart2;
 
   function money(n){
     const x = Number(n || 0);
-    return "S/ " + x.toLocaleString("es-PE", {minimumFractionDigits:2, maximumFractionDigits:2});
+    return "S/ " + x.toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2});
   }
 
-  function setStatus(msg, isErr=false){
-    const el = document.getElementById("status");
-    el.textContent = msg;
-    el.className = "status" + (isErr ? " err" : "");
+  function setStatus(msg,isErr=false){
+    const el=document.getElementById("status");
+    el.textContent=msg;
+    el.className="status"+(isErr?" err":"");
   }
 
-  // ✅ JSONP robusto: timeout + cache-bust + error claro
   function jsonp(url){
-    return new Promise((resolve, reject) => {
-      const cb = "cb_" + Math.random().toString(36).slice(2);
-      const script = document.createElement("script");
+    return new Promise((resolve,reject)=>{
+      const cb="cb_"+Math.random().toString(36).slice(2);
+      const script=document.createElement("script");
 
-      const timer = setTimeout(() => {
+      const timer=setTimeout(()=>{
         cleanup();
-        reject(new Error("Timeout: el WebApp no respondió. (Permisos, URL /exec o error interno)"));
-      }, 25000);
+        reject(new Error("Timeout: el WebApp no respondió (permiso/URL/error interno)."));
+      },25000);
 
       function cleanup(){
         clearTimeout(timer);
         script.remove();
-        try { delete window[cb]; } catch(e) { window[cb] = undefined; }
+        try{delete window[cb];}catch(e){window[cb]=undefined;}
       }
 
-      window[cb] = (data) => {
-        cleanup();
-        resolve(data);
-      };
+      window[cb]=(data)=>{cleanup();resolve(data);};
+      script.onerror=()=>{cleanup();reject(new Error("No se pudo cargar JSONP. Revisa WebApp público."));};
 
-      script.onerror = () => {
-        cleanup();
-        reject(new Error("No se pudo cargar JSONP. Revisa que el WebApp sea 'Cualquiera con el enlace' y que responda callback()."));
-      };
-
-      script.src = url + (url.includes("?") ? "&" : "?") + "callback=" + cb + "&_ts=" + Date.now();
+      script.src=url+(url.includes("?")?"&":"?")+"callback="+cb+"&_ts="+Date.now();
       document.body.appendChild(script);
     });
   }
 
   function buildUrl(action="dashboard"){
-    const mode = document.getElementById("mode").value;
-    const year = document.getElementById("year").value;
-    const month = document.getElementById("month").value;
-    const start = document.getElementById("start").value;
-    const end = document.getElementById("end").value;
+    const mode=document.getElementById("mode").value;
+    const year=document.getElementById("year").value;
+    const month=document.getElementById("month").value;
+    const start=document.getElementById("start").value;
+    const end=document.getElementById("end").value;
 
-    const u = new URL(API_URL);
-    u.searchParams.set("action", action);
-    u.searchParams.set("mode", mode);
+    const u=new URL(API_URL);
+    u.searchParams.set("action",action);
+    u.searchParams.set("mode",mode);
 
-    if(mode === "range"){
-      if(start) u.searchParams.set("start", start);
-      if(end) u.searchParams.set("end", end);
-    } else {
-      u.searchParams.set("year", year);
-      u.searchParams.set("month", month);
+    if(mode==="range"){
+      if(start)u.searchParams.set("start",start);
+      if(end)u.searchParams.set("end",end);
+    }else{
+      u.searchParams.set("year",year);
+      u.searchParams.set("month",month);
     }
     return u.toString();
   }
 
   function renderKPIs(k){
-    const items = [
-      ["Ventas totales", money(k.ventasTotal)],
-      ["Gastos totales", money(k.gastosTotal)],
-      ["Utilidad", money(k.utilidad)],
-      ["Saldo pendiente", money(k.saldoPendiente)],
-      ["Delivery cobrado", money(k.deliveryCobrado)],
-      ["Costo delivery", money(k.costoDelivery)],
-      ["Margen delivery", money(k.margenDelivery)],
-      ["Clientes (periodo)", String(k.clientesTotalPeriodo || 0)],
-      ["Boletas / Facturas", String(k.boletasFacturas || 0)],
-      ["Comprobantes faltantes", String(k.comprobantesFaltantes || 0)],
-      ["Promedio diario", money(k.promedioDiario)],
-      ["Proyección mensual (prom × 30)", money(k.proyeccionMensual)],
+    const items=[
+      ["Ventas totales",money(k.ventasTotal)],
+      ["Gastos totales",money(k.gastosTotal)],
+      ["Utilidad",money(k.utilidad)],
+      ["Saldo pendiente",money(k.saldoPendiente)],
+      ["Delivery cobrado",money(k.deliveryCobrado)],
+      ["Costo delivery",money(k.costoDelivery)],
+      ["Margen delivery",money(k.margenDelivery)],
+      ["Clientes (periodo)",String(k.clientesTotalPeriodo||0)],
+      ["Boletas / Facturas",String(k.boletasFacturas||0)],
+      ["Comprobantes faltantes",String(k.comprobantesFaltantes||0)],
+      ["Promedio diario",money(k.promedioDiario)],
+      ["Proyección mensual (prom × 30)",money(k.proyeccionMensual)],
     ];
-
-    const wrap = document.getElementById("kpis");
-    wrap.innerHTML = "";
-    items.forEach(([name, val]) => {
-      const div = document.createElement("div");
-      div.className = "card";
-      div.innerHTML = `<div class="k">${name}</div><div class="v">${val}</div>`;
+    const wrap=document.getElementById("kpis");
+    wrap.innerHTML="";
+    items.forEach(([name,val])=>{
+      const div=document.createElement("div");
+      div.className="card";
+      div.innerHTML=`<div class="k">${name}</div><div class="v">${val}</div>`;
       wrap.appendChild(div);
     });
   }
 
   function renderCharts(ch){
     if(!ch?.ventasVsGastos?.labels?.length){
-      setStatus("No hay datos para graficar en el periodo elegido.", true);
+      setStatus("No hay datos para graficar en el periodo elegido.",true);
       return;
     }
+    const labels=ch.ventasVsGastos.labels;
+    const ventas=ch.ventasVsGastos.ventas;
+    const gastos=ch.ventasVsGastos.gastos;
 
-    const labels = ch.ventasVsGastos.labels;
-    const ventas = ch.ventasVsGastos.ventas;
-    const gastos = ch.ventasVsGastos.gastos;
+    if(chart1)chart1.destroy();
+    if(chart2)chart2.destroy();
 
-    if(chart1) chart1.destroy();
-    if(chart2) chart2.destroy();
-
-    chart1 = new Chart(document.getElementById("chart1"), {
-      type: "line",
-      data: { labels, datasets: [
-        { label: "Ventas", data: ventas, tension: 0.25 },
-        { label: "Gastos", data: gastos, tension: 0.25 },
+    chart1=new Chart(document.getElementById("chart1"),{
+      type:"line",
+      data:{labels,datasets:[
+        {label:"Ventas",data:ventas,tension:0.25},
+        {label:"Gastos",data:gastos,tension:0.25},
       ]},
-      options: {
-        responsive:true,
-        plugins:{ legend:{ labels:{ color:"#eaf0ff" } } },
+      options:{responsive:true,
+        plugins:{legend:{labels:{color:"#eaf0ff"}}},
         scales:{
-          x:{ ticks:{ color:"rgba(234,240,255,.7)" }, grid:{ color:"rgba(255,255,255,.06)" } },
-          y:{ ticks:{ color:"rgba(234,240,255,.7)" }, grid:{ color:"rgba(255,255,255,.06)" } }
+          x:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}},
+          y:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}}
         }
       }
     });
 
-    chart2 = new Chart(document.getElementById("chart2"), {
-      type: "line",
-      data: { labels: ch.acumuladoVentas.labels, datasets: [
-        { label: "Acumulado", data: ch.acumuladoVentas.values, tension: 0.25 }
+    chart2=new Chart(document.getElementById("chart2"),{
+      type:"line",
+      data:{labels:ch.acumuladoVentas.labels,datasets:[
+        {label:"Acumulado",data:ch.acumuladoVentas.values,tension:0.25}
       ]},
-      options: {
-        responsive:true,
-        plugins:{ legend:{ labels:{ color:"#eaf0ff" } } },
+      options:{responsive:true,
+        plugins:{legend:{labels:{color:"#eaf0ff"}}},
         scales:{
-          x:{ ticks:{ color:"rgba(234,240,255,.7)" }, grid:{ color:"rgba(255,255,255,.06)" } },
-          y:{ ticks:{ color:"rgba(234,240,255,.7)" }, grid:{ color:"rgba(255,255,255,.06)" } }
+          x:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}},
+          y:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}}
         }
       }
     });
   }
 
   function renderGastosCat(arr){
-    const el = document.getElementById("gastosCat");
-    el.innerHTML = "";
-    if(!arr?.length){
-      el.innerHTML = `<div class="item"><b>Sin datos</b><span>—</span></div>`;
-      return;
-    }
-    arr.forEach(x => {
-      const row = document.createElement("div");
-      row.className = "item";
-      row.innerHTML = `<b>${x.name}</b><span>${money(x.total)}</span>`;
+    const el=document.getElementById("gastosCat");
+    el.innerHTML="";
+    if(!arr?.length){ el.innerHTML=`<div class="item"><b>Sin datos</b><span>—</span></div>`; return; }
+    arr.forEach(x=>{
+      const row=document.createElement("div");
+      row.className="item";
+      row.innerHTML=`<b>${x.name}</b><span>${money(x.total)}</span>`;
       el.appendChild(row);
     });
   }
 
   function renderServiciosAlert(s){
-    const el = document.getElementById("servAlert");
-    if(!s){
-      el.innerHTML = `<div class="item"><b>Sin datos</b><span>—</span></div>`;
-      return;
-    }
-    const v = s.vencidos || {count:0,total:0};
-    const h = s.hoy || {count:0,total:0};
-    const p = s.proximos || {count:0,total:0};
-
-    el.innerHTML = `
+    const el=document.getElementById("servAlert");
+    if(!s){ el.innerHTML=`<div class="item"><b>Sin datos</b><span>—</span></div>`; return; }
+    const v=s.vencidos||{count:0,total:0};
+    const h=s.hoy||{count:0,total:0};
+    const p=s.proximos||{count:0,total:0};
+    el.innerHTML=`
       <div class="item"><b>🔴 Vencidos</b><span>${v.count} | ${money(v.total)}</span></div>
       <div class="item"><b>🟡 Hoy</b><span>${h.count} | ${money(h.total)}</span></div>
       <div class="item"><b>🟢 Próximos</b><span>${p.count} | ${money(p.total)}</span></div>
@@ -287,66 +256,56 @@
   async function load(){
     try{
       setStatus("Cargando...");
-      const url = buildUrl("dashboard");
-      const data = await jsonp(url);
-
+      const data=await jsonp(buildUrl("dashboard"));
       if(!data || !data.ok){
-        const msg = (data && data.error) ? data.error : "Respuesta inválida del WebApp";
-        const stack = (data && data.stack) ? ("\n\n" + data.stack) : "";
-        throw new Error(msg + stack);
+        throw new Error((data && data.error ? data.error : "Respuesta inválida") + (data?.stack?("\n\n"+data.stack):""));
       }
-
       renderKPIs(data.kpis);
       renderCharts(data.charts);
-      renderGastosCat(data.breakdowns?.gastosPorCategoria || []);
-      renderServiciosAlert(data.servicios?.alertas || null);
-
-      setStatus(`OK ✅ Actualizado (${data.period.mode === "month" ? ("Mes " + data.period.month + "/" + data.period.year) : "Rango"})`);
+      renderGastosCat(data.breakdowns?.gastosPorCategoria||[]);
+      renderServiciosAlert(data.servicios?.alertas||null);
+      setStatus("OK ✅ Actualizado");
     }catch(err){
-      setStatus("ERROR ❌ " + err.message, true);
+      setStatus("ERROR ❌ "+err.message,true);
     }
   }
 
   async function ping(){
     try{
       setStatus("Probando API...");
-      const url = buildUrl("ping");
-      const data = await jsonp(url);
-      if(!data || !data.ok) throw new Error(data?.error || "Ping falló");
-      setStatus("Ping OK ✅ " + (data.now || ""), false);
+      const data=await jsonp(buildUrl("ping"));
+      if(!data || !data.ok) throw new Error(data?.error||"Ping falló");
+      setStatus("Ping OK ✅ "+(data.now||""),false);
     }catch(err){
-      setStatus("Ping ERROR ❌ " + err.message, true);
+      setStatus("Ping ERROR ❌ "+err.message,true);
     }
   }
 
-  function init(){
-    const y = document.getElementById("year");
-    const now = new Date();
-    for(let i=now.getFullYear()-2; i<=now.getFullYear()+2; i++){
-      const opt = document.createElement("option");
-      opt.value = String(i);
-      opt.textContent = String(i);
+  (function init(){
+    const y=document.getElementById("year");
+    const now=new Date();
+    for(let i=now.getFullYear()-2;i<=now.getFullYear()+2;i++){
+      const opt=document.createElement("option");
+      opt.value=String(i); opt.textContent=String(i);
       y.appendChild(opt);
     }
-    y.value = "2026";
-    document.getElementById("month").value = String(now.getMonth()+1);
+    y.value="2026";
+    document.getElementById("month").value=String(now.getMonth()+1);
 
-    document.getElementById("btn").addEventListener("click", load);
-    document.getElementById("btnPing").addEventListener("click", ping);
+    document.getElementById("btn").addEventListener("click",load);
+    document.getElementById("btnPing").addEventListener("click",ping);
 
-    document.getElementById("mode").addEventListener("change", () => {
-      const mode = document.getElementById("mode").value;
-      const showRange = mode === "range";
-      document.getElementById("start").style.display = showRange ? "inline-flex" : "none";
-      document.getElementById("end").style.display = showRange ? "inline-flex" : "none";
-      document.getElementById("month").style.display = showRange ? "none" : "inline-flex";
-      document.getElementById("year").style.display = showRange ? "none" : "inline-flex";
+    document.getElementById("mode").addEventListener("change",()=>{
+      const mode=document.getElementById("mode").value;
+      const showRange=mode==="range";
+      document.getElementById("start").style.display=showRange?"inline-flex":"none";
+      document.getElementById("end").style.display=showRange?"inline-flex":"none";
+      document.getElementById("month").style.display=showRange?"none":"inline-flex";
+      document.getElementById("year").style.display=showRange?"none":"inline-flex";
     });
 
     load();
-  }
-
-  init();
+  })();
 </script>
 </body>
 </html>
