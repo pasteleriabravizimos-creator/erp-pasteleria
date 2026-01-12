@@ -21,6 +21,7 @@
     button{cursor:pointer}
     .pill{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0 14px}
     .pill button{background:rgba(255,255,255,.06)}
+    .pill button.active{outline:2px solid rgba(110,231,255,.25);background:rgba(110,231,255,.10)}
     .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
     .card{background:var(--card);border:1px solid var(--stroke);border-radius:16px;padding:12px}
     .k{font-size:11px;color:var(--muted)}
@@ -32,6 +33,10 @@
     .status{margin:10px 0 0;padding:10px 12px;border-radius:14px;border:1px solid var(--stroke);
       background:rgba(110,231,255,.07);color:var(--muted);white-space:pre-wrap}
     .status.err{background:rgba(255,110,110,.08);color:#ffd2d2;border-color:rgba(255,110,110,.25)}
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{border-bottom:1px solid rgba(255,255,255,.08);padding:8px 6px;font-size:12px;text-align:left;color:rgba(234,240,255,.9)}
+    th{color:rgba(234,240,255,.75);font-weight:700}
+    .hide{display:none}
     @media (max-width: 980px){ .grid{grid-template-columns:repeat(2,1fr)} .row2{grid-template-columns:1fr} }
   </style>
 </head>
@@ -67,100 +72,158 @@
     <button id="btnPing">Probar API</button>
   </div>
 
-  <div class="pill">
-    <button class="active">Finanzas</button>
-    <button>Delivery</button>
-    <button>Clientes</button>
-    <button>Gastos</button>
-    <button>Servicios</button>
+  <div class="pill" id="tabs">
+    <button data-tab="finanzas" class="active">Finanzas</button>
+    <button data-tab="delivery">Delivery</button>
+    <button data-tab="clientes">Clientes</button>
+    <button data-tab="gastos">Gastos</button>
+    <button data-tab="servicios">Servicios</button>
   </div>
 
-  <div class="grid" id="kpis"></div>
+  <!-- FINANZAS -->
+  <section id="view-finanzas">
+    <div class="grid" id="kpis"></div>
 
-  <div class="row2">
-    <div class="card big">
-      <div class="k">Ventas vs Gastos (por día)</div>
-      <canvas id="chart1"></canvas>
+    <div class="row2">
+      <div class="card big">
+        <div class="k">Ventas vs Gastos (por día)</div>
+        <canvas id="chart1"></canvas>
+      </div>
+      <div class="card small">
+        <div class="k">Acumulado de ventas</div>
+        <canvas id="chart2"></canvas>
+      </div>
     </div>
-    <div class="card small">
-      <div class="k">Acumulado de ventas</div>
-      <canvas id="chart2"></canvas>
-    </div>
-  </div>
 
-  <div class="row2" style="grid-template-columns:1fr 1fr; margin-top:12px">
+    <div class="row2" style="grid-template-columns:1fr 1fr; margin-top:12px">
+      <div class="card">
+        <div class="k">Top Gastos por categoría</div>
+        <div id="gastosCat" class="list"></div>
+      </div>
+      <div class="card">
+        <div class="k">Alertas de Servicios (PENDIENTE)</div>
+        <div id="servAlert"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DELIVERY -->
+  <section id="view-delivery" class="hide">
+    <div class="row2" style="grid-template-columns:1fr 1fr;">
+      <div class="card big">
+        <div class="k">Delivery (Cobrado vs Costo) por día</div>
+        <canvas id="dChart"></canvas>
+      </div>
+      <div class="card">
+        <div class="k">Top delivery (por diferencia)</div>
+        <div id="dTop" class="list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLIENTES -->
+  <section id="view-clientes" class="hide">
     <div class="card">
-      <div class="k">Top Gastos por categoría</div>
-      <div id="gastosCat" class="list"></div>
+      <div class="k">Clientes del período (Top 200)</div>
+      <div style="overflow:auto">
+        <table id="cTable">
+          <thead><tr><th>#</th><th>Cliente</th><th>Celular</th><th>Última compra</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
-    <div class="card">
-      <div class="k">Alertas de Servicios (PENDIENTE)</div>
-      <div id="servAlert"></div>
+  </section>
+
+  <!-- GASTOS -->
+  <section id="view-gastos" class="hide">
+    <div class="row2" style="grid-template-columns:1fr 1fr;">
+      <div class="card big">
+        <div class="k">Gastos por día</div>
+        <canvas id="gChart"></canvas>
+      </div>
+      <div class="card">
+        <div class="k">Top categorías (monto)</div>
+        <div id="gTop" class="list"></div>
+      </div>
     </div>
-  </div>
+  </section>
+
+  <!-- SERVICIOS -->
+  <section id="view-servicios" class="hide">
+    <div class="row2" style="grid-template-columns:1fr 1fr;">
+      <div class="card">
+        <div class="k">Resumen alertas</div>
+        <div id="sResume"></div>
+      </div>
+      <div class="card">
+        <div class="k">Pendientes (detalle)</div>
+        <div style="overflow:auto">
+          <table id="sTable">
+            <thead><tr><th>Fecha</th><th>Tipo</th><th>Descripción</th><th>Monto</th><th>Estado</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </div>
 
 <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbz8OEtNgrUncEWc8mt9vqZDrLpx_DygokfqNJCkhaDwQ6aN5QpDjY5yu4CznDsF4__W/exec";
-
-  let chart1, chart2;
+  const API_URL = "https://script.google.com/macros/s/AKfycbyEKNgSTSul8LcjrWTP1uzvwdmmYdZxwiiAIqKpTvUJM-sugUfGRQTcE4t50GycaB-z/exec";
+  let chart1, chart2, dChart, gChart;
+  let LAST = null;
+  let ACTIVE_TAB = "finanzas";
 
   function money(n){
     const x = Number(n || 0);
     return "S/ " + x.toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2});
   }
-
   function setStatus(msg,isErr=false){
     const el=document.getElementById("status");
     el.textContent=msg;
     el.className="status"+(isErr?" err":"");
   }
-
   function jsonp(url){
     return new Promise((resolve,reject)=>{
       const cb="cb_"+Math.random().toString(36).slice(2);
       const script=document.createElement("script");
-
-      const timer=setTimeout(()=>{
-        cleanup();
-        reject(new Error("Timeout: el WebApp no respondió (permiso/URL/error interno)."));
-      },25000);
-
-      function cleanup(){
-        clearTimeout(timer);
-        script.remove();
-        try{delete window[cb];}catch(e){window[cb]=undefined;}
-      }
-
+      const timer=setTimeout(()=>{cleanup();reject(new Error("Timeout: WebApp no respondió."));},25000);
+      function cleanup(){clearTimeout(timer);script.remove();try{delete window[cb];}catch(e){window[cb]=undefined;}}
       window[cb]=(data)=>{cleanup();resolve(data);};
-      script.onerror=()=>{cleanup();reject(new Error("No se pudo cargar JSONP. Revisa WebApp público."));};
-
+      script.onerror=()=>{cleanup();reject(new Error("No se pudo cargar JSONP."));};
       script.src=url+(url.includes("?")?"&":"?")+"callback="+cb+"&_ts="+Date.now();
       document.body.appendChild(script);
     });
   }
-
   function buildUrl(action="dashboard"){
     const mode=document.getElementById("mode").value;
     const year=document.getElementById("year").value;
     const month=document.getElementById("month").value;
     const start=document.getElementById("start").value;
     const end=document.getElementById("end").value;
-
     const u=new URL(API_URL);
     u.searchParams.set("action",action);
     u.searchParams.set("mode",mode);
-
-    if(mode==="range"){
-      if(start)u.searchParams.set("start",start);
-      if(end)u.searchParams.set("end",end);
-    }else{
-      u.searchParams.set("year",year);
-      u.searchParams.set("month",month);
-    }
+    if(mode==="range"){ if(start)u.searchParams.set("start",start); if(end)u.searchParams.set("end",end); }
+    else { u.searchParams.set("year",year); u.searchParams.set("month",month); }
     return u.toString();
   }
 
+  // ====== TABS ======
+  function showTab(tab){
+    ACTIVE_TAB = tab;
+    document.querySelectorAll("#tabs button").forEach(b=>{
+      b.classList.toggle("active", b.dataset.tab===tab);
+    });
+    ["finanzas","delivery","clientes","gastos","servicios"].forEach(t=>{
+      document.getElementById("view-"+t).classList.toggle("hide", t!==tab);
+    });
+    // renderiza la vista con el último dataset
+    if(LAST) renderModules(LAST);
+  }
+
+  // ====== RENDER FINANZAS ======
   function renderKPIs(k){
     const items=[
       ["Ventas totales",money(k.ventasTotal)],
@@ -186,14 +249,9 @@
     });
   }
 
-  function renderCharts(ch){
-    if(!ch?.ventasVsGastos?.labels?.length){
-      setStatus("No hay datos para graficar en el periodo elegido.",true);
-      return;
-    }
+  function renderChartsFinanzas(ch){
     const labels=ch.ventasVsGastos.labels;
-    const ventas=ch.ventasVsGastos.ventas;
-    const gastos=ch.ventasVsGastos.gastos;
+    if(!labels?.length) return;
 
     if(chart1)chart1.destroy();
     if(chart2)chart2.destroy();
@@ -201,30 +259,20 @@
     chart1=new Chart(document.getElementById("chart1"),{
       type:"line",
       data:{labels,datasets:[
-        {label:"Ventas",data:ventas,tension:0.25},
-        {label:"Gastos",data:gastos,tension:0.25},
+        {label:"Ventas",data:ch.ventasVsGastos.ventas,tension:0.25},
+        {label:"Gastos",data:ch.ventasVsGastos.gastos,tension:0.25},
       ]},
-      options:{responsive:true,
-        plugins:{legend:{labels:{color:"#eaf0ff"}}},
-        scales:{
-          x:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}},
-          y:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}}
-        }
-      }
+      options:{responsive:true,plugins:{legend:{labels:{color:"#eaf0ff"}}},
+        scales:{x:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}},
+                y:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}}}}
     });
 
     chart2=new Chart(document.getElementById("chart2"),{
       type:"line",
-      data:{labels:ch.acumuladoVentas.labels,datasets:[
-        {label:"Acumulado",data:ch.acumuladoVentas.values,tension:0.25}
-      ]},
-      options:{responsive:true,
-        plugins:{legend:{labels:{color:"#eaf0ff"}}},
-        scales:{
-          x:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}},
-          y:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}}
-        }
-      }
+      data:{labels:ch.acumuladoVentas.labels,datasets:[{label:"Acumulado",data:ch.acumuladoVentas.values,tension:0.25}]},
+      options:{responsive:true,plugins:{legend:{labels:{color:"#eaf0ff"}}},
+        scales:{x:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}},
+                y:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}}}}
     });
   }
 
@@ -240,7 +288,7 @@
     });
   }
 
-  function renderServiciosAlert(s){
+  function renderServiciosAlertSimple(s){
     const el=document.getElementById("servAlert");
     if(!s){ el.innerHTML=`<div class="item"><b>Sin datos</b><span>—</span></div>`; return; }
     const v=s.vencidos||{count:0,total:0};
@@ -253,17 +301,133 @@
     `;
   }
 
+  // ====== RENDER MODULES ======
+  function renderModules(data){
+    // FINANZAS
+    if(ACTIVE_TAB==="finanzas"){
+      renderKPIs(data.kpis);
+      renderChartsFinanzas(data.charts);
+      renderGastosCat(data.breakdowns?.gastosPorCategoria||[]);
+      renderServiciosAlertSimple(data.modules?.servicios?.alertas || data.servicios?.alertas || null);
+      return;
+    }
+
+    // DELIVERY
+    if(ACTIVE_TAB==="delivery"){
+      const mod=data.modules?.delivery;
+      if(!mod){ setStatus("No hay módulo delivery.",true); return; }
+
+      // chart
+      const labels=mod.porDia?.labels||[];
+      if(dChart) dChart.destroy();
+      dChart=new Chart(document.getElementById("dChart"),{
+        type:"line",
+        data:{labels,datasets:[
+          {label:"Cobrado",data:mod.porDia.cobrado,tension:0.25},
+          {label:"Costo",data:mod.porDia.costo,tension:0.25},
+          {label:"Diferencia",data:mod.porDia.diferencia,tension:0.25},
+        ]},
+        options:{responsive:true,plugins:{legend:{labels:{color:"#eaf0ff"}}},
+          scales:{x:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}},
+                  y:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}}}}
+      });
+
+      // top list
+      const el=document.getElementById("dTop");
+      el.innerHTML="";
+      (mod.top||[]).forEach(x=>{
+        const row=document.createElement("div");
+        row.className="item";
+        row.innerHTML=`<b>${x.name}</b><span>${money(x.diferencia)} (Cob: ${money(x.cobrado)} | Cos: ${money(x.costo)})</span>`;
+        el.appendChild(row);
+      });
+      if(!(mod.top||[]).length) el.innerHTML=`<div class="item"><b>Sin datos</b><span>—</span></div>`;
+      return;
+    }
+
+    // CLIENTES
+    if(ACTIVE_TAB==="clientes"){
+      const arr=data.modules?.clientes?.top||[];
+      const tbody=document.querySelector("#cTable tbody");
+      tbody.innerHTML="";
+      arr.forEach((x,i)=>{
+        const tr=document.createElement("tr");
+        tr.innerHTML=`<td>${i+1}</td><td>${x.cliente||""}</td><td>${x.celular||""}</td><td>${x.ultimaCompra||""}</td>`;
+        tbody.appendChild(tr);
+      });
+      if(!arr.length){
+        const tr=document.createElement("tr");
+        tr.innerHTML=`<td colspan="4">Sin datos de clientes en el período</td>`;
+        tbody.appendChild(tr);
+      }
+      return;
+    }
+
+    // GASTOS
+    if(ACTIVE_TAB==="gastos"){
+      const mod=data.modules?.gastos;
+      if(!mod){ setStatus("No hay módulo gastos.",true); return; }
+
+      if(gChart) gChart.destroy();
+      gChart=new Chart(document.getElementById("gChart"),{
+        type:"line",
+        data:{labels:mod.porDia.labels,datasets:[{label:"Gastos",data:mod.porDia.total,tension:0.25}]},
+        options:{responsive:true,plugins:{legend:{labels:{color:"#eaf0ff"}}},
+          scales:{x:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}},
+                  y:{ticks:{color:"rgba(234,240,255,.7)"},grid:{color:"rgba(255,255,255,.06)"}}}}
+      });
+
+      const el=document.getElementById("gTop");
+      el.innerHTML="";
+      (mod.topCategorias||[]).forEach(x=>{
+        const row=document.createElement("div");
+        row.className="item";
+        row.innerHTML=`<b>${x.name}</b><span>${money(x.total)}</span>`;
+        el.appendChild(row);
+      });
+      if(!(mod.topCategorias||[]).length) el.innerHTML=`<div class="item"><b>Sin datos</b><span>—</span></div>`;
+      return;
+    }
+
+    // SERVICIOS
+    if(ACTIVE_TAB==="servicios"){
+      const mod=data.modules?.servicios;
+      const a=mod?.alertas;
+      const el=document.getElementById("sResume");
+      if(a){
+        el.innerHTML=`
+          <div class="item"><b>🔴 Vencidos</b><span>${a.vencidos.count} | ${money(a.vencidos.total)}</span></div>
+          <div class="item"><b>🟡 Hoy</b><span>${a.hoy.count} | ${money(a.hoy.total)}</span></div>
+          <div class="item"><b>🟢 Próximos</b><span>${a.proximos.count} | ${money(a.proximos.total)}</span></div>
+        `;
+      }else{
+        el.innerHTML=`<div class="item"><b>Sin datos</b><span>—</span></div>`;
+      }
+
+      const arr=mod?.pendientes||[];
+      const tbody=document.querySelector("#sTable tbody");
+      tbody.innerHTML="";
+      arr.forEach(x=>{
+        const tr=document.createElement("tr");
+        tr.innerHTML=`<td>${x.fecha||""}</td><td>${x.tipo||""}</td><td>${x.descripcion||""}</td><td>${money(x.monto)}</td><td>${x.estado||""}</td>`;
+        tbody.appendChild(tr);
+      });
+      if(!arr.length){
+        const tr=document.createElement("tr");
+        tr.innerHTML=`<td colspan="5">Sin pendientes en el período</td>`;
+        tbody.appendChild(tr);
+      }
+      return;
+    }
+  }
+
   async function load(){
     try{
       setStatus("Cargando...");
       const data=await jsonp(buildUrl("dashboard"));
-      if(!data || !data.ok){
-        throw new Error((data && data.error ? data.error : "Respuesta inválida") + (data?.stack?("\n\n"+data.stack):""));
-      }
-      renderKPIs(data.kpis);
-      renderCharts(data.charts);
-      renderGastosCat(data.breakdowns?.gastosPorCategoria||[]);
-      renderServiciosAlert(data.servicios?.alertas||null);
+      if(!data || !data.ok) throw new Error((data?.error||"Respuesta inválida") + (data?.stack?("\n\n"+data.stack):""));
+      LAST = data;
+      renderModules(LAST);
       setStatus("OK ✅ Actualizado");
     }catch(err){
       setStatus("ERROR ❌ "+err.message,true);
@@ -302,6 +466,11 @@
       document.getElementById("end").style.display=showRange?"inline-flex":"none";
       document.getElementById("month").style.display=showRange?"none":"inline-flex";
       document.getElementById("year").style.display=showRange?"none":"inline-flex";
+    });
+
+    // tabs click
+    document.querySelectorAll("#tabs button").forEach(b=>{
+      b.addEventListener("click",()=>showTab(b.dataset.tab));
     });
 
     load();
