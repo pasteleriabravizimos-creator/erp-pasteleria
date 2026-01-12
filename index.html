@@ -1,139 +1,203 @@
 <!doctype html>
-<html lang="es">
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BRAVIZIMO'S | Dashboard Insumos por Fecha</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>ERP Dashboard</title>
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin:0; background:#fafafa; }
-    header { padding: 14px 18px; background:#111; color:#fff; }
-    main { padding: 16px; max-width: 1200px; margin: 0 auto; }
-    .row { display:flex; gap:12px; flex-wrap:wrap; align-items:end; }
-    .cardGrid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-top: 14px;}
-    .card { background:#fff; border:1px solid #e6e6e6; border-radius:10px; padding:12px; }
-    .kpiTitle { font-size:12px; color:#666; }
-    .kpiValue { font-size:22px; font-weight:700; margin-top:6px; }
-    label { display:block; font-size:12px; color:#444; margin-bottom:4px; }
-    input, select, button { padding: 10px; font-size: 14px; border-radius:8px; border:1px solid #ddd; background:#fff; }
-    button { cursor:pointer; background:#111; color:#fff; border:1px solid #111; }
-    button.secondary { background:#fff; color:#111; }
-    h3 { margin: 18px 0 8px; }
-    table { border-collapse: collapse; width:100%; background:#fff; border:1px solid #e6e6e6; border-radius:10px; overflow:hidden; }
-    th, td { padding:8px; border-bottom:1px solid #eee; text-align:left; font-size:13px; }
-    th { background:#f5f5f5; }
-    .twoCol { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
-    @media (max-width: 900px){ .twoCol { grid-template-columns: 1fr; } }
-    .muted { color:#666; font-size:12px; }
-    .warn { color:#b45309; font-size:12px; }
-    .err { color:#b91c1c; font-size:12px; }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; margin:0; background:#fafafa;}
+    header{padding:16px 20px; background:#111; color:#fff;}
+    .wrap{padding:16px 20px; max-width:1200px; margin:0 auto;}
+    .grid{display:grid; gap:12px;}
+    .kpis{grid-template-columns:repeat(4,minmax(0,1fr));}
+    .card{background:#fff; border:1px solid #eee; border-radius:14px; padding:14px;}
+    .kpi-title{font-size:12px; color:#666; margin-bottom:6px;}
+    .kpi-value{font-size:22px; font-weight:700;}
+    .two{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .chart{height:360px;}
+    table{width:100%; border-collapse:collapse;}
+    th,td{padding:10px; border-bottom:1px solid #eee; text-align:left; font-size:14px;}
+    th{color:#666; font-weight:600;}
+    .muted{color:#777; font-size:12px;}
+    .btn{border:1px solid #ddd; background:#fff; border-radius:10px; padding:8px 10px; cursor:pointer;}
+    @media(max-width:900px){
+      .kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
+      .two{grid-template-columns:1fr;}
+    }
   </style>
 </head>
+
 <body>
-  <header>
-    <div style="font-weight:700;">BRAVIZIMO'S — Dashboard Insumos por Fecha</div>
-    <div class="muted" style="color:#cfcfcf;">Ventas/Producción → Packs → Recetas → Insumos → Costos → Margen</div>
-  </header>
-
-  <main>
-    <div class="row">
-      <div>
-        <label>Fecha</label>
-        <input type="date" id="fecha" />
-      </div>
-
-      <div>
-        <label>Hoja producción/ventas</label>
-        <input id="prodSheet" placeholder="ej: enero 2026" value="enero 2026" />
-        <div class="muted">Debe ser el nombre exacto de la pestaña donde está tu reporte diario.</div>
-      </div>
-
-      <div style="min-width:320px; flex:1;">
-        <label>URL Web App (Apps Script)</label>
-        <input id="apiUrl" placeholder="Pega aquí tu URL de Apps Script (Web App)" />
-        <div class="muted">La URL termina en /exec</div>
-      </div>
-
-      <button id="btnCargar">Calcular</button>
-      <button id="btnExportar" class="secondary">Exportar CSV Insumos</button>
+<header>
+  <div style="max-width:1200px;margin:0 auto; display:flex; justify-content:space-between; gap:12px; align-items:center;">
+    <div>
+      <div style="font-weight:700;">ERP Dashboard</div>
+      <div class="muted">Sincronizado con Google Sheets</div>
     </div>
+    <button class="btn" id="btnReload">Actualizar</button>
+  </div>
+</header>
 
-    <div id="msg" class="muted" style="margin-top:10px;"></div>
+<div class="wrap">
+  <div id="status" class="muted">Cargando datos…</div>
 
-    <div class="cardGrid">
-      <div class="card">
-        <div class="kpiTitle">Venta total (S/)</div>
-        <div class="kpiValue" id="kpiVenta">—</div>
-      </div>
-      <div class="card">
-        <div class="kpiTitle">Costo total insumos (S/)</div>
-        <div class="kpiValue" id="kpiCosto">—</div>
-      </div>
-      <div class="card">
-        <div class="kpiTitle">Utilidad estimada (S/)</div>
-        <div class="kpiValue" id="kpiUtilidad">—</div>
-      </div>
-      <div class="card">
-        <div class="kpiTitle">Margen (%)</div>
-        <div class="kpiValue" id="kpiMargen">—</div>
-      </div>
-      <div class="card">
-        <div class="kpiTitle">Unidades totales</div>
-        <div class="kpiValue" id="kpiUnidades">—</div>
-      </div>
-      <div class="card">
-        <div class="kpiTitle">Insumos distintos</div>
-        <div class="kpiValue" id="kpiInsumos">—</div>
-      </div>
+  <div class="grid kpis" style="margin-top:12px;">
+    <div class="card"><div class="kpi-title">Ingresos (caja)</div><div id="kpiIngresos" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Gastos</div><div id="kpiGastos" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Utilidad</div><div id="kpiUtilidad" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Pedidos</div><div id="kpiPedidos" class="kpi-value">—</div></div>
+
+    <div class="card"><div class="kpi-title">Ventas (Total pedidos)</div><div id="kpiVentasPedidos" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Clientes nuevos</div><div id="kpiNuevos" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Clientes recurrentes</div><div id="kpiRecurrentes" class="kpi-value">—</div></div>
+    <div class="card"><div class="kpi-title">Boletas / Facturas / Pend.</div><div id="kpiComp" class="kpi-value">—</div></div>
+  </div>
+
+  <div class="grid two" style="margin-top:12px;">
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:8px;">Ingresos vs Gastos por día</div>
+      <div id="chartIngresosGastos" class="chart"></div>
     </div>
-
-    <div class="twoCol" style="margin-top:12px;">
-      <div class="card">
-        <div style="font-weight:700; margin-bottom:8px;">Top productos por cantidad</div>
-        <canvas id="chTopProductos"></canvas>
-      </div>
-      <div class="card">
-        <div style="font-weight:700; margin-bottom:8px;">Costo por insumo (Top)</div>
-        <canvas id="chCostoInsumo"></canvas>
-      </div>
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:8px;">Ingresos acumulados</div>
+      <div id="chartAcumulado" class="chart"></div>
     </div>
+  </div>
 
-    <h3>Productos consolidados (incluye packs desarmados)</h3>
-    <div class="muted">Si un producto no tiene receta, aparecerá en “observaciones”.</div>
-    <table>
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th>Cantidad</th>
-          <th>Precio venta</th>
-          <th>Venta estimada</th>
-          <th>Costo estimado</th>
-          <th>Utilidad</th>
-        </tr>
-      </thead>
-      <tbody id="tbProductos"></tbody>
-    </table>
+  <div class="grid two" style="margin-top:12px;">
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:8px;">Ingresos por categoría</div>
+      <div id="chartCategorias" class="chart"></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:8px;">Ingresos por distrito</div>
+      <div id="chartDistritos" class="chart"></div>
+    </div>
+  </div>
 
-    <h3>Insumos requeridos</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Insumo</th>
-          <th>Cantidad requerida</th>
-          <th>Unidad</th>
-          <th>Costo unitario</th>
-          <th>Costo total</th>
-        </tr>
-      </thead>
-      <tbody id="tbInsumos"></tbody>
-    </table>
+  <div class="card" style="margin-top:12px;">
+    <div style="font-weight:700; margin-bottom:8px;">Reporte de vendedoras</div>
+    <div style="overflow:auto; max-height:360px;">
+      <table id="tablaVendedoras">
+        <thead>
+          <tr><th>Vendedora</th><th>Ingresos</th><th>Pedidos</th><th>Ticket prom.</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
 
-    <h3>Observaciones</h3>
-    <div id="obs" class="warn">—</div>
-  </main>
+  <div class="muted" style="margin-top:12px;" id="footerMeta"></div>
+</div>
 
-  <script src="./script.js"></script>
+<script>
+  // ✅ Pega tu URL del Web App aquí
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyfPaptyVNwsVD6YSn3Qe1Jnou6u8oEOUFWRQUkpkcstvw0nWBQwM4SS2oApqe3LZPZ/exec";
+
+  google.charts.load('current', {packages:['corechart']});
+
+  const money = (n) => new Intl.NumberFormat('es-PE', {style:'currency', currency:'PEN'}).format(Number(n||0));
+  const num = (n) => new Intl.NumberFormat('es-PE').format(Number(n||0));
+
+  // ✅ JSONP loader (evita CORS)
+  function loadJSONP(){
+    return new Promise((resolve, reject) => {
+      const cbName = "cb_" + Math.random().toString(36).slice(2);
+
+      window[cbName] = (data) => {
+        delete window[cbName];
+        script.remove();
+        resolve(data);
+      };
+
+      const script = document.createElement("script");
+      script.src = `${APPS_SCRIPT_URL}?action=data&callback=${cbName}&_=${Date.now()}`;
+      script.onerror = () => {
+        delete window[cbName];
+        script.remove();
+        reject(new Error("No se pudo cargar data desde Apps Script"));
+      };
+
+      document.body.appendChild(script);
+    });
+  }
+
+  function draw(data){
+    document.getElementById('kpiIngresos').textContent = money(data.kpis.ingresos);
+    document.getElementById('kpiGastos').textContent = money(data.kpis.gastos);
+    document.getElementById('kpiUtilidad').textContent = money(data.kpis.utilidad);
+    document.getElementById('kpiPedidos').textContent = num(data.kpis.pedidos);
+    document.getElementById('kpiVentasPedidos').textContent = money(data.kpis.ventasPedidos);
+    document.getElementById('kpiNuevos').textContent = num(data.kpis.clientesNuevos);
+    document.getElementById('kpiRecurrentes').textContent = num(data.kpis.clientesRecurrentes);
+
+    const bo = data.kpis.comprobantes?.boletas ?? 0;
+    const fa = data.kpis.comprobantes?.facturas ?? 0;
+    const pe = data.kpis.comprobantes?.pendientes ?? 0;
+    document.getElementById('kpiComp').textContent = `${num(bo)} / ${num(fa)} / ${num(pe)}`;
+
+    const ig = new google.visualization.DataTable();
+    ig.addColumn('string','Día');
+    ig.addColumn('number','Ingresos');
+    ig.addColumn('number','Gastos');
+    data.series.ingresosGastosDia.forEach(r => ig.addRow([r.date, Number(r.ingresos), Number(r.gastos)]));
+    new google.visualization.LineChart(document.getElementById('chartIngresosGastos'))
+      .draw(ig, {legend:{position:'bottom'}, height:360});
+
+    const ac = new google.visualization.DataTable();
+    ac.addColumn('string','Día');
+    ac.addColumn('number','Acumulado');
+    data.series.acumulado.forEach(r => ac.addRow([r.date, Number(r.acumulado)]));
+    new google.visualization.LineChart(document.getElementById('chartAcumulado'))
+      .draw(ac, {legend:{position:'bottom'}, height:360});
+
+    const cat = new google.visualization.DataTable();
+    cat.addColumn('string','Categoría');
+    cat.addColumn('number','Ingresos');
+    (data.breakdowns.categorias || []).slice(0,12).forEach(r => cat.addRow([r.name, Number(r.value)]));
+    new google.visualization.PieChart(document.getElementById('chartCategorias'))
+      .draw(cat, {legend:{position:'right'}, height:360});
+
+    const dist = new google.visualization.DataTable();
+    dist.addColumn('string','Distrito');
+    dist.addColumn('number','Ingresos');
+    (data.breakdowns.distritos || []).slice(0,12).forEach(r => dist.addRow([r.name, Number(r.value)]));
+    new google.visualization.BarChart(document.getElementById('chartDistritos'))
+      .draw(dist, {legend:{position:'none'}, height:360});
+
+    const tbody = document.querySelector('#tablaVendedoras tbody');
+    tbody.innerHTML = '';
+    (data.breakdowns.vendedoras || []).forEach(r => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${r.name}</td>
+        <td>${money(r.ingresos)}</td>
+        <td>${num(r.pedidos)}</td>
+        <td>${money(r.ticketProm)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('footerMeta').textContent = `Actualizado: ${data.meta.generatedAt}`;
+  }
+
+  async function loadAndRender(){
+    document.getElementById('status').textContent = 'Cargando datos…';
+    try{
+      const data = await loadJSONP();
+      document.getElementById('status').textContent = '';
+      draw(data);
+      window.onresize = () => draw(data);
+    }catch(err){
+      document.getElementById('status').textContent = 'Error: ' + err.message;
+      console.error(err);
+    }
+  }
+
+  document.getElementById('btnReload').addEventListener('click', loadAndRender);
+  google.charts.setOnLoadCallback(loadAndRender);
+</script>
+
 </body>
 </html>
