@@ -1,3 +1,9 @@
+/***************
+ * ERP BRAVIZIMO’S - Apps Script
+ * - Registra movimientos en KARDEX
+ * - Descuenta por receta en PRODUCCION y VENTAS
+ ***************/
+
 const SHEETS = {
   PRODUCTOS: "PRODUCTOS",
   KARDEX: "KARDEX",
@@ -8,65 +14,30 @@ const SHEETS = {
   VENTAS: "FORM_VENTAS",
 };
 
-const HEADERS = {
-  PRODUCTOS: ["SKU","Producto","Categoria","UnidadBase","StockMin","Costo","Precio","Activo"],
-  KARDEX: ["Fecha","Tipo","SKU","Producto","CantidadBase","UnidadBase","CostoUnit","Nota","Referencia"],
-  RECETAS: ["ProductoFinal","SKU_Insumo","Insumo","CantidadPorUnidad","UnidadBase"],
-  FORM_INGRESOS: ["Fecha","Producto","Cantidad","Unidad","CostoUnit","Nota","Referencia","PROCESADO"],
-  FORM_SALIDAS: ["Fecha","Producto","Cantidad","Unidad","Motivo","Nota","Referencia","PROCESADO"],
-  FORM_PRODUCCION: ["Fecha","ProductoFinal","CantidadProducida","Nota","Referencia","PROCESADO"],
-  FORM_VENTAS: ["Fecha","ProductoFinal","CantidadVendida","PrecioUnit","Canal","Nota","Referencia","PROCESADO"],
-};
+// ============== SETUP (crear triggers) ==============
+function setup() {
+  // Borra triggers anteriores del proyecto (opcional)
+  ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
 
-function onOpen() {
-  SpreadsheetApp.getUi()
-    .createMenu("ERP")
-    .addItem("1) Crear hojas (Setup)", "erpSetup")
-    .addItem("2) Crear trigger onEdit", "createOnEditTrigger")
-    .addToUi();
-}
-
-function erpSetup() {
-  const ss = SpreadsheetApp.getActive();
-
-  Object.keys(SHEETS).forEach(k => {
-    const name = SHEETS[k];
-    let sh = ss.getSheetByName(name);
-    if (!sh) sh = ss.insertSheet(name);
-
-    const headers = HEADERS[name];
-    if (!headers) return;
-
-    const firstRow = sh.getRange(1,1,1,sh.getLastColumn() || headers.length).getValues()[0];
-    const hasAnyHeader = firstRow.some(v => String(v).trim() !== "");
-
-    if (!hasAnyHeader) {
-      sh.getRange(1,1,1,headers.length).setValues([headers]);
-      sh.setFrozenRows(1);
-    }
-  });
-
-  SpreadsheetApp.getUi().alert("Listo ✅ Se crearon las hojas y encabezados del ERP.");
-}
-
-function createOnEditTrigger() {
-  // Borra triggers anteriores
-  ScriptApp.getProjectTriggers().forEach(t => {
-    if (t.getHandlerFunction() === "onEditRouter") ScriptApp.deleteTrigger(t);
-  });
-
+  // Trigger general onEdit
   ScriptApp.newTrigger("onEditRouter")
     .forSpreadsheet(SpreadsheetApp.getActive())
     .onEdit()
     .create();
 
-  SpreadsheetApp.getUi().alert("Trigger onEdit creado ✅ Ahora registra en KARDEX cuando llenes los forms.");
+  // Si usas Google Forms, lo mejor es usar onFormSubmit por cada form.
+  // Si ya tienes Forms conectados, cambia estas funciones por triggers instalables onFormSubmit
+  // y apunta a cada hoja de respuestas.
+
+  SpreadsheetApp.getUi().alert("Listo: Trigger onEditRouter creado. Si usas Forms, dime y te dejo versión onFormSubmit.");
 }
 
-// ---------- Router ----------
+// ============== ROUTER (detecta hoja editada) ==============
 function onEditRouter(e) {
   const sh = e.range.getSheet();
   const name = sh.getName();
+
+  // Evita bucles: solo actúa cuando se escribe en la última fila (nuevo registro)
   const row = e.range.getRow();
   if (row < 2) return;
 
@@ -76,71 +47,90 @@ function onEditRouter(e) {
   if (name === SHEETS.VENTAS) handleVenta_(sh, row);
 }
 
-// ---------- Helpers ----------
+// ============== HELPERS ==============
 function getHeaders_(sheet) {
-  const values = sheet.getRange(1,1,1,sheet.getLastColumn()).getValues()[0];
+  const values = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   const map = {};
-  values.forEach((h,i)=> map[String(h).trim()] = i+1);
+  values.forEach((h, i) => map[String(h).trim()] = i + 1);
   return map;
 }
-function getRowObject_(sheet,row) {
+
+function getRowObject_(sheet, row) {
   const headers = getHeaders_(sheet);
-  const vals = sheet.getRange(row,1,1,sheet.getLastColumn()).getValues()[0];
-  const o = {};
-  Object.keys(headers).forEach(h => o[h] = vals[headers[h]-1]);
-  return o;
+  const lastCol = sheet.getLastColumn();
+  const rowVals = sheet.getRange(row, 1, 1, lastCol).getValues()[0];
+
+  const obj = {};
+  Object.keys(headers).forEach(h => {
+    obj[h] = rowVals[headers[h] - 1];
+  });
+  return obj;
 }
-function norm_(s){
-  return String(s||"").trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-}
-function isProcessed_(sheet,row){
-  const h = getHeaders_(sheet);
-  const c = h["PROCESADO"];
-  if (!c) return false;
-  return norm_(sheet.getRange(row,c).getValue()) === "SI";
-}
-function markProcessed_(sheet,row){
-  const h = getHeaders_(sheet);
-  const c = h["PROCESADO"];
-  if (c) sheet.getRange(row,c).setValue("SI");
+
+function norm_(s) {
+  return String(s || "")
+    .trim()
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, ""); // sin tildes
 }
 
 function getProductosMap_() {
   const ss = SpreadsheetApp.getActive();
   const sh = ss.getSheetByName(SHEETS.PRODUCTOS);
-  const data = sh.getDataRange().getValues();
-  const headers = data[0].map(h=>String(h).trim());
-  const iSku = headers.indexOf("SKU");
-  const iProd = headers.indexOf("Producto");
-  const iUni = headers.indexOf("UnidadBase");
-  const iCos = headers.indexOf("Costo");
+  if (!sh) throw new Error("No existe hoja PRODUCTOS");
 
-  const byName = {};
-  for (let i=1;i<data.length;i++){
-    const sku = data[i][iSku];
-    const prod = data[i][iProd];
-    const unidad = iUni>=0 ? data[i][iUni] : "";
-    const costo = iCos>=0 ? data[i][iCos] : "";
+  const values = sh.getDataRange().getValues();
+  const headers = values[0].map(h => String(h).trim());
+  const idx = {
+    sku: headers.indexOf("SKU"),
+    prod: headers.indexOf("Producto"),
+    unidad: headers.indexOf("UnidadBase"),
+    costo: headers.indexOf("Costo"),
+  };
+  if (idx.sku < 0 || idx.prod < 0) throw new Error("PRODUCTOS debe tener columnas SKU y Producto");
+
+  const mapByName = {};
+  const mapBySku = {};
+
+  for (let i = 1; i < values.length; i++) {
+    const row = values[i];
+    const sku = row[idx.sku];
+    const prod = row[idx.prod];
+    const unidad = idx.unidad >= 0 ? row[idx.unidad] : "";
+    const costo = idx.costo >= 0 ? row[idx.costo] : "";
     if (!sku || !prod) continue;
-    byName[norm_(prod)] = { sku, prod, unidad, costo };
+
+    mapByName[norm_(prod)] = { sku, prod, unidad, costo };
+    mapBySku[String(sku).trim()] = { sku, prod, unidad, costo };
   }
-  return { byName };
+  return { mapByName, mapBySku };
 }
 
-function toBaseQty_(qty, unidadIngresada, unidadBase){
-  const q = Number(qty||0);
+// Convierte a unidad base (simple):
+// - Si UnidadBase es KG y te ingresan GR -> /1000
+// - Si UnidadBase es LT y te ingresan ML -> /1000
+// - Si es UND se queda igual
+function toBaseQty_(qty, unidadIngresada, unidadBase) {
+  const q = Number(qty || 0);
   const uIn = norm_(unidadIngresada);
   const uBase = norm_(unidadBase);
 
   if (!q) return 0;
-  if (uBase==="KG" && (uIn==="GR"||uIn==="G")) return q/1000;
-  if ((uBase==="LT"||uBase==="L") && uIn==="ML") return q/1000;
+
+  if (uBase === "KG" && (uIn === "GR" || uIn === "G")) return q / 1000;
+  if (uBase === "LT" && uIn === "ML") return q / 1000;
+  if (uBase === "L" && uIn === "ML") return q / 1000;
+
+  // Si ya coincide o no sabemos convertir, devolvemos tal cual
   return q;
 }
 
-function appendKardex_(mov){
+function appendKardex_(mov) {
   const ss = SpreadsheetApp.getActive();
   const k = ss.getSheetByName(SHEETS.KARDEX);
+  if (!k) throw new Error("No existe hoja KARDEX");
+
   k.appendRow([
     mov.fecha || new Date(),
     mov.tipo,
@@ -154,13 +144,31 @@ function appendKardex_(mov){
   ]);
 }
 
-// ---------- Handlers ----------
-function handleIngreso_(sheet,row){
-  if (isProcessed_(sheet,row)) return;
-  const r = getRowObject_(sheet,row);
-  const { byName } = getProductosMap_();
-  const p = byName[norm_(r["Producto"])];
-  if (!p) return;
+// Evita doble registro: marca la fila como "PROCESADO" en una columna auxiliar si existe
+function markProcessed_(sheet, row) {
+  const headers = getHeaders_(sheet);
+  const col = headers["PROCESADO"];
+  if (col) sheet.getRange(row, col).setValue("SI");
+}
+function isProcessed_(sheet, row) {
+  const headers = getHeaders_(sheet);
+  const col = headers["PROCESADO"];
+  if (!col) return false;
+  const v = sheet.getRange(row, col).getValue();
+  return norm_(v) === "SI";
+}
+
+// ============== HANDLERS ==============
+
+// FORM_INGRESOS: Fecha | Producto | Cantidad | Unidad | CostoUnit | Nota | Referencia
+function handleIngreso_(sheet, row) {
+  if (isProcessed_(sheet, row)) return;
+  const r = getRowObject_(sheet, row);
+  const { mapByName } = getProductosMap_();
+
+  const prodKey = norm_(r["Producto"]);
+  const p = mapByName[prodKey];
+  if (!p) return; // si no existe producto, no registra
 
   const qtyBase = toBaseQty_(r["Cantidad"], r["Unidad"], p.unidad);
 
@@ -169,20 +177,24 @@ function handleIngreso_(sheet,row){
     tipo: "INGRESO",
     sku: p.sku,
     producto: p.prod,
-    cantidadBase: qtyBase,
+    cantidadBase: qtyBase,          // ingreso positivo
     unidadBase: p.unidad,
     costoUnit: r["CostoUnit"] || p.costo,
-    nota: r["Nota"] || "Ingreso",
+    nota: r["Nota"] || "Compra/Ingreso",
     referencia: r["Referencia"] || "",
   });
-  markProcessed_(sheet,row);
+
+  markProcessed_(sheet, row);
 }
 
-function handleSalida_(sheet,row){
-  if (isProcessed_(sheet,row)) return;
-  const r = getRowObject_(sheet,row);
-  const { byName } = getProductosMap_();
-  const p = byName[norm_(r["Producto"])];
+// FORM_SALIDAS: Fecha | Producto | Cantidad | Unidad | Motivo | Nota | Referencia
+function handleSalida_(sheet, row) {
+  if (isProcessed_(sheet, row)) return;
+  const r = getRowObject_(sheet, row);
+  const { mapByName } = getProductosMap_();
+
+  const prodKey = norm_(r["Producto"]);
+  const p = mapByName[prodKey];
   if (!p) return;
 
   const qtyBase = toBaseQty_(r["Cantidad"], r["Unidad"], p.unidad);
@@ -192,47 +204,128 @@ function handleSalida_(sheet,row){
     tipo: "SALIDA",
     sku: p.sku,
     producto: p.prod,
-    cantidadBase: -Math.abs(qtyBase),
+    cantidadBase: -Math.abs(qtyBase), // salida negativa
     unidadBase: p.unidad,
     costoUnit: p.costo,
-    nota: r["Motivo"] || "Salida",
+    nota: `${r["Motivo"] || "Salida"}` + (r["Nota"] ? ` - ${r["Nota"]}` : ""),
     referencia: r["Referencia"] || "",
   });
-  markProcessed_(sheet,row);
+
+  markProcessed_(sheet, row);
 }
 
-function handleProduccion_(sheet,row){
-  if (isProcessed_(sheet,row)) return;
-  // Aquí luego lo conectamos con RECETAS para descontar por insumo.
-  const r = getRowObject_(sheet,row);
-  appendKardex_({
-    fecha: r["Fecha"] || new Date(),
-    tipo: "PRODUCCION",
-    sku: "",
-    producto: r["ProductoFinal"],
-    cantidadBase: 0,
-    unidadBase: "",
-    costoUnit: "",
-    nota: "Producción (pendiente receta)",
-    referencia: r["Referencia"] || "",
+// FORM_PRODUCCION: Fecha | ProductoFinal | CantidadProducida | Nota | Referencia
+function handleProduccion_(sheet, row) {
+  if (isProcessed_(sheet, row)) return;
+  const r = getRowObject_(sheet, row);
+
+  const prodFinal = norm_(r["ProductoFinal"]);
+  const qtyProd = Number(r["CantidadProducida"] || 0);
+  if (!prodFinal || !qtyProd) return;
+
+  const receta = getReceta_(prodFinal);
+  if (!receta.length) return;
+
+  // Por cada insumo, generar salida proporcional
+  receta.forEach(line => {
+    const consumo = Number(line.cantidadPorUnidad) * qtyProd;
+
+    appendKardex_({
+      fecha: r["Fecha"] || new Date(),
+      tipo: "PRODUCCION",
+      sku: line.sku,
+      producto: line.insumo,
+      cantidadBase: -Math.abs(consumo),
+      unidadBase: line.unidadBase,
+      costoUnit: line.costo,
+      nota: `Producción: ${r["ProductoFinal"]} x ${qtyProd}` + (r["Nota"] ? ` - ${r["Nota"]}` : ""),
+      referencia: r["Referencia"] || "",
+    });
   });
-  markProcessed_(sheet,row);
+
+  markProcessed_(sheet, row);
 }
 
-function handleVenta_(sheet,row){
-  if (isProcessed_(sheet,row)) return;
-  // Aquí luego lo conectamos con RECETAS para descontar por insumo.
-  const r = getRowObject_(sheet,row);
-  appendKardex_({
-    fecha: r["Fecha"] || new Date(),
-    tipo: "VENTA",
-    sku: "",
-    producto: r["ProductoFinal"],
-    cantidadBase: 0,
-    unidadBase: "",
-    costoUnit: "",
-    nota: "Venta (pendiente receta)",
-    referencia: r["Referencia"] || "",
-  });
-  markProcessed_(sheet,row);
+// FORM_VENTAS: Fecha | ProductoFinal | CantidadVendida | PrecioUnit | Canal | Nota | Referencia
+function handleVenta_(sheet, row) {
+  if (isProcessed_(sheet, row)) return;
+  const r = getRowObject_(sheet, row);
+
+  const prodFinal = norm_(r["ProductoFinal"]);
+  const qtyVend = Number(r["CantidadVendida"] || 0);
+  if (!prodFinal || !qtyVend) return;
+
+  const receta = getReceta_(prodFinal);
+
+  // Si hay receta, descuenta insumos por receta
+  if (receta.length) {
+    receta.forEach(line => {
+      const consumo = Number(line.cantidadPorUnidad) * qtyVend;
+      appendKardex_({
+        fecha: r["Fecha"] || new Date(),
+        tipo: "VENTA",
+        sku: line.sku,
+        producto: line.insumo,
+        cantidadBase: -Math.abs(consumo),
+        unidadBase: line.unidadBase,
+        costoUnit: line.costo,
+        nota: `Venta: ${r["ProductoFinal"]} x ${qtyVend} (${r["Canal"] || ""})` + (r["Nota"] ? ` - ${r["Nota"]}` : ""),
+        referencia: r["Referencia"] || "",
+      });
+    });
+  } else {
+    // Si NO hay receta, no descuenta (o podrías descontar producto final si también existe como SKU)
+    // Aquí lo dejamos sin descuento y solo marcamos para revisión.
+    appendKardex_({
+      fecha: r["Fecha"] || new Date(),
+      tipo: "VENTA_SIN_RECETA",
+      sku: "",
+      producto: r["ProductoFinal"],
+      cantidadBase: 0,
+      unidadBase: "",
+      costoUnit: "",
+      nota: `Venta sin receta definida: ${r["ProductoFinal"]} x ${qtyVend}`,
+      referencia: r["Referencia"] || "",
+    });
+  }
+
+  markProcessed_(sheet, row);
+}
+
+// Lee receta desde RECETAS por ProductoFinal (nombre)
+function getReceta_(productoFinalNorm) {
+  const ss = SpreadsheetApp.getActive();
+  const sh = ss.getSheetByName(SHEETS.RECETAS);
+  if (!sh) return [];
+
+  const values = sh.getDataRange().getValues();
+  if (values.length < 2) return [];
+
+  const headers = values[0].map(h => String(h).trim());
+  const iPF = headers.indexOf("ProductoFinal");
+  const iSKU = headers.indexOf("SKU_Insumo");
+  const iIns = headers.indexOf("Insumo");
+  const iCant = headers.indexOf("CantidadPorUnidad");
+  const iUni = headers.indexOf("UnidadBase");
+  if (iPF < 0 || iSKU < 0 || iCant < 0) return [];
+
+  const { mapBySku } = getProductosMap_();
+  const receta = [];
+
+  for (let i = 1; i < values.length; i++) {
+    const row = values[i];
+    if (norm_(row[iPF]) !== productoFinalNorm) continue;
+
+    const sku = String(row[iSKU] || "").trim();
+    const prod = mapBySku[sku];
+    receta.push({
+      sku,
+      insumo: row[iIns] || (prod ? prod.prod : ""),
+      cantidadPorUnidad: Number(row[iCant] || 0),
+      unidadBase: row[iUni] || (prod ? prod.unidad : ""),
+      costo: prod ? prod.costo : "",
+    });
+  }
+
+  return receta;
 }
